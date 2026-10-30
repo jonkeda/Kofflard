@@ -1,0 +1,4 @@
+[submodule "external/test-tooling"]
+	path = external/test-tooling
+	url = https://github.com/exact-mobile-apps/test-tooling
+	branch = MauiHeadless
