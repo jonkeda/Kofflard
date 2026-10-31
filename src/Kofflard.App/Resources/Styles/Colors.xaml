@@ -1,35 +1,174 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
+<!--
+    The Aurora look (.my/design/aurora.md): a night sky in dark, a dawn sky in light. Every colour comes
+    in a Light and a Dark pair, picked with AppThemeBinding in Styles.xaml and on the pages.
+-->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <Color x:Key="Primary">#0F766E</Color>
-    <Color x:Key="PrimaryDark">#ac99ea</Color>
-    <Color x:Key="PrimaryDarkText">#242424</Color>
-    <Color x:Key="Secondary">#CCFBF1</Color>
-    <Color x:Key="SecondaryDarkText">#9880e5</Color>
-    <Color x:Key="Tertiary">#2B0B98</Color>
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
-    <Color x:Key="Magenta">#D600AA</Color>
-    <Color x:Key="MidnightBlue">#190649</Color>
-    <Color x:Key="OffBlack">#1f1f1f</Color>
 
-    <Color x:Key="Gray100">#E1E1E1</Color>
-    <Color x:Key="Gray200">#C8C8C8</Color>
-    <Color x:Key="Gray300">#ACACAC</Color>
-    <Color x:Key="Gray400">#919191</Color>
-    <Color x:Key="Gray500">#6E6E6E</Color>
-    <Color x:Key="Gray600">#404040</Color>
-    <Color x:Key="Gray900">#212121</Color>
-    <Color x:Key="Gray950">#141414</Color>
+    <!-- The sky. -->
+    <Color x:Key="SkyLight">#FBFAFF</Color>
+    <Color x:Key="SkyDark">#0A0617</Color>
+    <Color x:Key="GlowVioletLight">#73A78BFA</Color>
+    <Color x:Key="GlowVioletDark">#8C7A52FF</Color>
+    <Color x:Key="GlowTealLight">#735EEAD4</Color>
+    <Color x:Key="GlowTealDark">#5938D6C4</Color>
+    <Color x:Key="GlowPinkLight">#73FBCFE8</Color>
+    <Color x:Key="GlowPinkDark">#595A28AA</Color>
 
-    <Color x:Key="Yellow100Accent">#F7B548</Color>
-    <Color x:Key="Yellow200Accent">#FFD590</Color>
-    <Color x:Key="Yellow300Accent">#FFE5B9</Color>
-    <Color x:Key="Cyan100Accent">#28C2D1</Color>
-    <Color x:Key="Cyan200Accent">#7BDDEF</Color>
-    <Color x:Key="Cyan300Accent">#C3F2F4</Color>
+    <!-- Text, strongest to faintest. -->
+    <Color x:Key="StrongLight">#120C26</Color>
+    <Color x:Key="StrongDark">#FFFFFF</Color>
+    <Color x:Key="TextLight">#221A3D</Color>
+    <Color x:Key="TextDark">#EEE8FF</Color>
+    <Color x:Key="MutedLight">#463D63</Color>
+    <Color x:Key="MutedDark">#C9BEEA</Color>
+    <Color x:Key="FaintLight">#504770</Color>
+    <Color x:Key="FaintDark">#BDB2DD</Color>
+    <Color x:Key="AskLight">#0A524C</Color>
+    <Color x:Key="AskDark">#9FF3E8</Color>
+    <Color x:Key="ErrorLight">#B42318</Color>
+    <Color x:Key="ErrorDark">#FF9A9A</Color>
+
+    <!-- The accent: links, the star, More →, the chosen adventure. -->
+    <Color x:Key="AccentLight">#4C2FD9</Color>
+    <Color x:Key="AccentDark">#E9DEFF</Color>
+    <Color x:Key="StarOnLight">#F59E0B</Color>
+    <Color x:Key="StarOnDark">#F5B04C</Color>
+
+    <!-- The rings around the search: teal, violet, pink. -->
+    <Color x:Key="Ring1Light">#2DD4BF</Color>
+    <Color x:Key="Ring1Dark">#7DF0E0</Color>
+    <Color x:Key="Ring2Light">#7C5CFF</Color>
+    <Color x:Key="Ring2Dark">#8F6BFF</Color>
+    <Color x:Key="Ring3Light">#F472B6</Color>
+    <Color x:Key="Ring3Dark">#FF8AD8</Color>
+    <Color x:Key="OrbLight">#D9FFFFFF</Color>
+    <Color x:Key="OrbDark">#5928165A</Color>
+
+    <!-- Glass: chips, the input, the adventure track. -->
+    <Color x:Key="ChipLight">#BFFFFFFF</Color>
+    <Color x:Key="ChipDark">#801E1246</Color>
+    <Color x:Key="ChipEdgeLight">#4D7C5CFF</Color>
+    <Color x:Key="ChipEdgeDark">#4DBEAAFF</Color>
+    <Color x:Key="InputLight">#FFFFFF</Color>
+    <Color x:Key="InputDark">#BF100A28</Color>
+    <Color x:Key="InputEdgeLight">#B35B3FD9</Color>
+    <Color x:Key="InputEdgeDark">#73C8B4FF</Color>
+    <Color x:Key="TrackLight">#385B5277</Color>
+    <Color x:Key="TrackDark">#40A08CDC</Color>
+    <Color x:Key="DotOnLight">#7C5CFF</Color>
+    <Color x:Key="DotOnDark">#E9DEFF</Color>
+    <Color x:Key="DotOffLight">#595B5277</Color>
+    <Color x:Key="DotOffDark">#73A08CDC</Color>
+    <Color x:Key="GoTextLight">#140E2B</Color>
+    <Color x:Key="GoTextDark">#FFFFFF</Color>
+    <Color x:Key="CardEndLight">#EBFFFFFF</Color>
+    <Color x:Key="CardEndDark">#E6120B2A</Color>
+
+    <!-- The lanes: Close is amber, Stretch teal, Leap violet. -->
+    <Color x:Key="CloseLight">#F59E0B</Color>
+    <Color x:Key="CloseDark">#F5B04C</Color>
+    <Color x:Key="CloseTextLight">#92400E</Color>
+    <Color x:Key="CloseTextDark">#FFD597</Color>
+    <Color x:Key="CloseTintLight">#4DFBBF24</Color>
+    <Color x:Key="CloseTintDark">#52F5B04C</Color>
+    <Color x:Key="CloseEdgeLight">#73D97706</Color>
+    <Color x:Key="CloseEdgeDark">#99F5B04C</Color>
+
+    <Color x:Key="StretchLight">#14B8A6</Color>
+    <Color x:Key="StretchDark">#3FD6C4</Color>
+    <Color x:Key="StretchTextLight">#0F766E</Color>
+    <Color x:Key="StretchTextDark">#9FF3E8</Color>
+    <Color x:Key="StretchTintLight">#422DD4BF</Color>
+    <Color x:Key="StretchTintDark">#423FD6C4</Color>
+    <Color x:Key="StretchEdgeLight">#730D9488</Color>
+    <Color x:Key="StretchEdgeDark">#8C3FD6C4</Color>
+
+    <Color x:Key="LeapLight">#8B5CF6</Color>
+    <Color x:Key="LeapDark">#B98CFF</Color>
+    <Color x:Key="LeapTextLight">#6D28D9</Color>
+    <Color x:Key="LeapTextDark">#DCC8FF</Color>
+    <Color x:Key="LeapTintLight">#4DA78BFA</Color>
+    <Color x:Key="LeapTintDark">#4DB98CFF</Color>
+    <Color x:Key="LeapEdgeLight">#737C3AED</Color>
+    <Color x:Key="LeapEdgeDark">#99B98CFF</Color>
+
+    <!-- Brushes. -->
+    <RadialGradientBrush x:Key="GlowVioletLightBrush" Center="0.5,0.5" Radius="0.5">
+        <GradientStop Color="{StaticResource GlowVioletLight}" Offset="0" />
+        <GradientStop Color="#00A78BFA" Offset="1" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="GlowVioletDarkBrush" Center="0.5,0.5" Radius="0.5">
+        <GradientStop Color="{StaticResource GlowVioletDark}" Offset="0" />
+        <GradientStop Color="#007A52FF" Offset="1" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="GlowTealLightBrush" Center="0.5,0.5" Radius="0.5">
+        <GradientStop Color="{StaticResource GlowTealLight}" Offset="0" />
+        <GradientStop Color="#005EEAD4" Offset="1" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="GlowTealDarkBrush" Center="0.5,0.5" Radius="0.5">
+        <GradientStop Color="{StaticResource GlowTealDark}" Offset="0" />
+        <GradientStop Color="#0038D6C4" Offset="1" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="GlowPinkLightBrush" Center="0.5,0.5" Radius="0.5">
+        <GradientStop Color="{StaticResource GlowPinkLight}" Offset="0" />
+        <GradientStop Color="#00FBCFE8" Offset="1" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="GlowPinkDarkBrush" Center="0.5,0.5" Radius="0.5">
+        <GradientStop Color="{StaticResource GlowPinkDark}" Offset="0" />
+        <GradientStop Color="#005A28AA" Offset="1" />
+    </RadialGradientBrush>
+
+    <LinearGradientBrush x:Key="RingLightBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource Ring1Light}" Offset="0" />
+        <GradientStop Color="{StaticResource Ring2Light}" Offset="0.5" />
+        <GradientStop Color="{StaticResource Ring3Light}" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="RingDarkBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource Ring1Dark}" Offset="0" />
+        <GradientStop Color="{StaticResource Ring2Dark}" Offset="0.5" />
+        <GradientStop Color="{StaticResource Ring3Dark}" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="GoLightBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#5EEAD4" Offset="0" />
+        <GradientStop Color="#A78BFA" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="GoDarkBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#407DF0E0" Offset="0" />
+        <GradientStop Color="#73B98CFF" Offset="1" />
+    </LinearGradientBrush>
+
+    <!-- A card: its lane's tint in the top corner, fading into the card. -->
+    <LinearGradientBrush x:Key="CloseCardLightBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource CloseTintLight}" Offset="0" />
+        <GradientStop Color="{StaticResource CardEndLight}" Offset="0.75" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="CloseCardDarkBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource CloseTintDark}" Offset="0" />
+        <GradientStop Color="{StaticResource CardEndDark}" Offset="0.75" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="StretchCardLightBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource StretchTintLight}" Offset="0" />
+        <GradientStop Color="{StaticResource CardEndLight}" Offset="0.75" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="StretchCardDarkBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource StretchTintDark}" Offset="0" />
+        <GradientStop Color="{StaticResource CardEndDark}" Offset="0.75" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="LeapCardLightBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource LeapTintLight}" Offset="0" />
+        <GradientStop Color="{StaticResource CardEndLight}" Offset="0.75" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="LeapCardDarkBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource LeapTintDark}" Offset="0" />
+        <GradientStop Color="{StaticResource CardEndDark}" Offset="0.75" />
+    </LinearGradientBrush>
 
 </ResourceDictionary>

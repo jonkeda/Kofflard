@@ -4,27 +4,87 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <Style x:Key="Headline" TargetType="Label">
-        <Setter Property="TextColor" Value="{StaticResource Primary}" />
-        <Setter Property="FontSize" Value="32" />
-        <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="HorizontalOptions" Value="Center" />
+    <!--
+        Every page sits on the sky: its base colour with three soft glows, drawn as gradients so no image or
+        SkiaSharp is needed. The glows are circles: Windows takes a radial gradient's radius from the width
+        alone, so an oval would be cut off before it fades. They let input through.
+    -->
+    <ControlTemplate x:Key="AuroraPage">
+        <Grid BackgroundColor="{AppThemeBinding Light={StaticResource SkyLight}, Dark={StaticResource SkyDark}}">
+            <Ellipse WidthRequest="720" HeightRequest="720"
+                     HorizontalOptions="Start" VerticalOptions="Start"
+                     TranslationX="-240" TranslationY="-420"
+                     InputTransparent="True"
+                     Fill="{AppThemeBinding Light={StaticResource GlowVioletLightBrush}, Dark={StaticResource GlowVioletDarkBrush}}" />
+            <Ellipse WidthRequest="560" HeightRequest="560"
+                     HorizontalOptions="End" VerticalOptions="Start"
+                     TranslationX="220" TranslationY="-330"
+                     InputTransparent="True"
+                     Fill="{AppThemeBinding Light={StaticResource GlowTealLightBrush}, Dark={StaticResource GlowTealDarkBrush}}" />
+            <Ellipse WidthRequest="700" HeightRequest="700"
+                     HorizontalOptions="Start" VerticalOptions="End"
+                     TranslationX="-320" TranslationY="220"
+                     InputTransparent="True"
+                     Fill="{AppThemeBinding Light={StaticResource GlowPinkLightBrush}, Dark={StaticResource GlowPinkDarkBrush}}" />
+            <ContentPresenter />
+        </Grid>
+    </ControlTemplate>
+
+    <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SkyLight}, Dark={StaticResource SkyDark}}" />
+        <Setter Property="ControlTemplate" Value="{StaticResource AuroraPage}" />
     </Style>
 
-    <Style x:Key="SubHeadline" TargetType="Label">
-        <Setter Property="TextColor" Value="{StaticResource Gray500}" />
-        <Setter Property="FontSize" Value="18" />
-        <Setter Property="HorizontalOptions" Value="Center" />
+    <!-- The title bar melts into the sky; its icons and title take the text colour. -->
+    <Style TargetType="Shell" ApplyToDerivedTypes="True">
+        <Setter Property="Shell.BackgroundColor" Value="{AppThemeBinding Light={StaticResource SkyLight}, Dark={StaticResource SkyDark}}" />
+        <Setter Property="Shell.ForegroundColor" Value="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}" />
+        <Setter Property="Shell.TitleColor" Value="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}" />
+        <Setter Property="Shell.NavBarHasShadow" Value="False" />
     </Style>
 
-    <Style TargetType="Button">
-        <Setter Property="TextColor" Value="White" />
-        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
+    <Style TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="BorderWidth" Value="0" />
-        <Setter Property="Padding" Value="14,10" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
+    </Style>
+
+    <Style x:Key="Title" TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}" />
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style x:Key="Heading" TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style x:Key="Muted" TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
+    </Style>
+
+    <Style x:Key="Faint" TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource FaintLight}, Dark={StaticResource FaintDark}}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style x:Key="Error" TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+    </Style>
+
+    <!-- The main button: a glowing pill. -->
+    <Style TargetType="Button">
+        <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource GoLightBrush}, Dark={StaticResource GoDarkBrush}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource GoTextLight}, Dark={StaticResource GoTextDark}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource ChipEdgeLight}, Dark={StaticResource ChipEdgeDark}}" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="Padding" Value="18,10" />
+        <Setter Property="MinimumHeightRequest" Value="48" />
         <Setter Property="MinimumWidthRequest" Value="44" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
@@ -32,8 +92,7 @@
                     <VisualState x:Name="Normal" />
                     <VisualState x:Name="Disabled">
                         <VisualState.Setters>
-                            <Setter Property="TextColor" Value="{StaticResource Gray300}" />
-                            <Setter Property="BackgroundColor" Value="{StaticResource Gray600}" />
+                            <Setter Property="Opacity" Value="0.5" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="PointerOver" />
@@ -42,98 +101,87 @@
         </Setter>
     </Style>
 
-    <Style TargetType="Entry">
-        <Setter Property="TextColor" Value="{StaticResource Black}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
+    <!-- A second button: glass, with a thin edge. -->
+    <Style x:Key="SoftButton" TargetType="Button">
+        <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource ChipLight}, Dark={StaticResource ChipDark}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource ChipEdgeLight}, Dark={StaticResource ChipEdgeDark}}" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="CornerRadius" Value="22" />
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="PlaceholderColor" Value="{StaticResource Gray300}" />
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="MinimumHeightRequest" Value="44" />
+        <Setter Property="MinimumWidthRequest" Value="44" />
+    </Style>
+
+    <!-- A button that reads as a link: the star, More →, Get a key. -->
+    <Style x:Key="LinkButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentLight}, Dark={StaticResource AccentDark}}" />
+        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="MinimumHeightRequest" Value="44" />
+        <Setter Property="MinimumWidthRequest" Value="44" />
+    </Style>
+
+    <Style TargetType="Entry">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource FaintLight}, Dark={StaticResource FaintDark}}" />
         <Setter Property="MinimumHeightRequest" Value="44" />
         <Setter Property="MinimumWidthRequest" Value="44" />
     </Style>
 
     <Style TargetType="Editor">
-        <Setter Property="TextColor" Value="{StaticResource Black}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="PlaceholderColor" Value="{StaticResource Gray300}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource FaintLight}, Dark={StaticResource FaintDark}}" />
     </Style>
 
-    <Style TargetType="Border">
-        <Setter Property="Stroke" Value="{StaticResource Gray200}" />
-        <Setter Property="BackgroundColor" Value="White" />
-    </Style>
-
-    <Style TargetType="Label">
-        <Setter Property="TextColor" Value="{StaticResource Gray900}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
-        <Setter Property="FontSize" Value="14" />
+    <!-- A field on glass: the input on the search page, the pickers and entries elsewhere. -->
+    <Style x:Key="Field" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource InputLight}, Dark={StaticResource InputDark}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource InputEdgeLight}, Dark={StaticResource InputEdgeDark}}" />
+        <Setter Property="StrokeThickness" Value="1.5" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+        <Setter Property="Padding" Value="10,0" />
     </Style>
 
     <Style TargetType="Picker">
-        <Setter Property="TextColor" Value="{StaticResource Gray900}" />
-        <Setter Property="TitleColor" Value="{StaticResource Gray500}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}" />
+        <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="MinimumHeightRequest" Value="44" />
         <Setter Property="MinimumWidthRequest" Value="44" />
     </Style>
 
-    <Style TargetType="ProgressBar">
-        <Setter Property="ProgressColor" Value="{StaticResource Primary}" />
+    <Style TargetType="ActivityIndicator">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Ring2Light}, Dark={StaticResource Ring1Dark}}" />
     </Style>
 
-    <Style TargetType="Slider">
-        <Setter Property="MinimumTrackColor" Value="{StaticResource Primary}" />
-        <Setter Property="MaximumTrackColor" Value="{StaticResource Gray200}" />
-        <Setter Property="ThumbColor" Value="{StaticResource Primary}" />
+    <Style TargetType="ProgressBar">
+        <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource Ring2Light}, Dark={StaticResource Ring2Dark}}" />
     </Style>
 
     <Style TargetType="Switch">
-        <Setter Property="OnColor" Value="{StaticResource Primary}" />
+        <Setter Property="OnColor" Value="{AppThemeBinding Light={StaticResource Ring2Light}, Dark={StaticResource Ring2Dark}}" />
         <Setter Property="ThumbColor" Value="White" />
     </Style>
 
-    <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
-        <Setter Property="BackgroundColor" Value="{StaticResource Gray100}" />
-    </Style>
-
-    <!-- The title bar in the main button's colour, on every page (.my/design/results-list-changes.md #10). -->
-    <Style TargetType="Shell" ApplyToDerivedTypes="True">
-        <Setter Property="Shell.BackgroundColor" Value="{StaticResource Primary}" />
-        <Setter Property="Shell.ForegroundColor" Value="White" />
-        <Setter Property="Shell.TitleColor" Value="White" />
-    </Style>
-
     <!--
-        One adventure choice: a RadioButton drawn as an icon button, Primary when chosen and Secondary
-        otherwise (.my/design/search-page-changes.md). The content (icon and name) follows IsChosen itself.
+        One adventure choice: a stop on the slider (.my/design/aurora.md). The template only gives it room;
+        the content draws the dot and the name, and follows IsChosen itself.
     -->
     <ControlTemplate x:Key="AdventureChoice">
         <Border StrokeThickness="0"
-                StrokeShape="RoundRectangle 8"
-                Padding="2,8"
-                MinimumHeightRequest="48"
-                BackgroundColor="{StaticResource Secondary}">
-            <VisualStateManager.VisualStateGroups>
-                <VisualStateGroupList>
-                    <VisualStateGroup x:Name="CheckedStates">
-                        <VisualState x:Name="Checked">
-                            <VisualState.Setters>
-                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-                            </VisualState.Setters>
-                        </VisualState>
-                        <VisualState x:Name="Unchecked">
-                            <VisualState.Setters>
-                                <Setter Property="BackgroundColor" Value="{StaticResource Secondary}" />
-                            </VisualState.Setters>
-                        </VisualState>
-                    </VisualStateGroup>
-                </VisualStateGroupList>
-            </VisualStateManager.VisualStateGroups>
+                BackgroundColor="Transparent"
+                Padding="0"
+                MinimumHeightRequest="48">
             <ContentPresenter />
         </Border>
     </ControlTemplate>

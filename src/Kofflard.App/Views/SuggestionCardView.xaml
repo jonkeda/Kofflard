@@ -15,7 +15,24 @@
              x:Class="Kofflard.App.Views.SuggestionCardView"
              x:DataType="vm:SuggestionViewModel">
 
-    <Border Padding="0" Margin="0,4" StrokeShape="RoundRectangle 10" Opacity="{Binding Opacity}">
+    <!-- Tinted by its lane: amber Close, teal Stretch, violet Leap (.my/design/aurora.md). -->
+    <Border Padding="0"
+            Margin="0,6"
+            StrokeShape="RoundRectangle 20"
+            StrokeThickness="1"
+            Background="{AppThemeBinding Light={StaticResource CloseCardLightBrush}, Dark={StaticResource CloseCardDarkBrush}}"
+            Stroke="{AppThemeBinding Light={StaticResource CloseEdgeLight}, Dark={StaticResource CloseEdgeDark}}"
+            Opacity="{Binding Opacity}">
+        <Border.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding LaneName}" Value="Stretch">
+                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource StretchCardLightBrush}, Dark={StaticResource StretchCardDarkBrush}}" />
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource StretchEdgeLight}, Dark={StaticResource StretchEdgeDark}}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Border" Binding="{Binding LaneName}" Value="Leap">
+                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource LeapCardLightBrush}, Dark={StaticResource LeapCardDarkBrush}}" />
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LeapEdgeLight}, Dark={StaticResource LeapEdgeDark}}" />
+            </DataTrigger>
+        </Border.Triggers>
         <Grid>
             <ContentView x:Name="TapSurface"
                          AutomationId="Suggestion_Card"
@@ -33,65 +50,74 @@
                 </FlyoutBase.ContextFlyout>
             </ContentView>
 
-            <VerticalStackLayout Padding="12" Spacing="4" InputTransparent="True" CascadeInputTransparent="False">
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="4" InputTransparent="True" CascadeInputTransparent="False">
+            <VerticalStackLayout Padding="8,4,8,14" Spacing="4" InputTransparent="True" CascadeInputTransparent="False">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="2" InputTransparent="True" CascadeInputTransparent="False">
                     <Button AutomationId="Suggestion_Save"
                             Text="{Binding StarText}"
                             Command="{Binding SaveCommand}"
                             SemanticProperties.Description="{Binding StarDescription}"
-                            BackgroundColor="Transparent"
-                            TextColor="{StaticResource Primary}"
-                            FontSize="20"
+                            Style="{StaticResource LinkButton}"
+                            FontSize="22"
                             Padding="4,0"
-                            MinimumWidthRequest="36"
-                            VerticalOptions="Center" />
+                            VerticalOptions="Center">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsSaved}" Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StarOnLight}, Dark={StaticResource StarOnDark}}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
                     <Label Grid.Column="1"
                            AutomationId="Suggestion_Name"
                            Text="{Binding Name}"
-                           FontSize="18"
+                           FontSize="19"
                            FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}"
                            VerticalOptions="Center"
                            InputTransparent="True" />
                     <Label Grid.Column="2"
                            AutomationId="Suggestion_Verified"
                            Text="{Binding VerifiedMark}"
-                           TextColor="{StaticResource Primary}"
+                           TextColor="{AppThemeBinding Light={StaticResource CloseTextLight}, Dark={StaticResource CloseTextDark}}"
                            FontAttributes="Bold"
                            VerticalOptions="Center"
                            SemanticProperties.Description="Confirmed by MusicBrainz"
                            IsVisible="{Binding IsVerified}"
-                           InputTransparent="True" />
+                           InputTransparent="True">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding LaneName}" Value="Stretch">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StretchTextLight}, Dark={StaticResource StretchTextDark}}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding LaneName}" Value="Leap">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LeapTextLight}, Dark={StaticResource LeapTextDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
                     <Button Grid.Column="3"
                             AutomationId="Suggestion_Explore"
                             Text="More →"
                             Command="{Binding ExploreCommand}"
                             SemanticProperties.Description="{Binding Name, StringFormat='More like {0}'}"
-                            BackgroundColor="Transparent"
-                            TextColor="{StaticResource Primary}"
-                            Padding="4,0"
+                            Style="{StaticResource LinkButton}"
                             VerticalOptions="Center" />
                 </Grid>
 
-                <VerticalStackLayout Spacing="4" InputTransparent="True">
-                    <Label AutomationId="Suggestion_Why" Text="{Binding Why}" />
+                <VerticalStackLayout Spacing="4" Padding="8,0" InputTransparent="True">
+                    <Label AutomationId="Suggestion_Why" Text="{Binding Why}" LineHeight="1.15" />
                     <Label AutomationId="Suggestion_Tags"
                            Text="{Binding TagsText}"
-                           FontSize="12"
-                           TextColor="{StaticResource Gray500}" />
+                           Style="{StaticResource Faint}" />
                     <Label AutomationId="Suggestion_KnownFor"
                            Text="{Binding KnownForText}"
-                           FontSize="12"
-                           TextColor="{StaticResource Gray500}"
+                           Style="{StaticResource Faint}"
                            IsVisible="{Binding HasKnownFor}" />
                     <Label AutomationId="Suggestion_Opened"
                            Text="{Binding OpenedText}"
                            FontAttributes="Bold"
-                           TextColor="{StaticResource Primary}"
+                           TextColor="{AppThemeBinding Light={StaticResource AccentLight}, Dark={StaticResource AccentDark}}"
                            IsVisible="{Binding HasOpenedText}" />
                     <Label AutomationId="Suggestion_NotFound"
                            Text="Couldn't confirm this artist"
-                           FontSize="12"
-                           TextColor="{StaticResource Gray500}"
+                           Style="{StaticResource Faint}"
                            IsVisible="{Binding IsNotFound}" />
                 </VerticalStackLayout>
 
@@ -100,17 +126,15 @@
                                        IsVisible="{Binding ShowsOtherServices}"
                                        InputTransparent="True"
                                        CascadeInputTransparent="False">
-                    <Label Text="Open in:" VerticalOptions="Center" InputTransparent="True" />
+                    <Label Text="Open in:" Style="{StaticResource Muted}" VerticalOptions="Center" InputTransparent="True" />
                     <Button AutomationId="Suggestion_Second"
                             Text="{Binding SecondText}"
                             Command="{Binding OpenSecondCommand}"
-                            BackgroundColor="{StaticResource Secondary}"
-                            TextColor="{StaticResource Tertiary}" />
+                            Style="{StaticResource SoftButton}" />
                     <Button AutomationId="Suggestion_Third"
                             Text="{Binding ThirdText}"
                             Command="{Binding OpenThirdCommand}"
-                            BackgroundColor="{StaticResource Secondary}"
-                            TextColor="{StaticResource Tertiary}" />
+                            Style="{StaticResource SoftButton}" />
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Grid>

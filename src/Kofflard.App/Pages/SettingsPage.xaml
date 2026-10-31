@@ -11,7 +11,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="10">
 
-            <Label Text="AI" FontAttributes="Bold" FontSize="18" />
+            <Label Text="AI" Style="{StaticResource Heading}" />
             <Label AutomationId="Settings_Connection" Text="{Binding ConnectionLine}" />
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                 <Button AutomationId="Settings_ChangeAi" Text="Change" Command="{Binding ChangeAiCommand}" />
@@ -19,24 +19,23 @@
                         AutomationId="Settings_Disconnect"
                         Text="Disconnect"
                         Command="{Binding DisconnectCommand}"
-                        BackgroundColor="{StaticResource Secondary}"
-                        TextColor="{StaticResource Tertiary}" />
+                        Style="{StaticResource SoftButton}" />
             </Grid>
 
-            <Label Text="Open with" FontAttributes="Bold" FontSize="18" Margin="0,12,0,0" />
+            <Label Text="Open with" Style="{StaticResource Heading}" Margin="0,12,0,0" />
             <Picker AutomationId="Settings_OpenWith"
                     Title="Open with"
                     ItemsSource="{Binding ServiceNames}"
                     SelectedIndex="{Binding OpenWithIndex}" />
 
-            <Label Text="Check musician names" FontAttributes="Bold" FontSize="18" Margin="0,12,0,0" />
+            <Label Text="Check musician names" Style="{StaticResource Heading}" Margin="0,12,0,0" />
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                 <Label Text="Confirms each suggestion with MusicBrainz. Slow: about one name per second."
                        VerticalOptions="Center" />
                 <Switch Grid.Column="1" AutomationId="Settings_CheckNames" IsToggled="{Binding CheckNames}" />
             </Grid>
 
-            <Label Text="How adventurous" FontAttributes="Bold" FontSize="18" Margin="0,12,0,0" />
+            <Label Text="How adventurous" Style="{StaticResource Heading}" Margin="0,12,0,0" />
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                 <Label AutomationId="Settings_AdventureName" Text="{Binding AdventureName}" VerticalOptions="Center" />
                 <Stepper Grid.Column="1"
@@ -47,16 +46,14 @@
                          Value="{Binding AdventureStep}" />
             </Grid>
 
-            <Label Text="History" FontAttributes="Bold" FontSize="18" Margin="0,12,0,0" />
+            <Label Text="History" Style="{StaticResource Heading}" Margin="0,12,0,0" />
             <Button AutomationId="Settings_ClearHistory"
                     Text="Clear history"
                     Command="{Binding ClearHistoryCommand}"
-                    BackgroundColor="{StaticResource Secondary}"
-                    TextColor="{StaticResource Tertiary}" />
+                    Style="{StaticResource SoftButton}" />
 
             <Label Text="Kofflard has no server and collects nothing. Names you search go to your AI provider; with name checks on, suggested names go to MusicBrainz."
-                   FontSize="12"
-                   TextColor="{StaticResource Gray500}"
+                   Style="{StaticResource Faint}"
                    Margin="0,12,0,0" />
         </VerticalStackLayout>
     </ScrollView>

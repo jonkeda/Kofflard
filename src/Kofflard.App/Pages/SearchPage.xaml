@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-    The search page, the Shell root (design §3.1). Ids are the contract with the page objects: renaming
-    one breaks them.
+    The search page, the Shell root (design §3.1), in the Aurora look (.my/design/aurora.md). Ids are the
+    contract with the page objects: renaming one breaks them.
 -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -12,76 +12,171 @@
              AutomationId="SearchPage"
              Title="Kofflard">
 
-    <!-- Icons on the Primary title bar; the text is each item's accessible name (.my/design/search-page-changes.md). -->
+    <!-- Icons on the title bar, dark on the light sky; the text is each item's accessible name (.my/design/search-page-changes.md). -->
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Favourites" IconImageSource="star.png" AutomationId="Search_Saved" Command="{Binding SavedCommand}" />
-        <ToolbarItem Text="Settings" IconImageSource="settings.png" AutomationId="Search_Settings" Command="{Binding SettingsCommand}" />
+        <ToolbarItem Text="Favourites" IconImageSource="{AppThemeBinding Light=star_dark.png, Dark=star.png}" AutomationId="Search_Saved" Command="{Binding SavedCommand}" />
+        <ToolbarItem Text="Settings" IconImageSource="{AppThemeBinding Light=settings_dark.png, Dark=settings.png}" AutomationId="Search_Settings" Command="{Binding SettingsCommand}" />
     </ContentPage.ToolbarItems>
 
-    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
+    <!-- One column, kept to phone width on a wide window. -->
+    <Grid RowDefinitions="Auto,*"
+          Padding="16,8,16,16"
+          RowSpacing="8"
+          MaximumWidthRequest="560"
+          HorizontalOptions="Center">
 
-        <VerticalStackLayout Spacing="10">
-            <Label Text="Who do you like?" FontSize="24" FontAttributes="Bold" />
+        <VerticalStackLayout Spacing="20">
 
-            <Entry AutomationId="Search_Name"
-                   Placeholder="A musician or band"
-                   Text="{Binding Name}"
-                   ReturnCommand="{Binding SearchCommand}"
-                   SemanticProperties.Hint="Type the name of a musician you like" />
+            <!--
+                The orb: glowing rings around the question and the name. The glow is two wide, faint strokes
+                under the ring: a Shadow on a shape is drawn as a square on Windows.
+            -->
+            <Grid WidthRequest="300" HeightRequest="300" HorizontalOptions="Center">
+                <Ellipse WidthRequest="296" HeightRequest="296"
+                         StrokeThickness="12"
+                         Opacity="0.12"
+                         Stroke="{AppThemeBinding Light={StaticResource RingLightBrush}, Dark={StaticResource RingDarkBrush}}"
+                         InputTransparent="True" />
+                <Ellipse WidthRequest="292" HeightRequest="292"
+                         StrokeThickness="6"
+                         Opacity="0.25"
+                         Stroke="{AppThemeBinding Light={StaticResource RingLightBrush}, Dark={StaticResource RingDarkBrush}}"
+                         InputTransparent="True" />
+                <Ellipse WidthRequest="288" HeightRequest="288"
+                         StrokeThickness="2.5"
+                         Stroke="{AppThemeBinding Light={StaticResource RingLightBrush}, Dark={StaticResource RingDarkBrush}}"
+                         InputTransparent="True" />
+                <Ellipse WidthRequest="270" HeightRequest="270"
+                         StrokeThickness="1"
+                         StrokeDashArray="1,5"
+                         Opacity="0.7"
+                         Stroke="{AppThemeBinding Light={StaticResource Ring2Light}, Dark={StaticResource Ring2Dark}}"
+                         InputTransparent="True" />
+                <Ellipse WidthRequest="244" HeightRequest="244"
+                         StrokeThickness="1"
+                         Fill="{AppThemeBinding Light={StaticResource OrbLight}, Dark={StaticResource OrbDark}}"
+                         Stroke="{AppThemeBinding Light={StaticResource ChipEdgeLight}, Dark={StaticResource ChipEdgeDark}}"
+                         InputTransparent="True" />
+
+                <VerticalStackLayout WidthRequest="210" Spacing="14" VerticalOptions="Center">
+                    <Label Text="Who do you like?"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource AskLight}, Dark={StaticResource AskDark}}" />
+                    <Border Style="{StaticResource Field}">
+                        <Entry AutomationId="Search_Name"
+                               Placeholder="A musician or band"
+                               Text="{Binding Name}"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               ReturnCommand="{Binding SearchCommand}"
+                               SemanticProperties.Hint="Type the name of a musician you like" />
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
             <Label AutomationId="Search_NameError"
+                   Style="{StaticResource Error}"
                    Text="{Binding NameError}"
-                   TextColor="Red"
+                   HorizontalOptions="Center"
                    IsVisible="{Binding HasNameError}" />
 
-            <Label Text="How adventurous?" />
-            <Grid AutomationId="Search_Adventure"
-                  ColumnDefinitions="*,*,*,*,*"
-                  ColumnSpacing="6"
-                  RadioButtonGroup.GroupName="Adventure"
-                  BindableLayout.ItemsSource="{Binding AdventureOptions}">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="vm:AdventureOptionViewModel">
-                        <RadioButton AutomationId="{Binding Name, StringFormat='Adventure_{0}'}"
-                                     Grid.Column="{Binding Column}"
-                                     Value="{Binding Adventure.Level}"
-                                     IsChecked="{Binding IsChosen}"
-                                     ControlTemplate="{StaticResource AdventureChoice}"
-                                     SemanticProperties.Description="{Binding Name}">
-                            <RadioButton.Content>
-                                <!--
-                                    The content of a templated RadioButton does not get the option as its
-                                    binding context (on Windows its bindings came up empty: coloured boxes,
-                                    no icon, no name), so it takes it from the radio button explicitly.
-                                -->
-                                <VerticalStackLayout Spacing="2"
-                                                     HorizontalOptions="Center"
-                                                     BindingContext="{Binding Source={RelativeSource AncestorType={x:Type vm:AdventureOptionViewModel}}}">
-                                    <Image Source="{Binding Icon}" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" />
-                                    <Label AutomationId="{Binding Name, StringFormat='Adventure_{0}_Name'}"
-                                           Text="{Binding Name}"
-                                           FontSize="11"
-                                           HorizontalOptions="Center">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsChosen}" Value="True">
-                                                <Setter Property="TextColor" Value="White" />
-                                            </DataTrigger>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsChosen}" Value="False">
-                                                <Setter Property="TextColor" Value="{StaticResource Tertiary}" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                </VerticalStackLayout>
-                            </RadioButton.Content>
-                        </RadioButton>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </Grid>
+            <!-- The slider: five stops on a track, the chosen one glowing. -->
+            <VerticalStackLayout Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="How adventurous?" Style="{StaticResource Muted}" FontSize="15" VerticalOptions="End" />
+                    <Label Grid.Column="1" Text="{Binding AdventureName}" Style="{StaticResource Heading}" VerticalOptions="End" />
+                </Grid>
+                <Grid>
+                    <Grid ColumnDefinitions="*,8*,*" InputTransparent="True">
+                        <BoxView Grid.Column="1"
+                                 HeightRequest="2"
+                                 VerticalOptions="Start"
+                                 Margin="0,17,0,0"
+                                 Color="{AppThemeBinding Light={StaticResource TrackLight}, Dark={StaticResource TrackDark}}" />
+                    </Grid>
+                    <Grid AutomationId="Search_Adventure"
+                          ColumnDefinitions="*,*,*,*,*"
+                          RadioButtonGroup.GroupName="Adventure"
+                          BindableLayout.ItemsSource="{Binding AdventureOptions}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AdventureOptionViewModel">
+                                <RadioButton AutomationId="{Binding Name, StringFormat='Adventure_{0}'}"
+                                             Grid.Column="{Binding Column}"
+                                             Value="{Binding Adventure.Level}"
+                                             IsChecked="{Binding IsChosen}"
+                                             ControlTemplate="{StaticResource AdventureChoice}"
+                                             HorizontalOptions="Center"
+                                             SemanticProperties.Description="{Binding Name}">
+                                    <RadioButton.Content>
+                                        <!--
+                                            The content of a templated RadioButton does not get the option as its
+                                            binding context (on Windows its bindings came up empty), so it takes
+                                            it from the radio button explicitly.
+                                        -->
+                                        <VerticalStackLayout Spacing="4"
+                                                             HorizontalOptions="Center"
+                                                             BindingContext="{Binding Source={RelativeSource AncestorType={x:Type vm:AdventureOptionViewModel}}}">
+                                            <Grid HeightRequest="36" WidthRequest="44" HorizontalOptions="Center">
+                                                <!-- The chosen stop's halo, in place of a Shadow (square on Windows). -->
+                                                <Ellipse WidthRequest="34"
+                                                         HeightRequest="34"
+                                                         HorizontalOptions="Center"
+                                                         VerticalOptions="Center"
+                                                         Opacity="0.3"
+                                                         IsVisible="{Binding IsChosen}"
+                                                         Fill="{AppThemeBinding Light={StaticResource DotOnLight}, Dark={StaticResource LeapDark}}" />
+                                                <Ellipse WidthRequest="12"
+                                                         HeightRequest="12"
+                                                         HorizontalOptions="Center"
+                                                         VerticalOptions="Center"
+                                                         Fill="{AppThemeBinding Light={StaticResource DotOffLight}, Dark={StaticResource DotOffDark}}">
+                                                    <Ellipse.Triggers>
+                                                        <DataTrigger TargetType="Ellipse" Binding="{Binding IsChosen}" Value="True">
+                                                            <Setter Property="WidthRequest" Value="22" />
+                                                            <Setter Property="HeightRequest" Value="22" />
+                                                            <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource DotOnLight}, Dark={StaticResource DotOnDark}}" />
+                                                        </DataTrigger>
+                                                    </Ellipse.Triggers>
+                                                </Ellipse>
+                                            </Grid>
+                                            <Label AutomationId="{Binding Name, StringFormat='Adventure_{0}_Name'}"
+                                                   Text="{Binding Name}"
+                                                   FontSize="12"
+                                                   HorizontalOptions="Center"
+                                                   TextColor="{AppThemeBinding Light={StaticResource FaintLight}, Dark={StaticResource FaintDark}}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsChosen}" Value="True">
+                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}" />
+                                                        <Setter Property="FontAttributes" Value="Bold" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                    </RadioButton.Content>
+                                </RadioButton>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </Grid>
+                </Grid>
+            </VerticalStackLayout>
 
             <Button AutomationId="Search_Go"
                     Text="Find musicians"
-                    Command="{Binding SearchCommand}" />
+                    FontSize="18"
+                    HeightRequest="56"
+                    CornerRadius="28"
+                    Command="{Binding SearchCommand}">
+                <Button.Shadow>
+                    <Shadow Brush="{AppThemeBinding Light={StaticResource Ring2Light}, Dark={StaticResource Ring2Dark}}"
+                            Radius="20"
+                            Opacity="0.45"
+                            Offset="0,6" />
+                </Button.Shadow>
+            </Button>
 
-            <Label Text="Recent" FontAttributes="Bold" IsVisible="{Binding HasRecent}" />
+            <Label Text="RECENT" Style="{StaticResource Faint}" CharacterSpacing="1.5" IsVisible="{Binding HasRecent}" />
         </VerticalStackLayout>
 
         <CollectionView Grid.Row="1"
@@ -91,8 +186,15 @@
                         SelectedItem="{Binding SelectedRecent}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:RecentSearch">
-                    <Grid AutomationId="RecentRow" Padding="8">
-                        <Label AutomationId="RecentRow_Artist" Text="{Binding Artist}" />
+                    <Grid AutomationId="RecentRow" Padding="0,4">
+                        <Border Padding="16,10"
+                                HorizontalOptions="Start"
+                                StrokeShape="RoundRectangle 20"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light={StaticResource ChipEdgeLight}, Dark={StaticResource ChipEdgeDark}}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource ChipLight}, Dark={StaticResource ChipDark}}">
+                            <Label AutomationId="RecentRow_Artist" Text="{Binding Artist}" />
+                        </Border>
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

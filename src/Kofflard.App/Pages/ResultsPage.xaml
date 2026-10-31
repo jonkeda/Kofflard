@@ -18,7 +18,7 @@
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="16,8" RowSpacing="8">
 
-        <Label AutomationId="Results_Summary" Text="{Binding Summary}" TextColor="{StaticResource Gray500}" />
+        <Label AutomationId="Results_Summary" Text="{Binding Summary}" Style="{StaticResource Muted}" FontSize="15" />
 
         <Grid Grid.Row="1"
               AutomationId="Results_State"
@@ -50,8 +50,7 @@
                            HorizontalTextAlignment="Center" />
                     <Label AutomationId="Results_Connection"
                            Text="{Binding ConnectionLine}"
-                           FontSize="12"
-                           TextColor="{StaticResource Gray500}"
+                           Style="{StaticResource Faint}"
                            HorizontalTextAlignment="Center" />
                     <Button AutomationId="Results_Retry"
                             Text="Try again"
@@ -60,6 +59,7 @@
                     <Button AutomationId="Results_FixConnection"
                             Text="Fix the AI connection"
                             Command="{Binding FixConnectionCommand}"
+                            Style="{StaticResource SoftButton}"
                             IsVisible="{Binding CanFixConnection}"
                             HorizontalOptions="Center" />
                 </VerticalStackLayout>
@@ -68,7 +68,7 @@
                       AutomationId="Results_Candidates"
                       RowDefinitions="Auto,*"
                       RowSpacing="8">
-                    <Label AutomationId="Results_CandidatesTitle" Text="{Binding CandidatesTitle}" FontAttributes="Bold" />
+                    <Label AutomationId="Results_CandidatesTitle" Text="{Binding CandidatesTitle}" Style="{StaticResource Heading}" />
                     <CollectionView Grid.Row="1"
                                     AutomationId="Results_CandidateList"
                                     ItemsSource="{Binding Candidates}"
@@ -77,8 +77,8 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Musician">
                                 <VerticalStackLayout AutomationId="CandidateRow" Padding="8">
-                                    <Label AutomationId="CandidateRow_Name" Text="{Binding Name}" FontAttributes="Bold" />
-                                    <Label AutomationId="CandidateRow_Summary" Text="{Binding Summary}" FontSize="12" />
+                                    <Label AutomationId="CandidateRow_Name" Text="{Binding Name}" Style="{StaticResource Heading}" FontSize="16" />
+                                    <Label AutomationId="CandidateRow_Summary" Text="{Binding Summary}" Style="{StaticResource Muted}" FontSize="12" />
                                 </VerticalStackLayout>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
@@ -92,16 +92,28 @@
                             SelectionMode="None">
                 <CollectionView.GroupHeaderTemplate>
                     <DataTemplate x:DataType="vm:LaneGroupViewModel">
-                        <Grid AutomationId="LaneHeader">
+                        <!-- A glass chip in the lane's colour: amber Close, teal Stretch, violet Leap. -->
+                        <Grid AutomationId="LaneHeader" Padding="0,10,0,2">
                             <Button AutomationId="LaneHeader_Toggle"
                                     Text="{Binding HeaderText}"
                                     Command="{Binding ToggleCommand}"
-                                    BackgroundColor="Transparent"
-                                    TextColor="{StaticResource Primary}"
+                                    Style="{StaticResource SoftButton}"
                                     FontAttributes="Bold"
-                                    FontSize="16"
-                                    Padding="4,8"
-                                    HorizontalOptions="Start" />
+                                    FontSize="15"
+                                    TextColor="{AppThemeBinding Light={StaticResource CloseTextLight}, Dark={StaticResource CloseTextDark}}"
+                                    BorderColor="{AppThemeBinding Light={StaticResource CloseEdgeLight}, Dark={StaticResource CloseEdgeDark}}"
+                                    HorizontalOptions="Start">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Name}" Value="Stretch">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StretchTextLight}, Dark={StaticResource StretchTextDark}}" />
+                                        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource StretchEdgeLight}, Dark={StaticResource StretchEdgeDark}}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Name}" Value="Leap">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LeapTextLight}, Dark={StaticResource LeapTextDark}}" />
+                                        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource LeapEdgeLight}, Dark={StaticResource LeapEdgeDark}}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.GroupHeaderTemplate>
@@ -118,6 +130,8 @@
         <Button Grid.Row="2"
                 AutomationId="Results_More"
                 Text="More like this…"
+                HeightRequest="52"
+                CornerRadius="26"
                 Command="{Binding MoreCommand}"
                 IsVisible="{Binding HasContent}" />
     </Grid>
