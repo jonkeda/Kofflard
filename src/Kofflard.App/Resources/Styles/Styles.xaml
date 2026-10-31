@@ -174,7 +174,7 @@
     </Style>
 
     <!--
-        One adventure choice: a stop on the slider (.my/design/aurora.md). The template only gives it room;
+        One adventure choice: a stop on the results' slider (.my/design/aurora.md). The template only gives it room;
         the content draws the dot and the name, and follows IsChosen itself.
     -->
     <ControlTemplate x:Key="AdventureChoice">

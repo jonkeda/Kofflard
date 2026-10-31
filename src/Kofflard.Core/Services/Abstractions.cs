@@ -9,30 +9,18 @@ namespace Kofflard.Core.Services;
 /// <param name="Connection">The AI connection, or null before one is set up.</param>
 /// <param name="OpenWith">The service a card's main button opens. YouTube by default.</param>
 /// <param name="CheckNames">Whether names are checked against MusicBrainz. Off by default: about a second per name.</param>
-/// <param name="Adventure">The adventurousness level, 1-5.</param>
+/// <param name="Adventure">
+/// How adventurous the results are shown: every lane up to this one. Set on the results page's slider and
+/// remembered for the next search; Safe on a new install (.my/design/adventure-as-outcomes.md).
+/// </param>
 public sealed record AppSettings(
     AiConnection? Connection,
     MusicService OpenWith,
     bool CheckNames,
-    int Adventure)
+    Lane Adventure)
 {
     /// <summary>A new install's settings.</summary>
-    public static AppSettings Default { get; } = new(null, MusicService.YouTube, false, Models.Adventure.Default.Level);
-
-    /// <summary>The result lanes left open; a new install has every lane closed. Remembered, not set.</summary>
-    public IReadOnlySet<Lane> OpenLanes { get; init; } = new HashSet<Lane>();
-
-    /// <summary>Equal when every setting is, the open lanes as a set.</summary>
-    public bool Equals(AppSettings? other)
-        => other is not null
-           && Connection == other.Connection
-           && OpenWith == other.OpenWith
-           && CheckNames == other.CheckNames
-           && Adventure == other.Adventure
-           && OpenLanes.SetEquals(other.OpenLanes);
-
-    /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(Connection, OpenWith, CheckNames, Adventure, OpenLanes.Count);
+    public static AppSettings Default { get; } = new(null, MusicService.YouTube, false, Lane.Safe);
 }
 
 /// <summary>Where the settings are kept: the app's own database.</summary>
@@ -47,9 +35,8 @@ public interface ISettingsStore
 
 /// <summary>A search the user made.</summary>
 /// <param name="Artist">The name searched.</param>
-/// <param name="Adventure">The level.</param>
 /// <param name="At">When.</param>
-public sealed record RecentSearch(string Artist, int Adventure, DateTimeOffset At);
+public sealed record RecentSearch(string Artist, DateTimeOffset At);
 
 /// <summary>
 /// What the user searched and was shown, on the device only (design §9). What was shown is sent back as
@@ -160,7 +147,7 @@ public static class KofflardRoutes
     /// <summary>The search page, the Shell root.</summary>
     public const string Search = "search";
 
-    /// <summary>The results; takes <see cref="ArtistParameter"/>, <see cref="LevelParameter"/> and optionally <see cref="CachedParameter"/>.</summary>
+    /// <summary>The results; takes <see cref="ArtistParameter"/> and optionally <see cref="CachedParameter"/>.</summary>
     public const string Results = "results";
 
     /// <summary>Connecting an AI.</summary>
@@ -175,33 +162,26 @@ public static class KofflardRoutes
     /// <summary>The musician to search.</summary>
     public const string ArtistParameter = "artist";
 
-    /// <summary>The adventurousness level.</summary>
-    public const string LevelParameter = "level";
-
     /// <summary>"true" when a cached result may be shown (a recent search opened again).</summary>
     public const string CachedParameter = "cached";
 
     /// <summary>The parameters of a search.</summary>
-    public static IReadOnlyDictionary<string, object> ForSearch(string artist, Adventure adventure, bool cached = false)
+    public static IReadOnlyDictionary<string, object> ForSearch(string artist, bool cached = false)
         => new Dictionary<string, object>
         {
             [ArtistParameter] = artist,
-            [LevelParameter] = adventure.Level.ToString(System.Globalization.CultureInfo.InvariantCulture),
             [CachedParameter] = cached ? "true" : "false",
         };
 
     /// <summary>Reads a search's parameters; null when there is no artist.</summary>
-    public static (string Artist, Adventure Adventure, bool Cached)? ReadSearch(IDictionary<string, object> query)
+    public static (string Artist, bool Cached)? ReadSearch(IDictionary<string, object> query)
     {
         if (!query.TryGetValue(ArtistParameter, out var artist) || artist?.ToString() is not { Length: > 0 } name)
         {
             return null;
         }
 
-        var level = query.TryGetValue(LevelParameter, out var value) && int.TryParse(value?.ToString(), out var parsed)
-            ? new Adventure(parsed)
-            : Adventure.Default;
         var cached = query.TryGetValue(CachedParameter, out var flag) && flag?.ToString() == "true";
-        return (name, level, cached);
+        return (name, cached);
     }
 }

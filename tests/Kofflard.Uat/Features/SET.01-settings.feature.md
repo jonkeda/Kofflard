@@ -1,7 +1,7 @@
 # Feature: SET.01 Settings
 
-The settings a new install starts with, Open with changing which service a tap on a card opens
-(design §3.3), and the adventure staying as chosen.
+The settings a new install starts with, and Open with changing which service a tap on a card opens
+(design §3.3). How adventurous is on the results now (RES.01).
 
 ## Metadata
 
@@ -40,16 +40,4 @@ Then I should be on the Results page
 And "Bert Jansch" should open in "Spotify" first
 ```
 
-@SET.01.3 @maui
-## Scenario: SET.01.3 The chosen adventure stays chosen
 
-```gherkin
-Given I am on the Search page
-Then "Curious" adventure should be chosen
-When I choose "Bold" adventure
-And I tap Settings
-Then I should be on the Settings page
-When I tap Back
-Then I should be on the Search page
-And "Bold" adventure should be chosen
-```

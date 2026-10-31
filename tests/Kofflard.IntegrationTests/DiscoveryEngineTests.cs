@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Kofflard.Core.Ai;
 using Kofflard.Core.Models;
+using Kofflard.Core.Rules;
 using Kofflard.Infrastructure.Ai;
 using Kofflard.TestSupport;
 
@@ -23,19 +24,19 @@ public sealed class DiscoveryEngineTests : IDisposable
     [Fact]
     public async Task Discover_ReturnsTheValidatedLanes()
     {
-        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", Adventure.Default, []);
+        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", LaneMix.Even, []);
 
         Assert.Equal(DiscoveryStatus.Ok, result.Status);
-        Assert.Equal(6, result.Count(Lane.Close));
-        Assert.Equal(4, result.Count(Lane.Stretch));
-        Assert.Equal(2, result.Count(Lane.Leap));
-        Assert.All(result.Suggestions.Where(s => s.Lane == Lane.Leap), s => Assert.NotNull(s.Bridge));
+        Assert.Equal(6, result.Count(Lane.Safe));
+        Assert.Equal(4, result.Count(Lane.Curious));
+        Assert.Equal(2, result.Count(Lane.Wild));
+        Assert.All(result.Suggestions.Where(s => s.Lane == Lane.Wild), s => Assert.NotNull(s.Bridge));
     }
 
     [Fact]
-    public async Task Discover_AsksForTheSchema_AndTheLevelsMix()
+    public async Task Discover_AsksForTheSchema_AndTheLeanedMix()
     {
-        await _engine.DiscoverAsync(Local, null, "Nick Drake", new Adventure(5), ["Bert Jansch"]);
+        await _engine.DiscoverAsync(Local, null, "Nick Drake", Lane.Wild, ["Bert Jansch"]);
 
         using var request = JsonDocument.Parse(Assert.Single(_ai.Requests));
         var root = request.RootElement;
@@ -49,7 +50,7 @@ public sealed class DiscoveryEngineTests : IDisposable
     [Fact]
     public async Task Discover_DropsExcludedNames_EvenWhenTheModelSuggestsThem()
     {
-        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", Adventure.Default, ["Vashti Bunyan"]);
+        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", LaneMix.Even, ["Vashti Bunyan"]);
 
         Assert.DoesNotContain(result.Suggestions, s => s.Name == "Vashti Bunyan");
     }
@@ -59,7 +60,7 @@ public sealed class DiscoveryEngineTests : IDisposable
     {
         _ai.InSequence("Sure! Here are some musicians you may like.", FakeAi.Default);
 
-        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", Adventure.Default, []);
+        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", LaneMix.Even, []);
 
         Assert.Equal(12, result.Suggestions.Count);
         Assert.Equal(2, _ai.Requests.Count);
@@ -71,7 +72,7 @@ public sealed class DiscoveryEngineTests : IDisposable
     {
         _ai.InSequence("not json", "still not json");
 
-        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(Local, null, "Nick Drake", Adventure.Default, []));
+        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(Local, null, "Nick Drake", LaneMix.Even, []));
 
         Assert.Equal(AiFailure.BadAnswer, failure.Failure);
     }
@@ -86,7 +87,7 @@ public sealed class DiscoveryEngineTests : IDisposable
     {
         _ai.FailWith(status);
 
-        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(Local, "key", "Nick Drake", Adventure.Default, []));
+        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(Local, "key", "Nick Drake", LaneMix.Even, []));
 
         Assert.Equal(expected, failure.Failure);
     }
@@ -96,7 +97,7 @@ public sealed class DiscoveryEngineTests : IDisposable
     {
         var nowhere = new AiConnection("local", "http://127.0.0.1:1", FakeAi.Model);
 
-        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(nowhere, null, "Nick Drake", Adventure.Default, []));
+        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(nowhere, null, "Nick Drake", LaneMix.Even, []));
 
         Assert.Equal(AiFailure.Unreachable, failure.Failure);
     }

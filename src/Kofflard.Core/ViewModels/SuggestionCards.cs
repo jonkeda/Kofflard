@@ -18,7 +18,7 @@ public sealed class SuggestionCards(IMusicLauncher launcher, IHistoryStore histo
     public SuggestionViewModel Create(SavedMusician musician, MusicService openWith, Func<SuggestionViewModel, Task> explore)
     {
         var card = Create(
-            new Suggestion(musician.Name, Lane.Close, musician.Why, null, musician.Tags, musician.KnownFor),
+            new Suggestion(musician.Name, Lane.Safe, musician.Why, null, musician.Tags, musician.KnownFor),
             openWith,
             isSaved: true,
             explore);

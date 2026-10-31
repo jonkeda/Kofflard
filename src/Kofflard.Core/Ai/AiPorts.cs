@@ -62,7 +62,7 @@ public interface IDiscoveryEngine
         AiConnection connection,
         string? secret,
         string artist,
-        Adventure adventure,
+        Lane lean,
         IReadOnlyCollection<string> exclude,
         CancellationToken cancellationToken = default);
 

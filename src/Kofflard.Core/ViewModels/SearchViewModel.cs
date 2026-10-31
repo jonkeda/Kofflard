@@ -9,7 +9,8 @@ using Kofflard.Core.Services;
 namespace Kofflard.Core.ViewModels;
 
 /// <summary>
-/// The search page, the Shell root: a name, how adventurous, and the recent searches (design §3.1).
+/// The search page, the Shell root: a name and the recent searches (design §3.1). How adventurous is
+/// chosen on the results (.my/design/adventure-as-outcomes.md).
 /// </summary>
 public sealed class SearchViewModel : ParentViewModel
 {
@@ -18,28 +19,22 @@ public sealed class SearchViewModel : ParentViewModel
 
     private readonly DiscoveryService _discovery;
     private readonly AiConnections _connections;
-    private readonly ISettingsStore _settings;
     private readonly INavigator _navigator;
 
     private string _name = string.Empty;
-    private int _adventureLevel = Adventure.Default.Level;
     private string? _nameError;
-    private bool _loaded;
 
     /// <summary>Creates the view model.</summary>
-    public SearchViewModel(DiscoveryService discovery, AiConnections connections, ISettingsStore settings, INavigator navigator)
+    public SearchViewModel(DiscoveryService discovery, AiConnections connections, INavigator navigator)
     {
         _discovery = discovery;
         _connections = connections;
-        _settings = settings;
         _navigator = navigator;
 
         SearchCommand = new TargetAsyncCommand(this, SearchAsync);
         OpenRecentCommand = new TargetAsyncCommand<RecentSearch>(this, OpenRecentAsync);
         SavedCommand = new TargetAsyncCommand(this, () => _navigator.GoToAsync(KofflardRoutes.Saved));
         SettingsCommand = new TargetAsyncCommand(this, () => _navigator.GoToAsync(KofflardRoutes.Settings));
-        AdventureOptions = [.. Adventure.All.Select(adventure => new AdventureOptionViewModel(adventure, chosen => AdventureLevel = chosen.Level))];
-        ShowChosenAdventure();
     }
 
     /// <summary>The name as typed. Typing clears a shown error.</summary>
@@ -55,28 +50,6 @@ public sealed class SearchViewModel : ParentViewModel
         }
     }
 
-    /// <summary>The adventurousness level, 1-5, kept in the settings as it changes.</summary>
-    public int AdventureLevel
-    {
-        get => _adventureLevel;
-        set
-        {
-            var level = new Adventure(value).Level;
-            if (SetProperty(ref _adventureLevel, level))
-            {
-                OnPropertyChanged(nameof(AdventureName));
-                ShowChosenAdventure();
-                if (_loaded)
-                {
-                    _ = SaveAdventureAsync(level);
-                }
-            }
-        }
-    }
-
-    /// <summary>The five levels as icon choices, Safe first; exactly one is chosen.</summary>
-    public IReadOnlyList<AdventureOptionViewModel> AdventureOptions { get; }
-
     /// <summary>Tapping a recent search selects it, which opens it; the selection is then cleared.</summary>
     public RecentSearch? SelectedRecent
     {
@@ -90,9 +63,6 @@ public sealed class SearchViewModel : ParentViewModel
             }
         }
     }
-
-    /// <summary>"Safe" to "Wild".</summary>
-    public string AdventureName => new Adventure(_adventureLevel).Name;
 
     /// <summary>The error under the name, or null.</summary>
     public string? NameError
@@ -129,17 +99,10 @@ public sealed class SearchViewModel : ParentViewModel
     public IAsyncRelayCommand SettingsCommand { get; }
 
     /// <summary>
-    /// Loads the settings and recent searches. With no AI connected, goes to Connect (design §4.2).
+    /// Loads the recent searches. With no AI connected, goes to Connect (design §4.2).
     /// </summary>
     public async Task LoadAsync()
     {
-        var settings = await _settings.LoadAsync();
-        _adventureLevel = new Adventure(settings.Adventure).Level;
-        OnPropertyChanged(nameof(AdventureLevel));
-        OnPropertyChanged(nameof(AdventureName));
-        ShowChosenAdventure();
-        _loaded = true;
-
         var connected = await _connections.GetWithSecretAsync();
 
         Recent.Clear();
@@ -165,25 +128,11 @@ public sealed class SearchViewModel : ParentViewModel
             return;
         }
 
-        await _navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(name, new Adventure(AdventureLevel)));
+        await _navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(name));
     }
 
     private Task OpenRecentAsync(RecentSearch? search)
         => search is null
             ? Task.CompletedTask
-            : _navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(search.Artist, new Adventure(search.Adventure), cached: true));
-
-    private void ShowChosenAdventure()
-    {
-        foreach (var option in AdventureOptions)
-        {
-            option.Show(option.Adventure.Level == _adventureLevel);
-        }
-    }
-
-    private async Task SaveAdventureAsync(int level)
-    {
-        var settings = await _settings.LoadAsync();
-        await _settings.SaveAsync(settings with { Adventure = level });
-    }
+            : _navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(search.Artist, cached: true));
 }

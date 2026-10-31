@@ -1,5 +1,6 @@
 using Kofflard.Core.Ai;
 using Kofflard.Core.Models;
+using Kofflard.Core.Rules;
 using Kofflard.Core.Services;
 using Kofflard.Core.ViewModels;
 using Microsoft.Extensions.Time.Testing;
@@ -45,37 +46,18 @@ public sealed class ViewModelTests
     }
 
     [Fact]
-    public async Task Search_OpensTheResults_ForTheCleanedName_AtTheChosenLevel()
+    public async Task Search_OpensTheResults_ForTheCleanedName()
     {
         var search = Search();
         await search.LoadAsync();
         search.Name = "  Nick   Drake ";
-        search.AdventureOptions[3].IsChosen = true;
 
         await search.SearchCommand.ExecuteAsync(null);
 
         var (route, parameters) = Assert.Single(_navigator.Visits);
         Assert.Equal(KofflardRoutes.Results, route);
         Assert.Equal("Nick Drake", parameters![KofflardRoutes.ArtistParameter]);
-        Assert.Equal("4", parameters[KofflardRoutes.LevelParameter]);
-        Assert.Equal(4, _settings.Current.Adventure);
-    }
-
-    [Fact]
-    public async Task Search_OffersFiveAdventures_WithExactlyOneChosen()
-    {
-        var search = Search();
-        await search.LoadAsync();
-
-        Assert.Equal(["Safe", "Curious", "Open", "Bold", "Wild"], search.AdventureOptions.Select(o => o.Name));
-        Assert.Equal("Curious", Assert.Single(search.AdventureOptions, o => o.IsChosen).Name);
-        Assert.Equal("adventure_curious_on.png", search.AdventureOptions[1].Icon);
-        Assert.Equal("adventure_safe.png", search.AdventureOptions[0].Icon);
-
-        search.AdventureOptions[4].IsChosen = true;
-
-        Assert.Equal("Wild", Assert.Single(search.AdventureOptions, o => o.IsChosen).Name);
-        Assert.Equal(5, search.AdventureLevel);
+        Assert.Equal([KofflardRoutes.ArtistParameter, KofflardRoutes.CachedParameter], parameters.Keys.Order());
     }
 
     [Fact]
@@ -89,83 +71,100 @@ public sealed class ViewModelTests
     }
 
     [Fact]
-    public async Task Results_ShowTheCards_InLanes_ThatStartClosed_WithTheirTotals()
+    public async Task Results_ShowTheCards_InLanes_OnlySafeAtFirst_WithTheirTotals()
     {
-        Answers(Ok(("Vashti Bunyan", Lane.Close), ("Ali Farka Touré", Lane.Leap), ("Bridget St John", Lane.Stretch), ("Linda Perhacs", Lane.Close)));
+        Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Ali Farka Touré", Lane.Wild), ("Bridget St John", Lane.Curious), ("Linda Perhacs", Lane.Safe)));
         var results = Results();
 
-        await results.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        await results.LoadAsync("Nick Drake", cached: false);
 
         Assert.Equal(ResultsViewModel.ContentState, results.State);
         Assert.Equal(["Vashti Bunyan", "Linda Perhacs", "Bridget St John", "Ali Farka Touré"], results.Cards.Select(i => i.Name));
-        Assert.Equal(["▸ Close (2)", "▸ Stretch (1)", "▸ Leap (1)"], results.Lanes.Select(l => l.HeaderText));
-        Assert.All(results.Lanes, lane => Assert.Empty(lane));
+        Assert.Equal(["Safe (2)", "Curious (1)", "Wild (1)"], results.Lanes.Select(l => l.HeaderText));
+        Assert.Equal([2, 0, 0], results.Lanes.Select(l => l.Count));
+        Assert.Equal(["Safe", "Curious", "Wild"], results.AdventureOptions.Select(o => o.Name));
+        Assert.Equal("Safe", Assert.Single(results.AdventureOptions, o => o.IsChosen).Name);
         Assert.Equal("Like Nick Drake", results.Heading);
     }
 
     [Fact]
     public async Task Results_ALaneThatHasNoSuggestions_IsNotShown()
     {
-        Answers(Ok(("Vashti Bunyan", Lane.Close)));
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
         var results = Results();
 
-        await results.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        await results.LoadAsync("Nick Drake", cached: false);
 
-        Assert.Equal([Lane.Close], results.Lanes.Select(l => l.Lane));
+        Assert.Equal([Lane.Safe], results.Lanes.Select(l => l.Lane));
     }
 
     [Fact]
-    public async Task Results_OpeningALane_ShowsItsCards_AndTheNextResultsOpenItToo()
+    public async Task Results_SlidingToCurious_ShowsItsCards_WithNoNewRequest_AndTheNextResultsStartThere()
     {
-        Answers(Ok(("Vashti Bunyan", Lane.Close), ("Bridget St John", Lane.Stretch)));
+        Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Bridget St John", Lane.Curious), ("Ali Farka Touré", Lane.Wild)));
         var results = Results();
-        await results.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        await results.LoadAsync("Nick Drake", cached: false);
+        _engine.ClearReceivedCalls();
 
-        var stretch = results.Lanes.Single(l => l.Lane == Lane.Stretch);
-        stretch.ToggleCommand.Execute(null);
+        results.AdventureOptions[1].IsChosen = true;
         await results.Remembering;
 
-        Assert.Equal("▾ Stretch (1)", stretch.HeaderText);
-        Assert.Equal("Bridget St John", Assert.Single(stretch).Name);
-        Assert.Equal([Lane.Stretch], _settings.Current.OpenLanes);
+        Assert.Equal(Lane.Curious, results.Adventure);
+        Assert.Equal("Curious", results.AdventureName);
+        Assert.Equal(["Vashti Bunyan", "Bridget St John"], results.Lanes.SelectMany(l => l).Select(c => c.Name));
+        Assert.Equal(Lane.Curious, _settings.Current.Adventure);
+        await _engine.DidNotReceiveWithAnyArgs().DiscoverAsync(default!, default, default!, default, default!, default);
 
         var next = Results();
-        await next.LoadAsync("Nick Drake", Adventure.Default, cached: true);
-        Assert.Equal([false, true], next.Lanes.Select(l => l.IsExpanded));
-        Assert.Equal(1, next.Lanes.Single(l => l.Lane == Lane.Stretch).Total);
+        await next.LoadAsync("Nick Drake", cached: true);
+        Assert.Equal([true, true, false], next.Lanes.Select(l => l.IsShown));
+        Assert.Equal("Curious", Assert.Single(next.AdventureOptions, o => o.IsChosen).Name);
     }
 
     [Fact]
-    public async Task Results_ClosingALane_KeepsItsTotal_AndForgetsItWasOpen()
+    public async Task Results_SlidingBackToSafe_HidesTheOthers_AndKeepsTheirTotals()
     {
-        await _settings.SaveAsync(_settings.Current with { OpenLanes = new HashSet<Lane> { Lane.Close, Lane.Leap } });
-        Answers(Ok(("Vashti Bunyan", Lane.Close), ("Linda Perhacs", Lane.Close)));
+        await _settings.SaveAsync(_settings.Current with { Adventure = Lane.Wild });
+        Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Bridget St John", Lane.Curious), ("Ali Farka Touré", Lane.Wild)));
         var results = Results();
-        await results.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        await results.LoadAsync("Nick Drake", cached: false);
+        Assert.Equal(3, results.Lanes.Sum(l => l.Count));
 
-        var close = Assert.Single(results.Lanes);
-        Assert.Equal(2, close.Count);
-        close.ToggleCommand.Execute(null);
+        results.AdventureOptions[0].IsChosen = true;
         await results.Remembering;
 
-        Assert.Empty(close);
-        Assert.Equal("▸ Close (2)", close.HeaderText);
+        Assert.Equal([1, 0, 0], results.Lanes.Select(l => l.Count));
+        Assert.Equal(["Safe (1)", "Curious (1)", "Wild (1)"], results.Lanes.Select(l => l.HeaderText));
+        Assert.Equal(Lane.Safe, _settings.Current.Adventure);
+    }
 
-        // Leap had nothing to show this time, so it stays open.
-        Assert.Equal([Lane.Leap], _settings.Current.OpenLanes);
+    [Fact]
+    public async Task Results_ASearch_AsksForTheEvenMix_AndMoreLeansToTheSlider()
+    {
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
+        var results = Results();
+        await results.LoadAsync("Nick Drake", cached: false);
+
+        await _engine.Received().DiscoverAsync(Azure, "key", "Nick Drake", LaneMix.Even, Arg.Any<IReadOnlyCollection<string>>(), Arg.Any<CancellationToken>());
+
+        results.AdventureOptions[2].IsChosen = true;
+        Answers(Ok(("Ali Farka Touré", Lane.Wild)));
+        await results.MoreCommand.ExecuteAsync(null);
+
+        await _engine.Received().DiscoverAsync(Azure, "key", "Nick Drake", Lane.Wild, Arg.Any<IReadOnlyCollection<string>>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task Results_ExcludeWhatWasShownBefore()
     {
-        Answers(Ok(("Vashti Bunyan", Lane.Close)));
-        await Results().LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
+        await Results().LoadAsync("Nick Drake", cached: false);
 
-        Answers(Ok(("Linda Perhacs", Lane.Close)));
-        await Results().LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        Answers(Ok(("Linda Perhacs", Lane.Safe)));
+        await Results().LoadAsync("Nick Drake", cached: false);
 
         await _engine.Received().DiscoverAsync(
-            Azure, "key", "Nick Drake", Adventure.Default,
+            Azure, "key", "Nick Drake", LaneMix.Even,
             Arg.Is<IReadOnlyCollection<string>>(exclude => exclude.Contains("Vashti Bunyan")),
             Arg.Any<CancellationToken>());
     }
@@ -173,13 +172,13 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Results_ForARecentSearch_ComeFromTheCache_WithinADay()
     {
-        Answers(Ok(("Vashti Bunyan", Lane.Close)));
-        await Results().LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
+        await Results().LoadAsync("Nick Drake", cached: false);
         _engine.ClearReceivedCalls();
 
         _time.Advance(TimeSpan.FromHours(23));
         var again = Results();
-        await again.LoadAsync("Nick Drake", Adventure.Default, cached: true);
+        await again.LoadAsync("Nick Drake", cached: true);
 
         Assert.Equal("Vashti Bunyan", Assert.Single(again.Cards).Name);
         await _engine.DidNotReceiveWithAnyArgs().DiscoverAsync(default!, default, default!, default, default!, default);
@@ -190,12 +189,12 @@ public sealed class ViewModelTests
     {
         Answers(new DiscoveryResult(DiscoveryStatus.Ambiguous, null, [], [new("Genesis", "English prog rock band"), new("Genesis Owusu", "Australian rapper")]));
         var results = Results();
-        await results.LoadAsync("Genesis", Adventure.Default, cached: false);
+        await results.LoadAsync("Genesis", cached: false);
 
         Assert.Equal(ResultsViewModel.CandidatesState, results.State);
         Assert.Equal("Which Genesis do you mean?", results.CandidatesTitle);
 
-        Answers(Ok(("Little Simz", Lane.Close)));
+        Answers(Ok(("Little Simz", Lane.Safe)));
         await results.ChooseCandidateCommand.ExecuteAsync(results.Candidates[1]);
 
         Assert.Equal("Like Genesis Owusu", results.Heading);
@@ -209,7 +208,7 @@ public sealed class ViewModelTests
             .ReturnsForAnyArgs<Task<DiscoveryResult>>(_ => throw new AiException(AiFailure.InvalidKey, "This key was not accepted by Azure OpenAI / Foundry."));
         var results = Results();
 
-        await results.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        await results.LoadAsync("Nick Drake", cached: false);
 
         Assert.Equal(ResultsViewModel.ErrorState, results.State);
         Assert.Equal("This key was not accepted by Azure OpenAI / Foundry.", results.ErrorMessage);
@@ -220,17 +219,17 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Results_CheckNames_OnlyWhenTheSettingIsOn()
     {
-        Answers(Ok(("Vashti Bunyan", Lane.Close)));
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
         _verifier.VerifyAsync("Vashti Bunyan", Arg.Any<CancellationToken>()).Returns(new Verification(VerificationState.Verified, "mbid", "4aF"));
 
         var off = Results();
-        await off.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        await off.LoadAsync("Nick Drake", cached: false);
         await off.Verifying;
         Assert.False(off.Cards.First().IsVerified);
 
         await _settings.SaveAsync(_settings.Current with { CheckNames = true });
         var on = Results();
-        await on.LoadAsync("Nick Drake", Adventure.Default, cached: true);
+        await on.LoadAsync("Nick Drake", cached: true);
         await on.Verifying;
         Assert.True(on.Cards.First().IsVerified);
         Assert.Equal("https://open.spotify.com/artist/4aF", on.Cards.First().Link(MusicService.Spotify).WebUrl.AbsoluteUri);
@@ -240,9 +239,9 @@ public sealed class ViewModelTests
     public async Task Card_Tap_OpensTheOpenWithService_AndALongPress_OffersTheOthers()
     {
         await _settings.SaveAsync(_settings.Current with { OpenWith = MusicService.Spotify });
-        Answers(Ok(("Vashti Bunyan", Lane.Close)));
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
         var results = Results();
-        await results.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        await results.LoadAsync("Nick Drake", cached: false);
         var card = results.Cards.First();
 
         Assert.Equal("Open Vashti Bunyan in Spotify", card.OpenDescription);
@@ -263,9 +262,9 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Card_ASecondLongPress_HidesTheOtherServices()
     {
-        Answers(Ok(("Vashti Bunyan", Lane.Close)));
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
         var results = Results();
-        await results.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        await results.LoadAsync("Nick Drake", cached: false);
         var card = results.Cards.First();
 
         card.ShowOtherServicesCommand.Execute(null);
@@ -278,9 +277,9 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Card_SaysWhereItOpened_ForAFewSeconds()
     {
-        Answers(Ok(("Vashti Bunyan", Lane.Close)));
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
         var results = Results();
-        await results.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        await results.LoadAsync("Nick Drake", cached: false);
         var card = results.Cards.First();
 
         await card.OpenCommand.ExecuteAsync(null);
@@ -294,9 +293,9 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Card_Star_TogglesFavourite()
     {
-        Answers(Ok(("Vashti Bunyan", Lane.Close)));
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
         var results = Results();
-        await results.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        await results.LoadAsync("Nick Drake", cached: false);
         var card = results.Cards.First();
 
         Assert.Equal("☆", card.StarText);
@@ -316,16 +315,15 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Card_Explore_SearchesFromThatMusician()
     {
-        Answers(Ok(("Vashti Bunyan", Lane.Close)));
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
         var results = Results();
-        await results.LoadAsync("Nick Drake", new Adventure(3), cached: false);
+        await results.LoadAsync("Nick Drake", cached: false);
 
         await results.Cards.First().ExploreCommand.ExecuteAsync(null);
 
         var (route, parameters) = Assert.Single(_navigator.Visits);
         Assert.Equal(KofflardRoutes.Results, route);
         Assert.Equal("Vashti Bunyan", parameters![KofflardRoutes.ArtistParameter]);
-        Assert.Equal("3", parameters[KofflardRoutes.LevelParameter]);
     }
 
     [Fact]
@@ -405,7 +403,7 @@ public sealed class ViewModelTests
         Assert.Equal("No AI connected", settings.ConnectionLine);
     }
 
-    private SearchViewModel Search() => new(_discovery, _connections, _settings, _navigator);
+    private SearchViewModel Search() => new(_discovery, _connections, _navigator);
 
     private ResultsViewModel Results()
         => new(_discovery, _settings, _saved, _verifier, new SuggestionCards(_launcher, _history, _saved, _time), _connections, _navigator);
@@ -420,6 +418,6 @@ public sealed class ViewModelTests
         => new(
             DiscoveryStatus.Ok,
             new Musician("Nick Drake", "English folk singer-songwriter"),
-            [.. picks.Select(p => new Suggestion(p.Name, p.Lane, $"Why {p.Name}", p.Lane == Lane.Leap ? "A concrete bridge to the original artist" : null, ["folk"], null)).OrderBy(s => s.Lane)],
+            [.. picks.Select(p => new Suggestion(p.Name, p.Lane, $"Why {p.Name}", p.Lane == Lane.Wild ? "A concrete bridge to the original artist" : null, ["folk"], null)).OrderBy(s => s.Lane)],
             []);
 }

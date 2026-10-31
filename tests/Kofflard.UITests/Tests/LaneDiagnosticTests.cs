@@ -4,7 +4,7 @@ namespace Kofflard.UITests.Tests;
 
 /// <summary>
 /// Regression for the results list on Windows versus headless (.my/rca/windows-vs-headless.md): with every
-/// lane open the list is taller than the window, and a card from each lane must still be found. It reports
+/// lane shown the list is taller than the window, and a card from each lane must still be found. It reports
 /// what the platform says about the list after each step, the evidence the RCA was built on.
 /// </summary>
 [Collection(KofflardCollection.Name)]
@@ -13,19 +13,19 @@ namespace Kofflard.UITests.Tests;
 public sealed class LaneDiagnosticTests(KofflardAppFixture fixture, ITestOutputHelper output)
 {
     [Fact]
-    public void WithEveryLaneOpen_ACardFromEachLane_IsFound()
+    public void WithEveryLaneShown_ACardFromEachLane_IsFound()
     {
         var results = fixture.StartTest().SearchFor("Nick Drake").WaitForSuggestions();
-        Report(results, "all closed");
+        Report(results, "only Safe");
 
-        // Stretch and Leap first, so the list ends up scrolled away from the top.
-        foreach (var lane in new[] { "Stretch", "Leap", "Close" })
+        foreach (var adventure in new[] { "Curious", "Wild" })
         {
-            results.LaneHeaders.Open(lane);
-            Report(results, $"{lane} opened");
+            results.ChooseAdventure(adventure);
+            Report(results, $"slid to {adventure}");
         }
 
-        foreach (var musician in new[] { "Bill Fay", "Ali Farka Touré", "Vashti Bunyan" })
+        // Wild and Curious first, so the list ends up scrolled away from the top.
+        foreach (var musician in new[] { "Ali Farka Touré", "Bill Fay", "Vashti Bunyan" })
         {
             results.Suggestions.Shown(musician);
             Report(results, $"found {musician}");

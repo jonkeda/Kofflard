@@ -9,7 +9,8 @@ using Kofflard.Core.Services;
 namespace Kofflard.Core.ViewModels;
 
 /// <summary>
-/// The results page: the suggestions in their lanes, or who the user may have meant (design §3.1).
+/// The results page: the suggestions in their lanes, or who the user may have meant (design §3.1). The
+/// slider shows the lanes up to how adventurous the user wants to go (.my/design/adventure-as-outcomes.md).
 /// </summary>
 public sealed class ResultsViewModel : ParentViewModel
 {
@@ -38,7 +39,8 @@ public sealed class ResultsViewModel : ParentViewModel
 
     private CancellationTokenSource? _work;
     private string _artist = string.Empty;
-    private Adventure _adventure = Adventure.Default;
+    private Lane _adventure = AppSettings.Default.Adventure;
+    private Lane _lean = LaneMix.Even;
     private string _stateKey = LoadingState;
     private string _summary = string.Empty;
     private string _candidatesTitle = string.Empty;
@@ -65,10 +67,37 @@ public sealed class ResultsViewModel : ParentViewModel
         _navigator = navigator;
 
         RetryCommand = new TargetAsyncCommand(this, () => SearchAsync(useCache: false));
-        MoreCommand = new TargetAsyncCommand(this, () => SearchAsync(useCache: false));
+        MoreCommand = new TargetAsyncCommand(this, () => SearchAsync(useCache: false, lean: _adventure));
         ChooseCandidateCommand = new TargetAsyncCommand<Musician>(this, ChooseAsync);
         FixConnectionCommand = new TargetAsyncCommand(this, () => _navigator.GoToAsync(KofflardRoutes.Connect));
+        AdventureOptions = [.. Enum.GetValues<Lane>().Select(lane => new AdventureOptionViewModel(lane, chosen => Adventure = chosen))];
+        ShowChosenAdventure();
     }
+
+    /// <summary>
+    /// How adventurous: the lanes up to this one show. Changing it shows or hides lanes at once, with no new
+    /// request, and is kept for the next search.
+    /// </summary>
+    public Lane Adventure
+    {
+        get => _adventure;
+        set
+        {
+            if (SetProperty(ref _adventure, value))
+            {
+                OnPropertyChanged(nameof(AdventureName));
+                ShowChosenAdventure();
+                ShowLanes();
+                Remembering = RememberAsync(Remembering, value);
+            }
+        }
+    }
+
+    /// <summary>"Safe", "Curious" or "Wild".</summary>
+    public string AdventureName => _adventure.ToString();
+
+    /// <summary>The slider's three stops, Safe first; exactly one is chosen.</summary>
+    public IReadOnlyList<AdventureOptionViewModel> AdventureOptions { get; }
 
     /// <summary>"Like Nick Drake".</summary>
     public string Heading => $"Like {_artist}";
@@ -117,10 +146,10 @@ public sealed class ResultsViewModel : ParentViewModel
         }
     }
 
-    /// <summary>The lanes that have suggestions, in order; each folds open and closed.</summary>
+    /// <summary>The lanes that have suggestions, in order; those past <see cref="Adventure"/> are empty.</summary>
     public ObservableCollection<LaneGroupViewModel> Lanes { get; } = [];
 
-    /// <summary>Every card, in lane order, whether its lane is open or not.</summary>
+    /// <summary>Every card, in lane order, whether its lane is shown or not.</summary>
     public IEnumerable<SuggestionViewModel> Cards => Lanes.SelectMany(lane => lane.Cards);
 
     /// <summary>Who the user may have meant.</summary>
@@ -157,7 +186,9 @@ public sealed class ResultsViewModel : ParentViewModel
     /// <summary>Tries the search again.</summary>
     public IAsyncRelayCommand RetryCommand { get; }
 
-    /// <summary>Asks for more musicians like this one; those already shown are excluded.</summary>
+    /// <summary>
+    /// Asks for more musicians like this one, leaning to <see cref="Adventure"/>; those already shown are excluded.
+    /// </summary>
     public IAsyncRelayCommand MoreCommand { get; }
 
     /// <summary>Searches the candidate the user picked.</summary>
@@ -166,26 +197,31 @@ public sealed class ResultsViewModel : ParentViewModel
     /// <summary>Opens Connect.</summary>
     public IAsyncRelayCommand FixConnectionCommand { get; }
 
-    /// <summary>The save of the open lanes still running, if any; tests wait on it.</summary>
+    /// <summary>The save of <see cref="Adventure"/> still running, if any; tests wait on it.</summary>
     public Task Remembering { get; private set; } = Task.CompletedTask;
 
     /// <summary>The verification still running, if any; tests wait on it.</summary>
     public Task Verifying { get; private set; } = Task.CompletedTask;
 
     /// <summary>Searches for <paramref name="artist"/>.</summary>
-    public Task LoadAsync(string artist, Adventure adventure, bool cached)
+    public async Task LoadAsync(string artist, bool cached)
     {
         _artist = artist;
-        _adventure = adventure;
         OnPropertyChanged(nameof(Heading));
-        return SearchAsync(cached);
+        _adventure = (await _settings.LoadAsync()).Adventure;
+        OnPropertyChanged(nameof(Adventure));
+        OnPropertyChanged(nameof(AdventureName));
+        ShowChosenAdventure();
+        await SearchAsync(cached, LaneMix.Even);
     }
 
     /// <summary>Stops the verification when the page goes away for good.</summary>
     public void Stop() => _work?.Cancel();
 
-    private async Task SearchAsync(bool useCache)
+    // A search asks for the even mix; "More like this…" leans to the slider. Retry asks as the last one did.
+    private async Task SearchAsync(bool useCache, Lane? lean = null)
     {
+        _lean = lean ?? _lean;
         _work?.Cancel();
         _work = new CancellationTokenSource();
         var token = _work.Token;
@@ -198,7 +234,7 @@ public sealed class ResultsViewModel : ParentViewModel
         DiscoveryResult result;
         try
         {
-            result = await _discovery.DiscoverAsync(_artist, _adventure, useCache, token);
+            result = await _discovery.DiscoverAsync(_artist, _lean, useCache, token);
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
@@ -237,7 +273,7 @@ public sealed class ResultsViewModel : ParentViewModel
                 .Where(suggestion => suggestion.Lane == lane)
                 .Select(suggestion => _cards.Create(suggestion, settings.OpenWith, saved.Contains(Names.Normalise(suggestion.Name)), ExploreAsync))
                 .ToList();
-            Lanes.Add(new LaneGroupViewModel(lane, cards, settings.OpenLanes.Contains(lane), RememberOpenLanes));
+            Lanes.Add(new LaneGroupViewModel(lane, cards, lane <= _adventure));
         }
 
         State = ContentState;
@@ -271,24 +307,29 @@ public sealed class ResultsViewModel : ParentViewModel
         State = ErrorState;
     }
 
-    // The lanes open now are the lanes the next results open with, on any search, after a restart too.
-    // One save at a time, in order, so quick toggles end with the last one.
-    private void RememberOpenLanes(LaneGroupViewModel toggled)
-        => Remembering = RememberOpenLanesAsync(Remembering);
+    private void ShowChosenAdventure()
+    {
+        foreach (var option in AdventureOptions)
+        {
+            option.Show(option.Lane == _adventure);
+        }
+    }
 
-    private async Task RememberOpenLanesAsync(Task previous)
+    private void ShowLanes()
+    {
+        foreach (var lane in Lanes)
+        {
+            lane.IsShown = lane.Lane <= _adventure;
+        }
+    }
+
+    // The slider's place is where the next results start, on any search, after a restart too.
+    // One save at a time, in order, so quick slides end with the last one.
+    private async Task RememberAsync(Task previous, Lane adventure)
     {
         await previous;
-        var open = Lanes.Where(lane => lane.IsExpanded).Select(lane => lane.Lane).ToHashSet();
         var settings = await _settings.LoadAsync();
-
-        // A lane with no suggestions this time keeps what it was.
-        foreach (var lane in settings.OpenLanes.Where(lane => Lanes.All(shown => shown.Lane != lane)))
-        {
-            open.Add(lane);
-        }
-
-        await _settings.SaveAsync(settings with { OpenLanes = open });
+        await _settings.SaveAsync(settings with { Adventure = adventure });
     }
 
     // One name at a time, in lane order: MusicBrainz allows about one request a second (design §8.4).
@@ -330,5 +371,5 @@ public sealed class ResultsViewModel : ParentViewModel
     }
 
     private Task ExploreAsync(SuggestionViewModel card)
-        => _navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(card.Name, _adventure));
+        => _navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(card.Name));
 }

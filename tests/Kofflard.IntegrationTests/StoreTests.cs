@@ -24,27 +24,31 @@ public sealed class StoreTests : IDisposable
         var store = new SqliteSettingsStore(_database);
         Assert.Equal(AppSettings.Default, await store.LoadAsync());
 
-        var changed = new AppSettings(new AiConnection("azure", "https://res.openai.azure.com", "gpt-4.1-mini"), MusicService.Spotify, true, 4)
-        {
-            OpenLanes = new HashSet<Lane> { Lane.Leap, Lane.Close },
-        };
+        var changed = new AppSettings(new AiConnection("azure", "https://res.openai.azure.com", "gpt-4.1-mini"), MusicService.Spotify, true, Lane.Wild);
         await store.SaveAsync(changed);
 
         Assert.Equal(changed, await new SqliteSettingsStore(_database).LoadAsync());
     }
 
-    [Fact]
-    public async Task Settings_ABadOpenLanesValue_ReadsAsTheLanesItNames()
+    [Theory]
+    [InlineData("1", Lane.Safe)]
+    [InlineData("2", Lane.Curious)]
+    [InlineData("3", Lane.Curious)]
+    [InlineData("4", Lane.Wild)]
+    [InlineData("5", Lane.Wild)]
+    [InlineData("curious", Lane.Curious)]
+    [InlineData("Sideways", Lane.Safe)]
+    public async Task Settings_AnOldLevel_ReadsAsItsLane_AndABadValueAsSafe(string stored, Lane expected)
     {
         var store = new SqliteSettingsStore(_database);
         await store.SaveAsync(AppSettings.Default);
         await using (var connection = await _database.OpenAsync())
-        await using (var command = connection.Command("UPDATE settings SET value = 'Stretch, Sideways,7,' WHERE key = 'open_lanes';"))
+        await using (var command = connection.Command("UPDATE settings SET value = $value WHERE key = 'adventure';", ("$value", stored)))
         {
             await command.ExecuteNonQueryAsync();
         }
 
-        Assert.Equal([Lane.Stretch], (await store.LoadAsync()).OpenLanes);
+        Assert.Equal(expected, (await store.LoadAsync()).Adventure);
     }
 
     [Fact]
@@ -59,14 +63,13 @@ public sealed class StoreTests : IDisposable
     public async Task History_KeepsOneSearchPerName_NewestFirst()
     {
         var history = new SqliteHistoryStore(_database);
-        await history.AddSearchAsync(new RecentSearch("Nick Drake", 2, Now));
-        await history.AddSearchAsync(new RecentSearch("Khruangbin", 3, Now.AddMinutes(1)));
-        await history.AddSearchAsync(new RecentSearch("nick drake", 4, Now.AddMinutes(2)));
+        await history.AddSearchAsync(new RecentSearch("Nick Drake", Now));
+        await history.AddSearchAsync(new RecentSearch("Khruangbin", Now.AddMinutes(1)));
+        await history.AddSearchAsync(new RecentSearch("nick drake", Now.AddMinutes(2)));
 
         var recent = await history.RecentSearchesAsync(20);
 
         Assert.Equal(["nick drake", "Khruangbin"], recent.Select(r => r.Artist));
-        Assert.Equal(4, recent[0].Adventure);
     }
 
     [Fact]
@@ -87,7 +90,7 @@ public sealed class StoreTests : IDisposable
         var result = new DiscoveryResult(
             DiscoveryStatus.Ok,
             new Musician("Nick Drake", null),
-            [new Suggestion("Vashti Bunyan", Lane.Close, "why", null, ["folk"], "Just Another Diamond Day")],
+            [new Suggestion("Vashti Bunyan", Lane.Safe, "why", null, ["folk"], "Just Another Diamond Day")],
             []);
         await history.CacheAsync("key", result, Now);
 

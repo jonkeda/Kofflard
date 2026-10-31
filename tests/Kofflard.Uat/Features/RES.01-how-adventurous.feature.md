@@ -1,8 +1,8 @@
-# Feature: RES.01 The lanes fold
+# Feature: RES.01 How adventurous
 
-The results fold by lane: Close, Stretch and Leap each under a header with the lane's total. A new
-install starts with every lane closed, and a lane opened stays open on the next results
-(.my/design/results-list-changes.md).
+The results come in three lanes, Safe, Curious and Wild, each under a header with the lane's total. The
+slider above them shows the lanes up to the one chosen: a new install shows only Safe, and the slider
+stays where it was for the next results (.my/design/adventure-as-outcomes.md).
 
 ## Metadata
 
@@ -15,26 +15,25 @@ install starts with every lane closed, and a lane opened stays open on the next 
 | Tags | maui, results |
 
 @RES.01.1 @maui
-## Scenario: RES.01.1 Lanes start closed, and an opened lane stays open
+## Scenario: RES.01.1 Only Safe shows at first, and the slider stays where it was
 
 ```gherkin
 Given the AI answers "Bill Fay" with "bill-fay"
 And I am on the Search page
 When I search for "Nick Drake"
 Then I should be on the Results page
-And the lanes should be "Close 6 · Stretch 4 · Leap 2"
-And the "Close" lane should be closed
-And the "Stretch" lane should be closed
-And the "Leap" lane should be closed
-When I open the "Stretch" lane
-Then the "Stretch" lane should be open
-And the "Close" lane should be closed
+And the lanes should be "Safe 6 · Curious 4 · Wild 2"
+And "Safe" adventure should be chosen
+And "Vashti Bunyan" should be shown
+And "Bill Fay" should not be shown
+When I choose "Curious" adventure
+Then "Bill Fay" should be shown
+And "Ali Farka Touré" should not be shown
 When I tap Back
 Then I should be on the Search page
 When I search for "Bill Fay"
 Then I should be on the Results page
-And the "Stretch" lane should be open
-And the "Close" lane should be closed
+And "Curious" adventure should be chosen
 ```
 
 @RES.01.2 @maui

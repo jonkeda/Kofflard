@@ -89,15 +89,15 @@ public static class DiscoveryPrompt
 
     /// <summary>The user message for one search.</summary>
     /// <param name="artist">The musician's name, already cleaned (<see cref="Names.Clean"/>).</param>
-    /// <param name="adventure">How adventurous.</param>
+    /// <param name="lean">Which lane the mix leans to (<see cref="LaneMix"/>).</param>
     /// <param name="exclude">Musicians already shown, newest first; at most <see cref="MaxExclusions"/> are sent.</param>
     /// <param name="language">The UI language for "why" and "bridge", e.g. "en".</param>
-    public static string User(string artist, Adventure adventure, IReadOnlyCollection<string> exclude, string language = "en")
+    public static string User(string artist, Lane lean, IReadOnlyCollection<string> exclude, string language = "en")
     {
-        var mix = LaneMix.Of(adventure);
+        var mix = LaneMix.Of(lean);
         var builder = new StringBuilder();
         builder.AppendLine($"Musician: \"{artist.Replace('"', '\'')}\"");
-        builder.AppendLine($"Suggest exactly {mix[Lane.Close]} close, {mix[Lane.Stretch]} stretch and {mix[Lane.Leap]} leap musicians.");
+        builder.AppendLine($"Suggest exactly {mix[Lane.Safe]} close, {mix[Lane.Curious]} stretch and {mix[Lane.Wild]} leap musicians.");
 
         var excluded = exclude.Take(MaxExclusions).ToList();
         builder.AppendLine(excluded.Count == 0
@@ -109,11 +109,8 @@ public static class DiscoveryPrompt
         return builder.ToString();
     }
 
-    /// <summary>
-    /// The temperature for a level: 0.4 when safe, 0.8 when wild, so wilder levels vary more
-    /// between searches.
-    /// </summary>
-    public static float Temperature(Adventure adventure) => 0.3f + (adventure.Level * 0.1f);
+    /// <summary>The temperature: one search asks for every lane, so one value in the middle.</summary>
+    public const float Temperature = 0.6f;
 
     /// <summary>The message that asks once more after an unusable answer.</summary>
     public static string Retry(string problem)

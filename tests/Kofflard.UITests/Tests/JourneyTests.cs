@@ -26,30 +26,30 @@ public sealed class JourneyTests
         var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
 
         results.Heading.AssertText("Like Nick Drake");
-        results.AssertLanes("Close 6 · Stretch 4 · Leap 2");
+        results.AssertLanes("Safe 6 · Curious 4 · Wild 2");
         results.Suggestions
-            .AssertLane("Vashti Bunyan", "Close")
-            .AssertLane("Bill Fay", "Stretch")
-            .AssertLane("Ali Farka Touré", "Leap");
+            .AssertLane("Vashti Bunyan", "Safe")
+            .AssertLane("Bill Fay", "Curious")
+            .AssertLane("Ali Farka Touré", "Wild");
         results.Suggestions.Card("Ali Farka Touré").Why.AssertTextStartsWith("Bridge: ");
         return Task.CompletedTask;
     }
 
     [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
     [Trait("Journey", "RES.01.1")]
-    public Task Lanes_StartClosed_AndAnOpenedLane_StaysOpen_OnTheNextSearch()
+    public Task OnlySafeShowsAtFirst_AndTheSliderStaysWhereItWas_OnTheNextSearch()
     {
         _fixture.Ai.Answer("Bill Fay", FakeAi.Canned("bill-fay"));
         var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
 
-        results.LaneHeaders.AssertClosed("Close").AssertClosed("Stretch").AssertClosed("Leap");
-        Assert.Empty(results.Suggestions.Names());
+        results.AssertAdventure("Safe");
+        results.Suggestions.AssertShown("Vashti Bunyan").AssertNotShown("Bill Fay").AssertNotShown("Ali Farka Touré");
 
-        results.LaneHeaders.Open("Stretch");
-        results.Suggestions.Shown("Bill Fay");
+        results.ChooseAdventure("Curious");
+        results.Suggestions.AssertShown("Bill Fay").AssertNotShown("Ali Farka Touré");
 
         var next = results.Back().SearchFor("Bill Fay").WaitForSuggestions();
-        next.LaneHeaders.AssertOpen("Stretch").AssertClosed("Close");
+        next.AssertAdventure("Curious");
         return Task.CompletedTask;
     }
 

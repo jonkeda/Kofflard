@@ -160,7 +160,7 @@
     {
       "number": 2,
       "name": "Three lanes",
-      "scenario": "Features/VID.01-the-video.feature.md#VID.01.1-The-lanes-run-from-close-to-a-leap-with-its-bridge",
+      "scenario": "Features/VID.01-the-video.feature.md#VID.01.1-The-lanes-run-from-safe-to-wild-with-a-bridge",
       "duration": 22.9,
       "status": "passed",
       "steps": [

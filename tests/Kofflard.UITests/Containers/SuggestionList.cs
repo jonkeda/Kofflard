@@ -5,7 +5,7 @@ namespace Kofflard.UITests.Containers;
 
 /// <summary>
 /// The results' cards (<c>Results_Items</c>, a grouped CollectionView). Cards are found by the repeating
-/// <c>Suggestion</c> id and told apart by name; a card is only there while its lane is open.
+/// <c>Suggestion</c> id and told apart by name; a card is only there while the slider shows its lane.
 /// </summary>
 public sealed class SuggestionList : CollectionObjectBase<ResultsPage, SuggestionList, SuggestionCard>
 {
@@ -25,7 +25,7 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
     /// <summary>The names of the cards, in the order shown.</summary>
     public IReadOnlyList<string> Names() => [.. Items.Select(card => TryReadName(card) ?? string.Empty)];
 
-    /// <summary>The card of <paramref name="musician"/>, once the AI has answered; closed lanes are opened to find it.</summary>
+    /// <summary>The card of <paramref name="musician"/>, once the AI has answered; the slider goes to Wild to find it.</summary>
     /// <remarks>
     /// While the AI answers, the list is not on screen at all (the state container shows Loading), so the
     /// wait is on the page's state first, which also lets a scenario go straight from "I should be on the
@@ -33,12 +33,12 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
     /// </remarks>
     public SuggestionCard Card(string musician)
     {
-        // Lanes start closed, and a closed lane has no rows to wait for.
-        new ResultsPage(Context).WaitForSuggestions().LaneHeaders.OpenAll();
+        // Only Safe shows at first, and a hidden lane has no rows to wait for.
+        new ResultsPage(Context).ChooseAdventure("Wild");
         return Shown(musician);
     }
 
-    /// <summary>The card of <paramref name="musician"/> as the lanes are now, without opening any.</summary>
+    /// <summary>The card of <paramref name="musician"/> as the slider is now, without moving it.</summary>
     public SuggestionCard Shown(string musician)
     {
         var budget = TestConstants.ListSearchMs(Context.Platform);
@@ -59,15 +59,38 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
         return Self;
     }
 
+    /// <summary>Asserts <paramref name="musician"/>'s card shows, as the slider is now.</summary>
+    [BddThen("{item} should be shown")]
+    public SuggestionList AssertShown(string musician)
+    {
+        Shown(musician);
+        return Self;
+    }
+
+    /// <summary>Asserts <paramref name="musician"/>'s card does not show, as the slider is now.</summary>
+    [BddThen("{item} should not be shown")]
+    public SuggestionList AssertNotShown(string musician)
+    {
+        Assert.Null(FindItem(card => TryReadName(card) == musician, TestConstants.ListSearchMs(Context.Platform)));
+        return Self;
+    }
+
     /// <summary>
-    /// Asserts <paramref name="musician"/>'s card is in <paramref name="lane"/>: Close, Stretch or Leap. It
-    /// opens only that lane, so the card can only be there.
+    /// Asserts <paramref name="musician"/>'s card is in <paramref name="lane"/>: Safe, Curious or Wild. The
+    /// slider at that lane shows it, and one stop before hides it, so the card can only be there.
     /// </summary>
     [BddThen("{item} should be a {value} suggestion")]
     public SuggestionList AssertLane(string musician, string lane)
     {
-        new ResultsPage(Context).WaitForSuggestions().LaneHeaders.OpenOnly(lane);
+        var results = new ResultsPage(Context).ChooseAdventure(lane);
         Shown(musician);
+        var stop = ResultsPage.Adventures.ToList().IndexOf(lane);
+        if (stop > 0)
+        {
+            results.ChooseAdventure(ResultsPage.Adventures[stop - 1]);
+            AssertNotShown(musician);
+        }
+
         return Self;
     }
 
@@ -219,7 +242,7 @@ public sealed class SuggestionCard : ItemObjectBase<SuggestionList, SuggestionCa
     public Button<SuggestionCard> ExploreButton => new(this, "Suggestion_Explore");
 }
 
-/// <summary>The lanes' headers in the results (<c>LaneHeader</c> rows in <c>Results_Items</c>): "▸ Close (6)".</summary>
+/// <summary>The lanes' headers in the results (<c>LaneHeader</c> rows in <c>Results_Items</c>): "Safe (6)".</summary>
 public sealed class LaneHeaderList : CollectionObjectBase<ResultsPage, LaneHeaderList, LaneHeader>
 {
     /// <summary>Creates the collection within the results page.</summary>
@@ -231,9 +254,19 @@ public sealed class LaneHeaderList : CollectionObjectBase<ResultsPage, LaneHeade
     {
     }
 
-
-    /// <summary>"Close 6 · Stretch 4 · Leap 2": each lane and its total, in order.</summary>
-    public string Summary() => string.Join(" · ", Items.Select(header => $"{header.Name} {header.Total}"));
+    /// <summary>"Safe 6 · Curious 4 · Wild 2": each lane and its total, in order.</summary>
+    /// <remarks>
+    /// Each lane is looked up by name, not read from the headers realised now: with a lane's cards shown,
+    /// the next header can be below the window, and on Windows and Android it is then not in the tree.
+    /// </remarks>
+    public string Summary()
+    {
+        var budget = TestConstants.ListSearchMs(Context.Platform);
+        return string.Join(" · ", ResultsPage.Adventures
+            .Select(lane => FindItem(header => header.Name == lane, budget))
+            .OfType<LaneHeader>()
+            .Select(header => $"{header.Name} {header.Total}"));
+    }
 
     /// <summary>The header of <paramref name="lane"/>.</summary>
     public LaneHeader Lane(string lane)
@@ -246,72 +279,9 @@ public sealed class LaneHeaderList : CollectionObjectBase<ResultsPage, LaneHeade
 
         return ItemWhere(header => header.Name == lane);
     }
-
-    /// <summary>Opens <paramref name="lane"/>.</summary>
-    public LaneHeaderList Open(string lane)
-    {
-        Lane(lane).SetOpen(true);
-        return Self;
-    }
-
-    /// <summary>Closes <paramref name="lane"/>.</summary>
-    public LaneHeaderList Close(string lane)
-    {
-        Lane(lane).SetOpen(false);
-        return Self;
-    }
-
-    /// <summary>Asserts <paramref name="lane"/> is open.</summary>
-    public LaneHeaderList AssertOpen(string lane)
-    {
-        Assert.True(Lane(lane).IsOpen, $"Expected the {lane} lane to be open.");
-        return Self;
-    }
-
-    /// <summary>Asserts <paramref name="lane"/> is closed.</summary>
-    public LaneHeaderList AssertClosed(string lane)
-    {
-        Assert.False(Lane(lane).IsOpen, $"Expected the {lane} lane to be closed.");
-        return Self;
-    }
-
-    /// <summary>Opens every closed lane.</summary>
-    public LaneHeaderList OpenAll()
-    {
-        foreach (var header in Present())
-        {
-            header.SetOpen(true);
-        }
-
-        return Self;
-    }
-
-    /// <summary>Opens <paramref name="lane"/> and closes the others.</summary>
-    public LaneHeaderList OpenOnly(string lane)
-    {
-        foreach (var header in Present())
-        {
-            header.SetOpen(header.Name == lane);
-        }
-
-        return Self;
-    }
-
-    // Every lane by name, not only the headers realized now: on Android a header scrolled away is
-    // not in the tree. Last lane first, so the list ends near its top.
-    private IEnumerable<LaneHeader> Present()
-    {
-        foreach (var name in new[] { "Leap", "Stretch", "Close" })
-        {
-            if (FindItem(header => header.Name == name, TestConstants.ListSearchMs(Context.Platform)) is { } header)
-            {
-                yield return header;
-            }
-        }
-    }
 }
 
-/// <summary>One lane's header: "▸ Close (6)" closed, "▾ Close (6)" open.</summary>
+/// <summary>One lane's header: "Safe (6)", whether the slider shows its cards or not.</summary>
 public sealed class LaneHeader : ItemObjectBase<LaneHeaderList, LaneHeader>
 {
     /// <summary>Creates a header from the root the collection found.</summary>
@@ -320,32 +290,16 @@ public sealed class LaneHeader : ItemObjectBase<LaneHeaderList, LaneHeader>
     {
     }
 
-    /// <summary>The header; a tap opens or closes the lane.</summary>
-    public TextButton<LaneHeader> Toggle => new(this, "LaneHeader_Toggle");
+    /// <summary>The header's text.</summary>
+    public Label<LaneHeader> NameLabel => new(this, "LaneHeader_Name");
 
-    private string Text => Toggle.GetText() ?? string.Empty;
+    private string Text => NameLabel.GetText() ?? string.Empty;
 
-    /// <summary>"Close".</summary>
-    public string Name => Text.TrimStart('▸', '▾', ' ').Split(" (")[0];
+    /// <summary>"Safe".</summary>
+    public string Name => Text.Split(" (")[0];
 
-    /// <summary>The lane's suggestions, open or closed.</summary>
+    /// <summary>The lane's suggestions, shown or not.</summary>
     public int Total => int.Parse(Text.Split(" (")[1].TrimEnd(')'), System.Globalization.CultureInfo.InvariantCulture);
-
-    /// <summary>Whether the lane's cards are shown.</summary>
-    public bool IsOpen => Text.StartsWith('▾');
-
-    /// <summary>Opens or closes the lane, and waits for the header to say so.</summary>
-    public LaneHeader SetOpen(bool open)
-    {
-        if (IsOpen != open)
-        {
-            var name = Name;
-            Toggle.Click();
-            Toggle.AssertText($"{(open ? "▾" : "▸")} {name} ({Total})", timeoutMs: TestConstants.PageTimeoutMs);
-        }
-
-        return Self;
-    }
 }
 
 /// <summary>Who the user may have meant (<c>Results_CandidateList</c>).</summary>

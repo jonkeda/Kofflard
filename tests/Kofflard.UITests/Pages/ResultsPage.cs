@@ -3,7 +3,10 @@ using Kofflard.UITests.Containers;
 
 namespace Kofflard.UITests.Pages;
 
-/// <summary>Page object for the results: the cards in lanes that fold, or who the user may have meant.</summary>
+/// <summary>
+/// Page object for the results: the cards in lanes, the slider that shows them up to how adventurous, or who
+/// the user may have meant.
+/// </summary>
 public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>(context)
 {
     private readonly AppRoot _appRoot = new(context);
@@ -20,7 +23,7 @@ public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>
     /// <summary>The list itself, for what the platform says about it: visible, scrollable, scrolled how far.</summary>
     public Label<ResultsPage> ItemsView => new(this, "Results_Items");
 
-    /// <summary>The lanes' headers: "▸ Close (6)".</summary>
+    /// <summary>The lanes' headers: "Safe (6)".</summary>
     public LaneHeaderList LaneHeaders => new(this, "Results_Items");
 
     /// <summary>Loading, Content, Candidates, Empty or Error.</summary>
@@ -58,7 +61,19 @@ public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>
         ? new(_appRoot, Locator.ByAccessibilityId("Navigate up"))
         : new(_appRoot, "NavigationViewBackButton");
 
-    /// <summary>Asserts each lane and its total, in order: "Close 6 · Stretch 4 · Leap 2".</summary>
+    /// <summary>The slider's stops, Safe to Wild; each shows the lanes up to it.</summary>
+    public static readonly IReadOnlyList<string> Adventures = ["Safe", "Curious", "Wild"];
+
+    /// <summary>One stop on the slider: "Curious".</summary>
+    public RadioButton<ResultsPage> Adventure(string name) => new(this, $"Adventure_{name}");
+
+    /// <summary>The name under a stop.</summary>
+    public Label<ResultsPage> AdventureName(string name) => new(this, $"Adventure_{name}_Name");
+
+    /// <summary>The chosen stop: "Curious".</summary>
+    public string? ChosenAdventure() => Adventures.SingleOrDefault(name => Adventure(name).IsChecked() == true);
+
+    /// <summary>Asserts each lane and its total, in order: "Safe 6 · Curious 4 · Wild 2".</summary>
     [BddThen("the lanes should be {lanes}")]
     public ResultsPage AssertLanes(string lanes)
     {
@@ -67,35 +82,26 @@ public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>
         return this;
     }
 
-    /// <summary>Opens <paramref name="lane"/>: Close, Stretch or Leap.</summary>
-    [BddWhen("I open the {lane} lane")]
-    public ResultsPage OpenLane(string lane)
+    /// <summary>Slides to <paramref name="adventure"/>: Safe, Curious or Wild. The lanes up to it show.</summary>
+    [BddWhen("I choose {adventure} adventure")]
+    public ResultsPage ChooseAdventure(string adventure)
     {
-        WaitForSuggestions().LaneHeaders.Open(lane);
+        WaitForSuggestions();
+        if (ChosenAdventure() != adventure)
+        {
+            Adventure(adventure).Click();
+            Adventure(adventure).AssertSelected(true, timeoutMs: TestConstants.PageTimeoutMs);
+        }
+
         return this;
     }
 
-    /// <summary>Closes <paramref name="lane"/>.</summary>
-    [BddWhen("I close the {lane} lane")]
-    public ResultsPage CloseLane(string lane)
+    /// <summary>Asserts the slider's stop.</summary>
+    [BddThen("{adventure} adventure should be chosen")]
+    public ResultsPage AssertAdventure(string adventure)
     {
-        WaitForSuggestions().LaneHeaders.Close(lane);
-        return this;
-    }
-
-    /// <summary>Asserts <paramref name="lane"/> is open.</summary>
-    [BddThen("the {lane} lane should be open")]
-    public ResultsPage AssertLaneOpen(string lane)
-    {
-        WaitForSuggestions().LaneHeaders.AssertOpen(lane);
-        return this;
-    }
-
-    /// <summary>Asserts <paramref name="lane"/> is closed.</summary>
-    [BddThen("the {lane} lane should be closed")]
-    public ResultsPage AssertLaneClosed(string lane)
-    {
-        WaitForSuggestions().LaneHeaders.AssertClosed(lane);
+        WaitForSuggestions();
+        Assert.Equal(adventure, ChosenAdventure());
         return this;
     }
 

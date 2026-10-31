@@ -15,7 +15,7 @@ public partial class ResultsPage : ContentPage, IQueryAttributable
         PageAutomation.Declare(this);
     }
 
-    /// <summary>Searches the route's artist at its level, once.</summary>
+    /// <summary>Searches the route's artist, once.</summary>
     /// <remarks>
     /// Shell applies the query again when the user comes back to this page (from an explored musician);
     /// searching again then would exclude everything this page shows and come back empty.
@@ -25,7 +25,7 @@ public partial class ResultsPage : ContentPage, IQueryAttributable
         if (!_searched && KofflardRoutes.ReadSearch(query) is { } search)
         {
             _searched = true;
-            _ = _viewModel.LoadAsync(search.Artist, search.Adventure, search.Cached);
+            _ = _viewModel.LoadAsync(search.Artist, search.Cached);
         }
     }
 

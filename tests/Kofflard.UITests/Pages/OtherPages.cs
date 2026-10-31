@@ -27,9 +27,6 @@ public class SettingsPage(IMauiTestContext context) : PageObjectBase<SettingsPag
     [UatName("Check Names")]
     public Switch<SettingsPage> CheckNames => new(this, "Settings_CheckNames");
 
-    /// <summary>The adventurousness, 1-5.</summary>
-    public Stepper<SettingsPage> Adventure => new(this, "Settings_Adventure");
-
     /// <summary>Shell's back arrow.</summary>
     [UatNavigatesTo(typeof(SearchPage))]
     public Button<AppRoot> BackButton => Context.Platform == Bruinet.Maui.Enums.MauiPlatform.Android

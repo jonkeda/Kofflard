@@ -15,22 +15,22 @@
              x:Class="Kofflard.App.Views.SuggestionCardView"
              x:DataType="vm:SuggestionViewModel">
 
-    <!-- Tinted by its lane: amber Close, teal Stretch, violet Leap (.my/design/aurora.md). -->
+    <!-- Tinted by its lane: amber Safe, teal Curious, violet Wild (.my/design/aurora.md). -->
     <Border Padding="0"
             Margin="0,6"
             StrokeShape="RoundRectangle 20"
             StrokeThickness="1"
-            Background="{AppThemeBinding Light={StaticResource CloseCardLightBrush}, Dark={StaticResource CloseCardDarkBrush}}"
-            Stroke="{AppThemeBinding Light={StaticResource CloseEdgeLight}, Dark={StaticResource CloseEdgeDark}}"
+            Background="{AppThemeBinding Light={StaticResource SafeCardLightBrush}, Dark={StaticResource SafeCardDarkBrush}}"
+            Stroke="{AppThemeBinding Light={StaticResource SafeEdgeLight}, Dark={StaticResource SafeEdgeDark}}"
             Opacity="{Binding Opacity}">
         <Border.Triggers>
-            <DataTrigger TargetType="Border" Binding="{Binding LaneName}" Value="Stretch">
-                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource StretchCardLightBrush}, Dark={StaticResource StretchCardDarkBrush}}" />
-                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource StretchEdgeLight}, Dark={StaticResource StretchEdgeDark}}" />
+            <DataTrigger TargetType="Border" Binding="{Binding LaneName}" Value="Curious">
+                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource CuriousCardLightBrush}, Dark={StaticResource CuriousCardDarkBrush}}" />
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource CuriousEdgeLight}, Dark={StaticResource CuriousEdgeDark}}" />
             </DataTrigger>
-            <DataTrigger TargetType="Border" Binding="{Binding LaneName}" Value="Leap">
-                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource LeapCardLightBrush}, Dark={StaticResource LeapCardDarkBrush}}" />
-                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LeapEdgeLight}, Dark={StaticResource LeapEdgeDark}}" />
+            <DataTrigger TargetType="Border" Binding="{Binding LaneName}" Value="Wild">
+                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource WildCardLightBrush}, Dark={StaticResource WildCardDarkBrush}}" />
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource WildEdgeLight}, Dark={StaticResource WildEdgeDark}}" />
             </DataTrigger>
         </Border.Triggers>
         <Grid>
@@ -77,18 +77,18 @@
                     <Label Grid.Column="2"
                            AutomationId="Suggestion_Verified"
                            Text="{Binding VerifiedMark}"
-                           TextColor="{AppThemeBinding Light={StaticResource CloseTextLight}, Dark={StaticResource CloseTextDark}}"
+                           TextColor="{AppThemeBinding Light={StaticResource SafeTextLight}, Dark={StaticResource SafeTextDark}}"
                            FontAttributes="Bold"
                            VerticalOptions="Center"
                            SemanticProperties.Description="Confirmed by MusicBrainz"
                            IsVisible="{Binding IsVerified}"
                            InputTransparent="True">
                         <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding LaneName}" Value="Stretch">
-                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StretchTextLight}, Dark={StaticResource StretchTextDark}}" />
+                            <DataTrigger TargetType="Label" Binding="{Binding LaneName}" Value="Curious">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource CuriousTextLight}, Dark={StaticResource CuriousTextDark}}" />
                             </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding LaneName}" Value="Leap">
-                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LeapTextLight}, Dark={StaticResource LeapTextDark}}" />
+                            <DataTrigger TargetType="Label" Binding="{Binding LaneName}" Value="Wild">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WildTextLight}, Dark={StaticResource WildTextDark}}" />
                             </DataTrigger>
                         </Label.Triggers>
                     </Label>

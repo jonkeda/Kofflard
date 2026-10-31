@@ -3,35 +3,37 @@ using Kofflard.Core.Models;
 namespace Kofflard.Core.Rules;
 
 /// <summary>
-/// How many suggestions each lane gets at each adventurousness level: 12 in all (design §3.2).
+/// How many suggestions each lane gets: 12 in all, 4 of each for a search (.my/design/adventure-as-outcomes.md).
+/// "More like this…" leans to where the results' slider is: more safe picks at Safe, more wild ones at Wild.
 /// </summary>
 public static class LaneMix
 {
     /// <summary>The number of suggestions a search asks for and shows.</summary>
     public const int Total = 12;
 
-    private static readonly (int Close, int Stretch, int Leap)[] Mix =
+    /// <summary>The lean of a search: the even mix.</summary>
+    public const Lane Even = Lane.Curious;
+
+    private static readonly (int Safe, int Curious, int Wild)[] Mix =
     [
-        (8, 4, 0),
         (6, 4, 2),
-        (4, 5, 3),
-        (3, 4, 5),
+        (4, 4, 4),
         (2, 4, 6),
     ];
 
-    /// <summary>The count for one lane at this level.</summary>
-    public static int For(Adventure adventure, Lane lane)
+    /// <summary>The count for one lane, leaning to <paramref name="lean"/>.</summary>
+    public static int For(Lane lean, Lane lane)
     {
-        var mix = Mix[adventure.Level - 1];
+        var mix = Mix[(int)lean];
         return lane switch
         {
-            Lane.Close => mix.Close,
-            Lane.Stretch => mix.Stretch,
-            _ => mix.Leap,
+            Lane.Safe => mix.Safe,
+            Lane.Curious => mix.Curious,
+            _ => mix.Wild,
         };
     }
 
-    /// <summary>The count per lane at this level, in lane order.</summary>
-    public static IReadOnlyDictionary<Lane, int> Of(Adventure adventure)
-        => Enum.GetValues<Lane>().ToDictionary(lane => lane, lane => For(adventure, lane));
+    /// <summary>The count per lane, leaning to <paramref name="lean"/>, in lane order.</summary>
+    public static IReadOnlyDictionary<Lane, int> Of(Lane lean)
+        => Enum.GetValues<Lane>().ToDictionary(lane => lane, lane => For(lean, lane));
 }

@@ -35,17 +35,6 @@
                 <Switch Grid.Column="1" AutomationId="Settings_CheckNames" IsToggled="{Binding CheckNames}" />
             </Grid>
 
-            <Label Text="How adventurous" Style="{StaticResource Heading}" Margin="0,12,0,0" />
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                <Label AutomationId="Settings_AdventureName" Text="{Binding AdventureName}" VerticalOptions="Center" />
-                <Stepper Grid.Column="1"
-                         AutomationId="Settings_Adventure"
-                         Minimum="1"
-                         Maximum="5"
-                         Increment="1"
-                         Value="{Binding AdventureStep}" />
-            </Grid>
-
             <Label Text="History" Style="{StaticResource Heading}" Margin="0,12,0,0" />
             <Button AutomationId="Settings_ClearHistory"
                     Text="Clear history"

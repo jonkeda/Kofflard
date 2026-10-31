@@ -19,18 +19,18 @@ Kofflard starts with one question: who do you like?
 | And I tap Go | Kofflard asks an AI for musicians you may not know yet. |
 | Then I should be on the Results page | Twelve of them, in three lanes. |
 
-Close ones first. Then stretches. Then a few leaps.
+Safe ones first. Slide, and the curious ones show. Then the wild ones.
 
 ## Scene: Three lanes
 
-Scenario: Features/VID.01-the-video.feature.md#VID.01.1-The-lanes-run-from-close-to-a-leap-with-its-bridge
+Scenario: Features/VID.01-the-video.feature.md#VID.01.1-The-lanes-run-from-safe-to-wild-with-a-bridge
 
 | Step | Say |
 | --- | --- |
-| When I look at "Vashti Bunyan" | Close: the same quiet folk, well chosen. |
-| And I look at "Bill Fay" | A stretch: less known, another year, the same feeling. |
-| And I look at "Ali Farka Touré" | And a leap: Ali Farka Touré, from Mali. |
-| Then "Ali Farka Touré" should be a "Leap" suggestion | Every leap says why: the same soft, looping fingerpicking. |
+| When I look at "Vashti Bunyan" | Safe: the same quiet folk, well chosen. |
+| And I look at "Bill Fay" | Curious: less known, another year, the same feeling. |
+| And I look at "Ali Farka Touré" | And wild: Ali Farka Touré, from Mali. |
+| Then "Ali Farka Touré" should be a "Wild" suggestion | Every wild one says why: the same soft, looping fingerpicking. |
 
 Relevance first. Surprise, but never out of the blue.
 

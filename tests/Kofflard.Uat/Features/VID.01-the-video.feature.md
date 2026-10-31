@@ -14,7 +14,7 @@ covers: walking the lanes, the confirmation after an open, and following a music
 | Tags | maui, video |
 
 @VID.01.1 @maui @video
-## Scenario: VID.01.1 The lanes run from close to a leap with its bridge
+## Scenario: VID.01.1 The lanes run from safe to wild with a bridge
 
 ```gherkin
 Given I am on the Search page
@@ -24,7 +24,7 @@ Then I should be on the Results page
 When I look at "Vashti Bunyan"
 And I look at "Bill Fay"
 And I look at "Ali Farka Touré"
-Then "Ali Farka Touré" should be a "Leap" suggestion
+Then "Ali Farka Touré" should be a "Wild" suggestion
 ```
 
 @VID.01.2 @maui @video
@@ -55,5 +55,5 @@ And I explore "Bill Fay"
 Then Heading should equal "Like Bill Fay"
 And Suggestions should suggest "Judee Sill"
 When I look at "Talk Talk"
-Then "Talk Talk" should be a "Leap" suggestion
+Then "Talk Talk" should be a "Wild" suggestion
 ```

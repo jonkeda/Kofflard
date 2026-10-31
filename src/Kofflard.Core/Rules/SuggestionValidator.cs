@@ -7,7 +7,7 @@ namespace Kofflard.Core.Rules;
 /// </summary>
 /// <remarks>
 /// In order: drop picks with no name or lane, duplicates, the searched musician and anything excluded;
-/// drop leaps whose bridge is missing or generic; take each lane's share of the mix; fill what is still
+/// drop wild picks whose bridge is missing or generic; take each lane's share of the mix; fill what is still
 /// short from the other lanes' leftovers, never by inventing picks; cap at <see cref="LaneMix.Total"/>.
 /// </remarks>
 public static class SuggestionValidator
@@ -33,12 +33,12 @@ public static class SuggestionValidator
     /// <summary>Validates <paramref name="answer"/> for a search on <paramref name="artist"/>.</summary>
     /// <param name="answer">The parsed answer.</param>
     /// <param name="artist">The name that was searched.</param>
-    /// <param name="adventure">The level, which sets each lane's share.</param>
+    /// <param name="lean">Which lane the mix leans to, which sets each lane's share.</param>
     /// <param name="exclude">Names already shown.</param>
     public static DiscoveryResult Validate(
         DiscoveryAnswer answer,
         string artist,
-        Adventure adventure,
+        Lane lean,
         IReadOnlyCollection<string> exclude)
     {
         var status = answer.Status switch
@@ -81,7 +81,7 @@ public static class SuggestionValidator
             usable.Add(suggestion);
         }
 
-        return new DiscoveryResult(status, searched, Balance(usable, adventure), candidates);
+        return new DiscoveryResult(status, searched, Balance(usable, lean), candidates);
     }
 
     /// <summary>Whether <paramref name="bridge"/> names a concrete link rather than a vague likeness.</summary>
@@ -97,12 +97,12 @@ public static class SuggestionValidator
 
     // Each lane's share first, in lane order; then whatever is still short from the leftovers, in the
     // model's order. A pick keeps the lane the model gave it.
-    private static List<Suggestion> Balance(List<Suggestion> usable, Adventure adventure)
+    private static List<Suggestion> Balance(List<Suggestion> usable, Lane lean)
     {
         var chosen = new List<Suggestion>();
         foreach (var lane in Enum.GetValues<Lane>())
         {
-            chosen.AddRange(usable.Where(suggestion => suggestion.Lane == lane).Take(LaneMix.For(adventure, lane)));
+            chosen.AddRange(usable.Where(suggestion => suggestion.Lane == lane).Take(LaneMix.For(lean, lane)));
         }
 
         var leftovers = usable.Where(suggestion => !chosen.Contains(suggestion));
@@ -119,7 +119,7 @@ public static class SuggestionValidator
         }
 
         var bridge = Blank(pick.Bridge);
-        if (lane == Lane.Leap && !IsConcreteBridge(bridge))
+        if (lane == Lane.Wild && !IsConcreteBridge(bridge))
         {
             return null;
         }
@@ -134,16 +134,17 @@ public static class SuggestionValidator
             pick.Name.Trim(),
             lane,
             Blank(pick.Why) ?? string.Empty,
-            lane == Lane.Leap ? bridge : null,
+            lane == Lane.Wild ? bridge : null,
             tags,
             Blank(pick.KnownFor));
     }
 
+    // The prompt's words for the lanes.
     private static Lane? ParseLane(string? lane) => lane?.Trim().ToLowerInvariant() switch
     {
-        "close" => Lane.Close,
-        "stretch" => Lane.Stretch,
-        "leap" => Lane.Leap,
+        "close" => Lane.Safe,
+        "stretch" => Lane.Curious,
+        "leap" => Lane.Wild,
         _ => null,
     };
 

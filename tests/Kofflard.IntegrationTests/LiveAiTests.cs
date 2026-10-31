@@ -1,4 +1,5 @@
 using Kofflard.Core.Models;
+using Kofflard.Core.Rules;
 using Kofflard.Infrastructure.Ai;
 using Kofflard.TestSupport;
 
@@ -32,12 +33,12 @@ public sealed class LiveAiTests : IDisposable
     {
         var live = LiveAi.Load();
 
-        var result = await _engine.DiscoverAsync(live.Connection, live.Key, "Nick Drake", Adventure.Default, []);
+        var result = await _engine.DiscoverAsync(live.Connection, live.Key, "Nick Drake", LaneMix.Even, []);
 
         Assert.Equal(DiscoveryStatus.Ok, result.Status);
         Assert.InRange(result.Suggestions.Count, 8, 12);
-        Assert.True(result.Count(Lane.Close) > 0);
-        Assert.All(result.Suggestions.Where(s => s.Lane == Lane.Leap), s => Assert.False(string.IsNullOrWhiteSpace(s.Bridge)));
+        Assert.True(result.Count(Lane.Safe) > 0);
+        Assert.All(result.Suggestions.Where(s => s.Lane == Lane.Wild), s => Assert.False(string.IsNullOrWhiteSpace(s.Bridge)));
         Assert.DoesNotContain(result.Suggestions, s => s.Name.Equals("Nick Drake", StringComparison.OrdinalIgnoreCase));
     }
 

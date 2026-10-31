@@ -71,33 +71,33 @@
     <Color x:Key="CardEndLight">#EBFFFFFF</Color>
     <Color x:Key="CardEndDark">#E6120B2A</Color>
 
-    <!-- The lanes: Close is amber, Stretch teal, Leap violet. -->
-    <Color x:Key="CloseLight">#F59E0B</Color>
-    <Color x:Key="CloseDark">#F5B04C</Color>
-    <Color x:Key="CloseTextLight">#92400E</Color>
-    <Color x:Key="CloseTextDark">#FFD597</Color>
-    <Color x:Key="CloseTintLight">#4DFBBF24</Color>
-    <Color x:Key="CloseTintDark">#52F5B04C</Color>
-    <Color x:Key="CloseEdgeLight">#73D97706</Color>
-    <Color x:Key="CloseEdgeDark">#99F5B04C</Color>
+    <!-- The lanes: Safe is amber, Curious teal, Wild violet. -->
+    <Color x:Key="SafeLight">#F59E0B</Color>
+    <Color x:Key="SafeDark">#F5B04C</Color>
+    <Color x:Key="SafeTextLight">#92400E</Color>
+    <Color x:Key="SafeTextDark">#FFD597</Color>
+    <Color x:Key="SafeTintLight">#4DFBBF24</Color>
+    <Color x:Key="SafeTintDark">#52F5B04C</Color>
+    <Color x:Key="SafeEdgeLight">#73D97706</Color>
+    <Color x:Key="SafeEdgeDark">#99F5B04C</Color>
 
-    <Color x:Key="StretchLight">#14B8A6</Color>
-    <Color x:Key="StretchDark">#3FD6C4</Color>
-    <Color x:Key="StretchTextLight">#0F766E</Color>
-    <Color x:Key="StretchTextDark">#9FF3E8</Color>
-    <Color x:Key="StretchTintLight">#422DD4BF</Color>
-    <Color x:Key="StretchTintDark">#423FD6C4</Color>
-    <Color x:Key="StretchEdgeLight">#730D9488</Color>
-    <Color x:Key="StretchEdgeDark">#8C3FD6C4</Color>
+    <Color x:Key="CuriousLight">#14B8A6</Color>
+    <Color x:Key="CuriousDark">#3FD6C4</Color>
+    <Color x:Key="CuriousTextLight">#0F766E</Color>
+    <Color x:Key="CuriousTextDark">#9FF3E8</Color>
+    <Color x:Key="CuriousTintLight">#422DD4BF</Color>
+    <Color x:Key="CuriousTintDark">#423FD6C4</Color>
+    <Color x:Key="CuriousEdgeLight">#730D9488</Color>
+    <Color x:Key="CuriousEdgeDark">#8C3FD6C4</Color>
 
-    <Color x:Key="LeapLight">#8B5CF6</Color>
-    <Color x:Key="LeapDark">#B98CFF</Color>
-    <Color x:Key="LeapTextLight">#6D28D9</Color>
-    <Color x:Key="LeapTextDark">#DCC8FF</Color>
-    <Color x:Key="LeapTintLight">#4DA78BFA</Color>
-    <Color x:Key="LeapTintDark">#4DB98CFF</Color>
-    <Color x:Key="LeapEdgeLight">#737C3AED</Color>
-    <Color x:Key="LeapEdgeDark">#99B98CFF</Color>
+    <Color x:Key="WildLight">#8B5CF6</Color>
+    <Color x:Key="WildDark">#B98CFF</Color>
+    <Color x:Key="WildTextLight">#6D28D9</Color>
+    <Color x:Key="WildTextDark">#DCC8FF</Color>
+    <Color x:Key="WildTintLight">#4DA78BFA</Color>
+    <Color x:Key="WildTintDark">#4DB98CFF</Color>
+    <Color x:Key="WildEdgeLight">#737C3AED</Color>
+    <Color x:Key="WildEdgeDark">#99B98CFF</Color>
 
     <!-- Brushes. -->
     <RadialGradientBrush x:Key="GlowVioletLightBrush" Center="0.5,0.5" Radius="0.5">
@@ -146,28 +146,28 @@
     </LinearGradientBrush>
 
     <!-- A card: its lane's tint in the top corner, fading into the card. -->
-    <LinearGradientBrush x:Key="CloseCardLightBrush" StartPoint="0,0" EndPoint="0.8,1">
-        <GradientStop Color="{StaticResource CloseTintLight}" Offset="0" />
+    <LinearGradientBrush x:Key="SafeCardLightBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource SafeTintLight}" Offset="0" />
         <GradientStop Color="{StaticResource CardEndLight}" Offset="0.75" />
     </LinearGradientBrush>
-    <LinearGradientBrush x:Key="CloseCardDarkBrush" StartPoint="0,0" EndPoint="0.8,1">
-        <GradientStop Color="{StaticResource CloseTintDark}" Offset="0" />
+    <LinearGradientBrush x:Key="SafeCardDarkBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource SafeTintDark}" Offset="0" />
         <GradientStop Color="{StaticResource CardEndDark}" Offset="0.75" />
     </LinearGradientBrush>
-    <LinearGradientBrush x:Key="StretchCardLightBrush" StartPoint="0,0" EndPoint="0.8,1">
-        <GradientStop Color="{StaticResource StretchTintLight}" Offset="0" />
+    <LinearGradientBrush x:Key="CuriousCardLightBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource CuriousTintLight}" Offset="0" />
         <GradientStop Color="{StaticResource CardEndLight}" Offset="0.75" />
     </LinearGradientBrush>
-    <LinearGradientBrush x:Key="StretchCardDarkBrush" StartPoint="0,0" EndPoint="0.8,1">
-        <GradientStop Color="{StaticResource StretchTintDark}" Offset="0" />
+    <LinearGradientBrush x:Key="CuriousCardDarkBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource CuriousTintDark}" Offset="0" />
         <GradientStop Color="{StaticResource CardEndDark}" Offset="0.75" />
     </LinearGradientBrush>
-    <LinearGradientBrush x:Key="LeapCardLightBrush" StartPoint="0,0" EndPoint="0.8,1">
-        <GradientStop Color="{StaticResource LeapTintLight}" Offset="0" />
+    <LinearGradientBrush x:Key="WildCardLightBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource WildTintLight}" Offset="0" />
         <GradientStop Color="{StaticResource CardEndLight}" Offset="0.75" />
     </LinearGradientBrush>
-    <LinearGradientBrush x:Key="LeapCardDarkBrush" StartPoint="0,0" EndPoint="0.8,1">
-        <GradientStop Color="{StaticResource LeapTintDark}" Offset="0" />
+    <LinearGradientBrush x:Key="WildCardDarkBrush" StartPoint="0,0" EndPoint="0.8,1">
+        <GradientStop Color="{StaticResource WildTintDark}" Offset="0" />
         <GradientStop Color="{StaticResource CardEndDark}" Offset="0.75" />
     </LinearGradientBrush>
 

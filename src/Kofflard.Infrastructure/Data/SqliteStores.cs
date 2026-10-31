@@ -20,7 +20,6 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
     private const string OpenWithKey = "open_with";
     private const string CheckNamesKey = "check_names";
     private const string AdventureKey = "adventure";
-    private const string OpenLanesKey = "open_lanes";
 
     /// <inheritdoc />
     public async Task<AppSettings> LoadAsync()
@@ -47,12 +46,7 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
                 : null,
             values.TryGetValue(OpenWithKey, out var openWith) && Enum.TryParse<MusicService>(openWith, out var service) ? service : defaults.OpenWith,
             values.TryGetValue(CheckNamesKey, out var check) ? check == "true" : defaults.CheckNames,
-            values.TryGetValue(AdventureKey, out var level) && int.TryParse(level, CultureInfo.InvariantCulture, out var parsed)
-                ? new Adventure(parsed).Level
-                : defaults.Adventure)
-        {
-            OpenLanes = ReadLanes(values.GetValueOrDefault(OpenLanesKey)),
-        };
+            ReadAdventure(values.GetValueOrDefault(AdventureKey)) ?? defaults.Adventure);
     }
 
     /// <inheritdoc />
@@ -62,8 +56,7 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
         {
             [OpenWithKey] = settings.OpenWith.ToString(),
             [CheckNamesKey] = settings.CheckNames ? "true" : "false",
-            [AdventureKey] = settings.Adventure.ToString(CultureInfo.InvariantCulture),
-            [OpenLanesKey] = string.Join(",", Enum.GetValues<Lane>().Where(settings.OpenLanes.Contains)),
+            [AdventureKey] = settings.Adventure.ToString(),
         };
 
         if (settings.Connection is { } ai)
@@ -89,12 +82,22 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
         await transaction.CommitAsync();
     }
 
-    // "Close,Leap"; a name that is not a lane is skipped, so a bad value reads as fewer open lanes.
-    private static HashSet<Lane> ReadLanes(string? value)
-        => [.. (value ?? string.Empty)
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(name => Enum.TryParse<Lane>(name, ignoreCase: true, out var lane) && Enum.IsDefined(lane) ? lane : (Lane?)null)
-            .OfType<Lane>()];
+    // "Curious"; or a level of 1-5 from before the slider moved to the results: 1 is Safe, 2-3 Curious,
+    // 4-5 Wild (.my/design/adventure-as-outcomes.md). Anything else reads as not set.
+    private static Lane? ReadAdventure(string? value)
+    {
+        if (int.TryParse(value, CultureInfo.InvariantCulture, out var level))
+        {
+            return level switch
+            {
+                <= 1 => Lane.Safe,
+                <= 3 => Lane.Curious,
+                _ => Lane.Wild,
+            };
+        }
+
+        return Enum.TryParse<Lane>(value, ignoreCase: true, out var lane) && Enum.IsDefined(lane) ? lane : null;
+    }
 }
 
 /// <summary>Searches, what was shown, and the result cache (design §9).</summary>
@@ -108,12 +111,11 @@ public sealed class SqliteHistoryStore(KofflardDatabase database) : IHistoryStor
         await using var connection = await database.OpenAsync();
         await using var command = connection.Command(
             """
-            INSERT INTO searches (normalised, artist, adventure, at) VALUES ($normalised, $artist, $adventure, $at)
-            ON CONFLICT(normalised) DO UPDATE SET artist = $artist, adventure = $adventure, at = $at;
+            INSERT INTO searches (normalised, artist, adventure, at) VALUES ($normalised, $artist, 0, $at)
+            ON CONFLICT(normalised) DO UPDATE SET artist = $artist, at = $at;
             """,
             ("$normalised", Names.Normalise(search.Artist)),
             ("$artist", search.Artist),
-            ("$adventure", search.Adventure),
             ("$at", SqliteCommands.Stamp(search.At)));
         await command.ExecuteNonQueryAsync();
     }
@@ -122,13 +124,14 @@ public sealed class SqliteHistoryStore(KofflardDatabase database) : IHistoryStor
     public async Task<IReadOnlyList<RecentSearch>> RecentSearchesAsync(int count)
     {
         await using var connection = await database.OpenAsync();
-        await using var command = connection.Command("SELECT artist, adventure, at FROM searches ORDER BY at DESC LIMIT $count;", ("$count", count));
+        // The adventure column is from before the slider moved to the results; it is no longer read.
+        await using var command = connection.Command("SELECT artist, at FROM searches ORDER BY at DESC LIMIT $count;", ("$count", count));
         await using var reader = await command.ExecuteReaderAsync();
 
         var searches = new List<RecentSearch>();
         while (await reader.ReadAsync())
         {
-            searches.Add(new RecentSearch(reader.GetString(0), reader.GetInt32(1), SqliteCommands.ReadStamp(reader.GetString(2))));
+            searches.Add(new RecentSearch(reader.GetString(0), SqliteCommands.ReadStamp(reader.GetString(1))));
         }
 
         return searches;

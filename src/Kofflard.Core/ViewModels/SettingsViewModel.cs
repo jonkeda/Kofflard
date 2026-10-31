@@ -79,30 +79,6 @@ public sealed class SettingsViewModel : ParentViewModel
         }
     }
 
-    /// <summary>The adventurousness level, 1-5.</summary>
-    public int AdventureLevel
-    {
-        get => _current.Adventure;
-        set
-        {
-            var level = new Adventure(value).Level;
-            if (level != _current.Adventure)
-            {
-                _ = ChangeAsync(_current with { Adventure = level }, nameof(AdventureLevel), nameof(AdventureStep), nameof(AdventureName));
-            }
-        }
-    }
-
-    /// <summary><see cref="AdventureLevel"/> as the Stepper binds it.</summary>
-    public double AdventureStep
-    {
-        get => AdventureLevel;
-        set => AdventureLevel = (int)Math.Round(value);
-    }
-
-    /// <summary>"Safe" to "Wild".</summary>
-    public string AdventureName => new Adventure(_current.Adventure).Name;
-
     /// <summary>Opens Connect.</summary>
     public IAsyncRelayCommand ChangeAiCommand { get; }
 

@@ -208,7 +208,7 @@ public class KofflardAppFixture : MauiTestFixtureBase
         }
     }
 
-    // Open with YouTube, no name checks, adventure 2: what a new install has, connected to the test's AI.
+    // Open with YouTube, no name checks, only Safe shown: what a new install has, connected to the test's AI.
     private void DefaultSettings()
     {
         if (Platform is MauiPlatform.Windows or MauiPlatform.Headless)

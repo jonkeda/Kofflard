@@ -24,7 +24,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         AiConnection connection,
         string? secret,
         string artist,
-        Adventure adventure,
+        Lane lean,
         IReadOnlyCollection<string> exclude,
         CancellationToken cancellationToken = default)
     {
@@ -34,12 +34,12 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
             new(ChatRole.System, connection.Provider.StructuredOutput == AiStructuredOutput.JsonSchema
                 ? DiscoveryPrompt.System
                 : DiscoveryPrompt.System + "\n\nThe JSON schema of your answer:\n" + DiscoveryPrompt.Schema),
-            new(ChatRole.User, DiscoveryPrompt.User(artist, adventure, exclude)),
+            new(ChatRole.User, DiscoveryPrompt.User(artist, lean, exclude)),
         };
 
         var options = new ChatOptions
         {
-            Temperature = DiscoveryPrompt.Temperature(adventure),
+            Temperature = DiscoveryPrompt.Temperature,
             MaxOutputTokens = 4000,
             ResponseFormat = connection.Provider.StructuredOutput == AiStructuredOutput.JsonSchema
                 ? ChatResponseFormat.ForJsonSchema(Schema, DiscoveryPrompt.SchemaName)
@@ -49,7 +49,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         var text = await AskAsync(client, connection, messages, options, cancellationToken);
         try
         {
-            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(text), artist, adventure, exclude);
+            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(text), artist, lean, exclude);
         }
         catch (DiscoveryAnswerException problem)
         {
@@ -60,7 +60,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         var retried = await AskAsync(client, connection, messages, options, cancellationToken);
         try
         {
-            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(retried), artist, adventure, exclude);
+            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(retried), artist, lean, exclude);
         }
         catch (DiscoveryAnswerException problem)
         {

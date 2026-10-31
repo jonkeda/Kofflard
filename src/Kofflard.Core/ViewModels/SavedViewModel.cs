@@ -27,9 +27,6 @@ public sealed class SavedViewModel(ISavedStore saved, ISettingsStore settings, S
         OnPropertyChanged(nameof(IsEmpty));
     }
 
-    private async Task ExploreAsync(SuggestionViewModel card)
-    {
-        var level = (await settings.LoadAsync()).Adventure;
-        await navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(card.Name, new Adventure(level)));
-    }
+    private Task ExploreAsync(SuggestionViewModel card)
+        => navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(card.Name));
 }

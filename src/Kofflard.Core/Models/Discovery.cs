@@ -1,16 +1,20 @@
 namespace Kofflard.Core.Models;
 
-/// <summary>Where a suggestion sits on the scale from safe to surprising (design §3.2).</summary>
+/// <summary>
+/// How adventurous a suggestion is, from safe to wild (design §3.2, .my/design/adventure-as-outcomes.md).
+/// The order matters: the results show every lane up to the one the user slid to.
+/// </summary>
+/// <remarks>The prompt still calls them close, stretch and leap; those words never reach the screen.</remarks>
 public enum Lane
 {
-    /// <summary>High relevance, some novelty, little surprise.</summary>
-    Close,
+    /// <summary>High relevance, some novelty, little surprise. The prompt's "close".</summary>
+    Safe,
 
-    /// <summary>Relevant and novel: lesser-known artists, other eras, the same sound.</summary>
-    Stretch,
+    /// <summary>Relevant and novel: lesser-known artists, other eras, the same sound. The prompt's "stretch".</summary>
+    Curious,
 
-    /// <summary>Another genre, country or decade, joined to the original by a bridge.</summary>
-    Leap,
+    /// <summary>Another genre, country or decade, joined to the original by a bridge. The prompt's "leap".</summary>
+    Wild,
 }
 
 /// <summary>How the model answered the name it was given.</summary>
@@ -61,7 +65,7 @@ public sealed record Verification(VerificationState State, string? MusicBrainzId
 /// <param name="Name">The name.</param>
 /// <param name="Lane">The lane.</param>
 /// <param name="Why">One line on why it fits.</param>
-/// <param name="Bridge">For a leap: the concrete link back to the typed artist. Null otherwise.</param>
+/// <param name="Bridge">For a wild pick: the concrete link back to the typed artist. Null otherwise.</param>
 /// <param name="Tags">One to three tags: genre, era, country.</param>
 /// <param name="KnownFor">A real album or song, so the user can check the name.</param>
 public sealed record Suggestion(

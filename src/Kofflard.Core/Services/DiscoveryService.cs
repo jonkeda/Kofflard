@@ -1,4 +1,3 @@
-using System.Globalization;
 using Kofflard.Core.Ai;
 using Kofflard.Core.Models;
 using Kofflard.Core.Rules;
@@ -23,7 +22,9 @@ public sealed class DiscoveryService(
 
     /// <summary>Searches for musicians like <paramref name="artist"/>.</summary>
     /// <param name="artist">The name as typed; cleaned here.</param>
-    /// <param name="adventure">How adventurous.</param>
+    /// <param name="lean">
+    /// Which lane the mix leans to: <see cref="LaneMix.Even"/> for a search, the slider's lane for "More like this…".
+    /// </param>
     /// <param name="useCache">
     /// Whether a result from the last 24 hours may be shown again: yes for a recent search opened again,
     /// no for a new search or "More like this", which ask the AI for musicians not shown yet.
@@ -32,7 +33,7 @@ public sealed class DiscoveryService(
     /// <exception cref="AiException">No AI is connected, or the request failed.</exception>
     public async Task<DiscoveryResult> DiscoverAsync(
         string artist,
-        Adventure adventure,
+        Lane lean,
         bool useCache,
         CancellationToken cancellationToken = default)
     {
@@ -47,9 +48,9 @@ public sealed class DiscoveryService(
             throw new AiException(AiFailure.NotConnected, "Connect an AI first.");
         }
 
-        var key = CacheKey(name, adventure, connected.Connection);
+        var key = CacheKey(name, lean, connected.Connection);
         var now = time.GetUtcNow();
-        await history.AddSearchAsync(new RecentSearch(name, adventure.Level, now));
+        await history.AddSearchAsync(new RecentSearch(name, now));
 
         if (useCache && await history.CachedAsync(key, now - CacheFor) is { } cached)
         {
@@ -57,7 +58,7 @@ public sealed class DiscoveryService(
         }
 
         var exclude = await history.ShownAsync(DiscoveryPrompt.MaxExclusions);
-        var result = await engine.DiscoverAsync(connected.Connection, connected.Secret, name, adventure, exclude, cancellationToken);
+        var result = await engine.DiscoverAsync(connected.Connection, connected.Secret, name, lean, exclude, cancellationToken);
 
         if (result.Status == DiscoveryStatus.Ok && result.Suggestions.Count > 0)
         {
@@ -71,12 +72,12 @@ public sealed class DiscoveryService(
     /// <summary>The latest searches, newest first.</summary>
     public Task<IReadOnlyList<RecentSearch>> RecentAsync() => history.RecentSearchesAsync(RecentCount);
 
-    /// <summary>The cache key: the same name, level, provider and model give the same key.</summary>
-    public static string CacheKey(string artist, Adventure adventure, AiConnection connection)
+    /// <summary>The cache key: the same name, lean, provider and model give the same key.</summary>
+    public static string CacheKey(string artist, Lane lean, AiConnection connection)
         => string.Join(
             '|',
             Names.Normalise(artist),
-            adventure.Level.ToString(CultureInfo.InvariantCulture),
+            lean.ToString(),
             connection.ProviderId,
             connection.Model);
 }
