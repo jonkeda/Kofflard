@@ -26,6 +26,12 @@ public sealed record LaunchSettings
     /// <summary>The key for <see cref="AiBaseUrlVariable"/>.</summary>
     public const string AiKeyVariable = "KOFFLARD_AI_KEY";
 
+    /// <summary>The provider of <see cref="AiBaseUrlVariable"/>: "local" (the fake AI) unless a test connects to the live one ("azure").</summary>
+    public const string AiProviderVariable = "KOFFLARD_AI_PROVIDER";
+
+    /// <summary>The model or deployment of <see cref="AiBaseUrlVariable"/>.</summary>
+    public const string AiModelVariable = "KOFFLARD_AI_MODEL";
+
     /// <summary>MusicBrainz's base URL; a stub under test.</summary>
     public const string MusicBrainzBaseUrlVariable = "KOFFLARD_MUSICBRAINZ_BASEURL";
 
@@ -34,6 +40,9 @@ public sealed record LaunchSettings
 
     /// <summary>A file the app writes every link it would open to, instead of opening it.</summary>
     public const string LaunchLogVariable = "KOFFLARD_LAUNCH_LOG";
+
+    /// <summary>The window's size on Windows, as <c>1280x800</c>: the same frame in every recorded take. Read by the app.</summary>
+    public const string WindowVariable = "KOFFLARD_WINDOW";
 
     /// <summary>The model a pre-connected fake AI is asked for.</summary>
     public const string TestModel = "kofflard-test";
@@ -50,6 +59,12 @@ public sealed record LaunchSettings
     /// <summary>The key for <see cref="AiBaseUrl"/>.</summary>
     public string? AiKey { get; init; }
 
+    /// <summary>The provider of <see cref="AiBaseUrl"/>.</summary>
+    public string AiProvider { get; init; } = "local";
+
+    /// <summary>The model or deployment of <see cref="AiBaseUrl"/>.</summary>
+    public string AiModel { get; init; } = TestModel;
+
     /// <summary>MusicBrainz's base URL.</summary>
     public string MusicBrainzBaseUrl { get; init; } = "https://musicbrainz.org/";
 
@@ -62,7 +77,7 @@ public sealed record LaunchSettings
     /// <summary>How long an AI request may take.</summary>
     public TimeSpan AiTimeout { get; init; } = TimeSpan.FromSeconds(60);
 
-    /// <summary>Whether the app runs against a test's fake AI.</summary>
+    /// <summary>Whether the app starts connected to a test's AI: the fake one, or the live one.</summary>
     public bool IsPreConnected => !string.IsNullOrWhiteSpace(AiBaseUrl);
 
     /// <summary>Builds settings from named values, with the defaults for anything not set.</summary>
@@ -79,6 +94,8 @@ public sealed record LaunchSettings
                 : null,
             AiBaseUrl = Value(read, AiBaseUrlVariable),
             AiKey = Value(read, AiKeyVariable),
+            AiProvider = Value(read, AiProviderVariable) ?? defaults.AiProvider,
+            AiModel = Value(read, AiModelVariable) ?? defaults.AiModel,
             MusicBrainzBaseUrl = Value(read, MusicBrainzBaseUrlVariable) ?? defaults.MusicBrainzBaseUrl,
             OpenRouterBaseUrl = Value(read, OpenRouterBaseUrlVariable) ?? defaults.OpenRouterBaseUrl,
             LaunchLog = Value(read, LaunchLogVariable),
@@ -92,6 +109,8 @@ public sealed record LaunchSettings
         Add(values, FixedNowVariable, FixedNow?.ToString("O", CultureInfo.InvariantCulture));
         Add(values, AiBaseUrlVariable, AiBaseUrl);
         Add(values, AiKeyVariable, AiKey);
+        Add(values, AiProviderVariable, AiProvider);
+        Add(values, AiModelVariable, AiModel);
         Add(values, MusicBrainzBaseUrlVariable, MusicBrainzBaseUrl);
         Add(values, OpenRouterBaseUrlVariable, OpenRouterBaseUrl);
         Add(values, LaunchLogVariable, LaunchLog);

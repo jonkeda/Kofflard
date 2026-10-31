@@ -1,0 +1,19 @@
+{
+  "status": "ok",
+  "artist": { "name": "Bill Fay", "summary": "English singer-songwriter and pianist, 1970–" },
+  "suggestions": [
+    { "name": "Judee Sill", "lane": "close", "why": "Hymn-like songs of faith and longing, carried by piano and choir.", "bridge": null, "tags": ["singer-songwriter", "1971", "US"], "knownFor": "Heart Food" },
+    { "name": "Roy Harper", "lane": "close", "why": "Long, searching English songs from the same early-70s underground.", "bridge": null, "tags": ["folk", "1971", "UK"], "knownFor": "Stormcock" },
+    { "name": "Kevin Ayers", "lane": "close", "why": "Warm, wry songs with gentle psychedelic arrangements.", "bridge": null, "tags": ["psych pop", "1969", "UK"], "knownFor": "Joy of a Toy" },
+    { "name": "Robert Wyatt", "lane": "close", "why": "A fragile voice over slow, spacious keyboards.", "bridge": null, "tags": ["art rock", "1974", "UK"], "knownFor": "Rock Bottom" },
+    { "name": "Tim Buckley", "lane": "close", "why": "Searching songs that drift between folk and something freer.", "bridge": null, "tags": ["folk", "1969", "US"], "knownFor": "Happy Sad" },
+    { "name": "Duncan Browne", "lane": "close", "why": "Delicate, orchestral English songwriting from 1968.", "bridge": null, "tags": ["baroque pop", "1968", "UK"], "knownFor": "Give Me, Take You" },
+    { "name": "Jackson C. Frank", "lane": "stretch", "why": "One quiet, haunted album that shaped a whole folk scene.", "bridge": null, "tags": ["folk", "1965", "US"], "knownFor": "Jackson C. Frank" },
+    { "name": "Mark Fry", "lane": "stretch", "why": "A dreamy, private-press folk record made at nineteen.", "bridge": null, "tags": ["psych folk", "1972", "UK"], "knownFor": "Dreaming with Alice" },
+    { "name": "Dave Bixby", "lane": "stretch", "why": "Lonely, devotional home recordings from the Midwest.", "bridge": null, "tags": ["folk", "1969", "US"], "knownFor": "Ode to Quetzalcoatl" },
+    { "name": "Vashti Bunyan", "lane": "stretch", "why": "Fragile pastoral songs, rediscovered decades later, as Fay was.", "bridge": null, "tags": ["folk", "1970", "UK"], "knownFor": "Just Another Diamond Day" },
+    { "name": "Talk Talk", "lane": "leap", "why": "Late Talk Talk: patient, spiritual, almost silent rock.", "bridge": "Spirit of Eden shares Fay's hymn-like piano and his long, patient spiritual songs", "tags": ["post-rock", "1988", "UK"], "knownFor": "Spirit of Eden" },
+    { "name": "Arvo Pärt", "lane": "leap", "why": "Estonian sacred minimalism: a few notes, held for a long time.", "bridge": "Both build devotional music from a handful of slow, repeated piano chords", "tags": ["contemporary classical", "1977", "Estonia"], "knownFor": "Tabula Rasa" }
+  ],
+  "candidates": []
+}

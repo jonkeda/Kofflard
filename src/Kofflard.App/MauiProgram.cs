@@ -23,6 +23,17 @@ public static class MauiProgram
 #endif
             });
 
+#if WINDOWS
+        // MAUI 10 keeps Picker.IsOpen in step with the WinUI ComboBox: on DropDownOpened it sets IsOpen, and
+        // the IsOpen mapper then writes ComboBox.IsDropDownOpen back from inside that event. When the
+        // dropdown was opened through UI Automation (Bruinet's ExpandCollapse), the ComboBox could still
+        // report closed there, the write went through, and it blocked the UI thread for good
+        // (.my/rca/picker-hang.md). Kofflard never opens a picker from code, so the mapping is not needed.
+        Microsoft.Maui.Handlers.PickerHandler.Mapper.ModifyMapping(
+            nameof(IPicker.IsOpen),
+            (handler, picker, map) => { });
+#endif
+
         // Off unless this build has the bridge and the test run asks for it.
         builder.UseBruinetGestureBridge();
 

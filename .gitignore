@@ -6,3 +6,10 @@ obj/
 TestResults/
 **/TestSettings/testsettings.local.json
 **/TestSettings/**/*.secrets.json
+
+# Local secrets; never in git (voice: Bruinet's narrator; ai: the live AI for tests)
+**/voice.secrets.json
+**/ai.secrets.json
+
+# Recorded videos are release assets, not source (the script and captions are kept)
+.my/video/**/*.mp4

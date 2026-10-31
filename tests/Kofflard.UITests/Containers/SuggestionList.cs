@@ -66,6 +66,22 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
         return Self;
     }
 
+    /// <summary>Scrolls <paramref name="musician"/>'s card into view: the leaps are below the fold.</summary>
+    [BddWhen("I look at {item}")]
+    public SuggestionList LookAt(string musician)
+    {
+        Card(musician).NameLabel.ScrollIntoView();
+        return Self;
+    }
+
+    /// <summary>Asserts <paramref name="musician"/>'s card says <paramref name="text"/> after an open: "Opened in YouTube ✓".</summary>
+    [BddThen("{item} should say {value}")]
+    public SuggestionList AssertSays(string musician, string text)
+    {
+        Card(musician).Opened.AssertText(text, timeoutMs: TestConstants.PageTimeoutMs);
+        return Self;
+    }
+
     /// <summary>Opens <paramref name="musician"/> with the main button: the Open with service.</summary>
     [BddWhen("I open {item}")]
     public SuggestionList Open(string musician)
@@ -102,6 +118,9 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
         Card(musician).ExploreButton.Click();
         var next = new ResultsPage(Context);
         next.Heading.AssertText($"Like {musician}", timeoutMs: TestConstants.PageTimeoutMs);
+
+        // Until the AI has answered: an answer that lands in the next test would mark its names as shown there.
+        next.State.WaitShowing(ResultsState.Loading, false, TestConstants.PageTimeoutMs);
         return next;
     }
 
@@ -136,6 +155,9 @@ public sealed class SuggestionCard : ItemObjectBase<SuggestionList, SuggestionCa
 
     /// <summary>Why it fits, or "Bridge: …" for a leap.</summary>
     public Label<SuggestionCard> Why => new(this, "Suggestion_Why");
+
+    /// <summary>"Opened in YouTube ✓" for a moment after an open.</summary>
+    public Label<SuggestionCard> Opened => new(this, "Suggestion_Opened");
 
     /// <summary>"✓" once MusicBrainz confirmed the name.</summary>
     public Label<SuggestionCard> Verified => new(this, "Suggestion_Verified");

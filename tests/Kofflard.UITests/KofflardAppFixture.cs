@@ -49,8 +49,14 @@ public class KofflardAppFixture : MauiTestFixtureBase
         SearchPage.Arrived(Context);
     }
 
-    /// <summary>The fake AI the app is connected to.</summary>
+    /// <summary>The fake AI the app is connected to, unless the run is live.</summary>
     public FakeAi Ai => Arranged.Ai;
+
+    /// <summary>
+    /// Whether the app talks to the live AI (<c>KOFFLARD_LIVE_AI=1</c>, <see cref="LiveAi"/>): for a demo
+    /// video with real answers. Scenarios that check specific names are for the fake AI only.
+    /// </summary>
+    public bool IsLive => Arranged.Live is not null;
 
     /// <summary>The search page, where every test starts.</summary>
     public SearchPage Search => new(Context);
@@ -202,14 +208,14 @@ public class KofflardAppFixture : MauiTestFixtureBase
         }
     }
 
-    // Open with YouTube, no name checks, adventure 2: what a new install has, connected to the fake AI.
+    // Open with YouTube, no name checks, adventure 2: what a new install has, connected to the test's AI.
     private void DefaultSettings()
     {
         if (Platform is MauiPlatform.Windows or MauiPlatform.Headless)
         {
-            var fake = new Kofflard.Core.Ai.AiConnection("local", Arranged.Settings.AiBaseUrl, LaunchSettings.TestModel);
+            var test = new Kofflard.Core.Ai.AiConnection(Arranged.Settings.AiProvider, Arranged.Settings.AiBaseUrl, Arranged.Settings.AiModel);
             new SqliteSettingsStore(new KofflardDatabase(Arranged.Settings.DatabasePath))
-                .SaveAsync(Kofflard.Core.Services.AppSettings.Default with { Connection = fake })
+                .SaveAsync(Kofflard.Core.Services.AppSettings.Default with { Connection = test })
                 .GetAwaiter().GetResult();
         }
     }
@@ -228,18 +234,23 @@ public class KofflardAppFixture : MauiTestFixtureBase
         var folder = Path.Combine(Path.GetTempPath(), "kofflard-ui", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(folder);
         var ai = FakeAi.Start();
+        var live = LiveAi.Requested ? LiveAi.Load() : null;
         var settings = new LaunchSettings
         {
             DatabasePath = Path.Combine(folder, "kofflard.db"),
             FixedNow = Now,
-            AiBaseUrl = ai.BaseUrl,
-            AiKey = "test-key",
+            AiBaseUrl = live?.Connection.Endpoint ?? ai.BaseUrl,
+            AiKey = live?.Key ?? "test-key",
+            // Azure, as a new user's first choice: the fake AI answers on Azure's /openai/v1/ path too, so
+            // Connect opens on Azure and a scene needs no dropdown (WinUI's left one open: 2026-10-31).
+            AiProvider = live?.Connection.ProviderId ?? Kofflard.Core.Ai.AiProviders.Azure.Id,
+            AiModel = live?.Connection.Model ?? LaunchSettings.TestModel,
             // Nothing listens there: name checks are off by default, and a test that turns them on gets "unverified".
             MusicBrainzBaseUrl = "http://127.0.0.1:1/",
             LaunchLog = Path.Combine(folder, "opened.txt"),
         };
 
-        _arrangement = new Arrangement(folder, ai, settings, settings.LaunchLog);
+        _arrangement = new Arrangement(folder, ai, settings, settings.LaunchLog, live);
         return settings;
     }
 
@@ -248,11 +259,17 @@ public class KofflardAppFixture : MauiTestFixtureBase
     private static Dictionary<string, string> LaunchValues(LaunchSettings settings, MauiPlatform platform)
     {
         var values = new Dictionary<string, string>(settings.ToVariables());
-        if (platform == MauiPlatform.Android)
+        if (platform == MauiPlatform.Android && !settings.AiBaseUrl!.Contains("azure.com", StringComparison.OrdinalIgnoreCase))
         {
             values.Remove(LaunchSettings.DatabasePathVariable);
             values.Remove(LaunchSettings.LaunchLogVariable);
             values[LaunchSettings.AiBaseUrlVariable] = Bruinet.Appium.AndroidHost.EmulatorUrl(settings.AiBaseUrl!);
+        }
+
+        if (platform == MauiPlatform.Windows)
+        {
+            // The same frame in every take of a recorded video.
+            values[LaunchSettings.WindowVariable] = "1280x800";
         }
 
         return values;
@@ -285,7 +302,7 @@ public class KofflardAppFixture : MauiTestFixtureBase
         return SearchPage.Arrived(Context);
     }
 
-    private sealed record Arrangement(string Folder, FakeAi Ai, LaunchSettings Settings, string LaunchLog);
+    private sealed record Arrangement(string Folder, FakeAi Ai, LaunchSettings Settings, string LaunchLog, LiveAi? Live);
 
     private sealed class NoSignIn : IOAuthBroker
     {

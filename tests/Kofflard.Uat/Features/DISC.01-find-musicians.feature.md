@@ -66,5 +66,5 @@ When I enter "Nick Drake" into Name
 And I tap Go
 Then I should be on the Results page
 And Results should show the Error state
-And Error Message should equal "This key was not accepted by Local (Ollama / LM Studio)."
+And Error Message should equal "This key was not accepted by Azure OpenAI / Foundry."
 ```

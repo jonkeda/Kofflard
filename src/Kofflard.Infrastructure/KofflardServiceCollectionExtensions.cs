@@ -55,7 +55,7 @@ public static class KofflardServiceCollectionExtensions
             var launch = provider.GetRequiredService<LaunchSettings>();
             return new SqliteSettingsStore(
                 provider.GetRequiredService<KofflardDatabase>(),
-                launch.IsPreConnected ? new AiConnection("local", launch.AiBaseUrl, LaunchSettings.TestModel) : null);
+                launch.IsPreConnected ? new AiConnection(launch.AiProvider, launch.AiBaseUrl, launch.AiModel) : null);
         });
         services.AddSingleton<IHistoryStore, SqliteHistoryStore>();
         services.AddSingleton<ISavedStore, SqliteSavedStore>();

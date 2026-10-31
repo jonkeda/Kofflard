@@ -1,0 +1,1102 @@
+{
+  "title": "Kofflard in a minute and a half",
+  "scenes": [
+    {
+      "number": 1,
+      "name": "Who do you like?",
+      "scenario": "Features/DISC.01-find-musicians.feature.md#DISC.01.1-Typing-a-name-shows-twelve-suggestions-in-three-lanes",
+      "duration": 23.1666666,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 20,
+          "text": "Given I am on the Search page",
+          "start": 3.5170165,
+          "end": 3.5298163,
+          "status": "passed"
+        },
+        {
+          "line": 21,
+          "text": "When I enter \u0022Nick Drake\u0022 into Name",
+          "start": 4.1382827,
+          "end": 4.8412162,
+          "status": "passed"
+        },
+        {
+          "line": 22,
+          "text": "And I tap Go",
+          "start": 5.9640765,
+          "end": 6.6660247,
+          "status": "passed"
+        },
+        {
+          "line": 23,
+          "text": "Then I should be on the Results page",
+          "start": 10.2084339,
+          "end": 10.220473,
+          "status": "passed"
+        },
+        {
+          "line": 24,
+          "text": "And Heading should equal \u0022Like Nick Drake\u0022",
+          "start": 10.8311466,
+          "end": 10.8370104,
+          "status": "passed"
+        },
+        {
+          "line": 25,
+          "text": "And Lanes should equal \u0022Close 6 \u00B7 Stretch 4 \u00B7 Leap 2\u0022",
+          "start": 11.4388173,
+          "end": 11.4466712,
+          "status": "passed"
+        },
+        {
+          "line": 26,
+          "text": "And Suggestions should suggest \u0022Vashti Bunyan\u0022",
+          "start": 12.0482183,
+          "end": 12.0999217,
+          "status": "passed"
+        },
+        {
+          "line": 27,
+          "text": "And \u0022Vashti Bunyan\u0022 should be a \u0022Close\u0022 suggestion",
+          "start": 12.7020852,
+          "end": 12.7714397,
+          "status": "passed"
+        },
+        {
+          "line": 28,
+          "text": "And \u0022Bill Fay\u0022 should be a \u0022Stretch\u0022 suggestion",
+          "start": 13.3773208,
+          "end": 14.3488804,
+          "status": "passed"
+        },
+        {
+          "line": 29,
+          "text": "And \u0022Ali Farka Tour\u00E9\u0022 should be a \u0022Leap\u0022 suggestion",
+          "start": 14.9490558,
+          "end": 16.8323291,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "Kofflard starts with one question: who do you like?",
+          "start": 0.0093721,
+          "end": 3.5093721
+        },
+        {
+          "text": "Say, Nick Drake.",
+          "start": 4.1382517,
+          "end": 5.9582517
+        },
+        {
+          "text": "Kofflard asks an AI for musicians you may not know yet.",
+          "start": 5.9640471,
+          "end": 10.200047099999999
+        },
+        {
+          "text": "Twelve of them, in three lanes.",
+          "start": 10.2083704,
+          "end": 13.870370399999999
+        },
+        {
+          "text": "Close ones first. Then stretches. Then a few leaps.",
+          "start": 17.4426809,
+          "end": 23.150680899999998
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "7A8B777B06F001E5",
+      "interactions": [
+        {
+          "kind": "clear",
+          "at": 4.1437983,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 4.1521286,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 5.9695075,
+          "bounds": {
+            "x": 63,
+            "y": 321,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        }
+      ],
+      "source": {
+        "x": 42,
+        "y": 33,
+        "width": 1582,
+        "height": 991
+      }
+    },
+    {
+      "number": 2,
+      "name": "Three lanes",
+      "scenario": "Features/VID.01-the-video.feature.md#VID.01.1-The-lanes-run-from-close-to-a-leap-with-its-bridge",
+      "duration": 22.9,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 20,
+          "text": "Given I am on the Search page",
+          "start": 23.1732613,
+          "end": 23.1819331,
+          "status": "passed"
+        },
+        {
+          "line": 21,
+          "text": "When I enter \u0022Nick Drake\u0022 into Name",
+          "start": 23.7926978,
+          "end": 24.4950466,
+          "status": "passed"
+        },
+        {
+          "line": 22,
+          "text": "And I tap Go",
+          "start": 25.1043961,
+          "end": 25.8183306,
+          "status": "passed"
+        },
+        {
+          "line": 23,
+          "text": "Then I should be on the Results page",
+          "start": 26.4269982,
+          "end": 26.4356772,
+          "status": "passed"
+        },
+        {
+          "line": 24,
+          "text": "When I look at \u0022Vashti Bunyan\u0022",
+          "start": 27.0472038,
+          "end": 27.854464,
+          "status": "passed"
+        },
+        {
+          "line": 25,
+          "text": "And I look at \u0022Bill Fay\u0022",
+          "start": 30.4719376,
+          "end": 32.264443,
+          "status": "passed"
+        },
+        {
+          "line": 26,
+          "text": "And I look at \u0022Ali Farka Tour\u00E9\u0022",
+          "start": 34.4737376,
+          "end": 37.2589156,
+          "status": "passed"
+        },
+        {
+          "line": 27,
+          "text": "Then \u0022Ali Farka Tour\u00E9\u0022 should be a \u0022Leap\u0022 suggestion",
+          "start": 37.8656191,
+          "end": 39.26893,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "Close: the same quiet folk, well chosen.",
+          "start": 27.047159999999998,
+          "end": 30.46716
+        },
+        {
+          "text": "A stretch: less known, another year, the same feeling.",
+          "start": 30.471874,
+          "end": 34.467873999999995
+        },
+        {
+          "text": "And a leap: Ali Farka Tour\u00E9, from Mali.",
+          "start": 34.4736696,
+          "end": 37.7816696
+        },
+        {
+          "text": "Every leap says why: the same soft, looping fingerpicking.",
+          "start": 37.8655667,
+          "end": 42.0055667
+        },
+        {
+          "text": "Relevance first. Surprise, but never out of the blue.",
+          "start": 42.014936199999994,
+          "end": 46.0589361
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "3DDE5EB3C40B3868",
+      "interactions": [
+        {
+          "kind": "clear",
+          "at": 23.7947948,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 23.7983388,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 25.1090323,
+          "bounds": {
+            "x": 63,
+            "y": 321,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        }
+      ],
+      "source": {
+        "x": 42,
+        "y": 33,
+        "width": 1582,
+        "height": 991
+      }
+    },
+    {
+      "number": 3,
+      "name": "Open it anywhere",
+      "scenario": "Features/VID.01-the-video.feature.md#VID.01.2-Opening-a-musician-says-where-it-opened",
+      "duration": 15.5666666,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 34,
+          "text": "Given I am on the Search page",
+          "start": 46.0859136,
+          "end": 46.1054587,
+          "status": "passed"
+        },
+        {
+          "line": 35,
+          "text": "When I enter \u0022Nick Drake\u0022 into Name",
+          "start": 46.7183492,
+          "end": 47.4344812,
+          "status": "passed"
+        },
+        {
+          "line": 36,
+          "text": "And I tap Go",
+          "start": 48.043249599999996,
+          "end": 48.7453382,
+          "status": "passed"
+        },
+        {
+          "line": 37,
+          "text": "Then I should be on the Results page",
+          "start": 49.344950999999995,
+          "end": 49.398206599999995,
+          "status": "passed"
+        },
+        {
+          "line": 38,
+          "text": "When I open \u0022Vashti Bunyan\u0022",
+          "start": 50.007379099999994,
+          "end": 50.8515734,
+          "status": "passed"
+        },
+        {
+          "line": 39,
+          "text": "Then \u0022Vashti Bunyan\u0022 should say \u0022Opened in YouTube \u2713\u0022",
+          "start": 51.4630923,
+          "end": 51.5235203,
+          "status": "passed"
+        },
+        {
+          "line": 40,
+          "text": "When I open \u0022Vashti Bunyan\u0022 in \u0022Spotify\u0022",
+          "start": 52.1321173,
+          "end": 52.9606791,
+          "status": "passed"
+        },
+        {
+          "line": 41,
+          "text": "Then \u0022Vashti Bunyan\u0022 should say \u0022Opened in Spotify \u2713\u0022",
+          "start": 53.5699342,
+          "end": 53.644712399999996,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "One tap opens YouTube.",
+          "start": 50.007058199999996,
+          "end": 52.1250582
+        },
+        {
+          "text": "Or Spotify, or YouTube Music.",
+          "start": 52.132085499999995,
+          "end": 54.8560855
+        },
+        {
+          "text": "On a phone, in the app. On Windows, in the browser.",
+          "start": 54.8658578,
+          "end": 61.6138578
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "888D521DB7A60883",
+      "interactions": [
+        {
+          "kind": "clear",
+          "at": 46.733171999999996,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 46.746166699999996,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 48.0526793,
+          "bounds": {
+            "x": 63,
+            "y": 321,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        },
+        {
+          "kind": "tap",
+          "at": 50.1456393,
+          "bounds": {
+            "x": 79,
+            "y": 391,
+            "width": 123,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Suggestion_Open"
+        },
+        {
+          "kind": "tap",
+          "at": 52.261756,
+          "bounds": {
+            "x": 394,
+            "y": 418,
+            "width": 90,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Suggestion_Third"
+        }
+      ],
+      "source": {
+        "x": 42,
+        "y": 33,
+        "width": 1582,
+        "height": 991
+      }
+    },
+    {
+      "number": 4,
+      "name": "Follow the thread",
+      "scenario": "Features/VID.01-the-video.feature.md#VID.01.3-More-like-this-follows-a-musician",
+      "duration": 14.2666666,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 48,
+          "text": "Given the AI answers \u0022Bill Fay\u0022 with \u0022bill-fay\u0022",
+          "start": 61.633333199999996,
+          "end": 61.633333199999996,
+          "status": "passed"
+        },
+        {
+          "line": 49,
+          "text": "And I am on the Search page",
+          "start": 62.2441063,
+          "end": 62.2694359,
+          "status": "passed"
+        },
+        {
+          "line": 50,
+          "text": "When I enter \u0022Nick Drake\u0022 into Name",
+          "start": 62.8725993,
+          "end": 63.574480199999996,
+          "status": "passed"
+        },
+        {
+          "line": 51,
+          "text": "And I tap Go",
+          "start": 64.18338039999999,
+          "end": 64.88437479999999,
+          "status": "passed"
+        },
+        {
+          "line": 52,
+          "text": "Then I should be on the Results page",
+          "start": 65.49036439999999,
+          "end": 65.4993614,
+          "status": "passed"
+        },
+        {
+          "line": 53,
+          "text": "When I look at \u0022Bill Fay\u0022",
+          "start": 66.11407419999999,
+          "end": 67.37537239999999,
+          "status": "passed"
+        },
+        {
+          "line": 54,
+          "text": "And I explore \u0022Bill Fay\u0022",
+          "start": 67.98335229999999,
+          "end": 69.5672084,
+          "status": "passed"
+        },
+        {
+          "line": 55,
+          "text": "Then Heading should equal \u0022Like Bill Fay\u0022",
+          "start": 70.1790886,
+          "end": 70.18848469999999,
+          "status": "passed"
+        },
+        {
+          "line": 56,
+          "text": "And Suggestions should suggest \u0022Judee Sill\u0022",
+          "start": 70.7916176,
+          "end": 70.8273239,
+          "status": "passed"
+        },
+        {
+          "line": 57,
+          "text": "When I look at \u0022Talk Talk\u0022",
+          "start": 71.4315834,
+          "end": 73.36316529999999,
+          "status": "passed"
+        },
+        {
+          "line": 58,
+          "text": "Then \u0022Talk Talk\u0022 should be a \u0022Leap\u0022 suggestion",
+          "start": 73.9710669,
+          "end": 75.2842417,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "Like Bill Fay?",
+          "start": 66.11402559999999,
+          "end": 67.9340256
+        },
+        {
+          "text": "Follow him, and the next twelve start from there.",
+          "start": 67.9832856,
+          "end": 71.0992856
+        },
+        {
+          "text": "Even a leap to Talk Talk, by way of the same hymn-like piano.",
+          "start": 71.4315647,
+          "end": 75.3335647
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "3159D2D2E7B2CD77",
+      "interactions": [
+        {
+          "kind": "clear",
+          "at": 62.878652599999995,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 62.883243699999994,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 64.19351999999999,
+          "bounds": {
+            "x": 63,
+            "y": 321,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        },
+        {
+          "kind": "tap",
+          "at": 68.8383412,
+          "bounds": {
+            "x": 615,
+            "y": 893,
+            "width": 160,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Suggestion_Explore"
+        }
+      ],
+      "source": {
+        "x": 42,
+        "y": 33,
+        "width": 1582,
+        "height": 991
+      }
+    },
+    {
+      "number": 5,
+      "name": "Which Genesis?",
+      "scenario": "Features/DISC.01-find-musicians.feature.md#DISC.01.3-A-name-that-fits-several-musicians-asks-which-one-is-meant",
+      "duration": 11.3,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 46,
+          "text": "Given the AI answers \u0022Genesis\u0022 with \u0022genesis-ambiguous\u0022",
+          "start": 75.91045619999998,
+          "end": 75.9113309,
+          "status": "passed"
+        },
+        {
+          "line": 47,
+          "text": "And the AI answers \u0022Genesis Owusu\u0022 with \u0022genesis-owusu\u0022",
+          "start": 76.51467099999999,
+          "end": 76.51498109999999,
+          "status": "passed"
+        },
+        {
+          "line": 48,
+          "text": "And I am on the Search page",
+          "start": 77.12421009999998,
+          "end": 77.13912769999999,
+          "status": "passed"
+        },
+        {
+          "line": 49,
+          "text": "When I enter \u0022Genesis\u0022 into Name",
+          "start": 77.7392266,
+          "end": 78.44515159999999,
+          "status": "passed"
+        },
+        {
+          "line": 50,
+          "text": "And I tap Go",
+          "start": 79.053029,
+          "end": 79.75915679999999,
+          "status": "passed"
+        },
+        {
+          "line": 51,
+          "text": "Then I should be on the Results page",
+          "start": 80.3705239,
+          "end": 80.39068809999999,
+          "status": "passed"
+        },
+        {
+          "line": 52,
+          "text": "And Results should show the Candidates state",
+          "start": 80.99883739999999,
+          "end": 81.00492789999998,
+          "status": "passed"
+        },
+        {
+          "line": 53,
+          "text": "And Candidates Title should equal \u0022Which Genesis do you mean?\u0022",
+          "start": 81.6117381,
+          "end": 81.61776749999999,
+          "status": "passed"
+        },
+        {
+          "line": 54,
+          "text": "When I choose \u0022Genesis Owusu\u0022",
+          "start": 82.6584547,
+          "end": 82.70441639999999,
+          "status": "passed"
+        },
+        {
+          "line": 55,
+          "text": "Then Heading should equal \u0022Like Genesis Owusu\u0022",
+          "start": 83.31192709999999,
+          "end": 83.3160499,
+          "status": "passed"
+        },
+        {
+          "line": 56,
+          "text": "And Suggestions should suggest \u0022Little Simz\u0022",
+          "start": 83.92109419999998,
+          "end": 83.94468079999999,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "Some names are shared.",
+          "start": 77.73921429999999,
+          "end": 79.5592143
+        },
+        {
+          "text": "Kofflard asks which one you mean.",
+          "start": 80.37046939999999,
+          "end": 82.64646929999999
+        },
+        {
+          "text": "Genesis Owusu, then.",
+          "start": 82.65843759999998,
+          "end": 87.1664376
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "31F76A53224AE158",
+      "interactions": [
+        {
+          "kind": "clear",
+          "at": 77.7452611,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 77.7520096,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 79.05963359999998,
+          "bounds": {
+            "x": 63,
+            "y": 321,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        },
+        {
+          "kind": "tap",
+          "at": 82.69176809999999,
+          "bounds": {
+            "x": 63,
+            "y": 323,
+            "width": 1540,
+            "height": 60
+          },
+          "duration": 0
+        }
+      ],
+      "source": {
+        "x": 42,
+        "y": 33,
+        "width": 1582,
+        "height": 991
+      }
+    },
+    {
+      "number": 6,
+      "name": "Make it yours",
+      "scenario": "Features/SET.01-settings.feature.md#SET.01.2-Choosing-Spotify-makes-it-every-card-s-main-button",
+      "duration": 11.1666666,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 31,
+          "text": "Given I am on the Search page",
+          "start": 87.20249789999998,
+          "end": 87.21034279999999,
+          "status": "passed"
+        },
+        {
+          "line": 32,
+          "text": "When I tap Settings",
+          "start": 87.80999539999999,
+          "end": 88.54490259999999,
+          "status": "passed"
+        },
+        {
+          "line": 33,
+          "text": "Then I should be on the Settings page",
+          "start": 89.14824829999999,
+          "end": 89.15164159999999,
+          "status": "passed"
+        },
+        {
+          "line": 34,
+          "text": "When I choose to open with \u0022Spotify\u0022",
+          "start": 89.75863979999998,
+          "end": 90.47553179999998,
+          "status": "passed"
+        },
+        {
+          "line": 35,
+          "text": "And I tap Back",
+          "start": 91.07463899999999,
+          "end": 91.77865789999998,
+          "status": "passed"
+        },
+        {
+          "line": 36,
+          "text": "Then I should be on the Search page",
+          "start": 92.38450449999999,
+          "end": 92.38642919999998,
+          "status": "passed"
+        },
+        {
+          "line": 37,
+          "text": "When I enter \u0022Nick Drake\u0022 into Name",
+          "start": 92.99219799999999,
+          "end": 93.69283829999999,
+          "status": "passed"
+        },
+        {
+          "line": 38,
+          "text": "And I tap Go",
+          "start": 94.30146939999999,
+          "end": 95.00361629999999,
+          "status": "passed"
+        },
+        {
+          "line": 39,
+          "text": "Then I should be on the Results page",
+          "start": 95.61186299999999,
+          "end": 95.62526999999999,
+          "status": "passed"
+        },
+        {
+          "line": 40,
+          "text": "And \u0022Bert Jansch\u0022 should open in \u0022Spotify\u0022 first",
+          "start": 96.23905959999999,
+          "end": 96.30493009999998,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "Spotify more your thing?",
+          "start": 89.75859939999998,
+          "end": 91.57859939999999
+        },
+        {
+          "text": "Make it the main button, everywhere.",
+          "start": 96.23903319999998,
+          "end": 98.35503319999998
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "19D54BE30212C206",
+      "interactions": [
+        {
+          "kind": "tap",
+          "at": 87.81936299999998,
+          "bounds": {
+            "x": 1520,
+            "y": 73,
+            "width": 95,
+            "height": 60
+          },
+          "duration": 0,
+          "label": "Search_Settings"
+        },
+        {
+          "kind": "tap",
+          "at": 89.76578919999999,
+          "bounds": {
+            "x": 58,
+            "y": 349,
+            "width": 1550,
+            "height": 76
+          },
+          "duration": 0,
+          "label": "Settings_OpenWith"
+        },
+        {
+          "kind": "tap",
+          "at": 91.08449009999998,
+          "bounds": {
+            "x": 43,
+            "y": 33,
+            "width": 50,
+            "height": 40
+          },
+          "duration": 0,
+          "label": "NavigationViewBackButton"
+        },
+        {
+          "kind": "clear",
+          "at": 92.99973439999998,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 93.00362369999999,
+          "bounds": {
+            "x": 63,
+            "y": 201,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 94.306165,
+          "bounds": {
+            "x": 63,
+            "y": 321,
+            "width": 1540,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        }
+      ],
+      "source": {
+        "x": 42,
+        "y": 33,
+        "width": 1582,
+        "height": 991
+      }
+    },
+    {
+      "number": 7,
+      "name": "Your AI, your answers",
+      "scenario": "Features/AI.01-connect-an-ai.feature.md#AI.01.1-Connect-shows-the-Azure-connection-with-its-endpoint-and-deployment",
+      "duration": 19.9333333,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 21,
+          "text": "Given I am on the Search page",
+          "start": 100.71208699999998,
+          "end": 100.73025669999998,
+          "status": "passed"
+        },
+        {
+          "line": 22,
+          "text": "When I tap Settings",
+          "start": 101.33616739999998,
+          "end": 102.05815269999998,
+          "status": "passed"
+        },
+        {
+          "line": 23,
+          "text": "Then I should be on the Settings page",
+          "start": 102.65872389999998,
+          "end": 102.66114509999998,
+          "status": "passed"
+        },
+        {
+          "line": 24,
+          "text": "When I tap Change",
+          "start": 103.26338309999998,
+          "end": 103.98516019999998,
+          "status": "passed"
+        },
+        {
+          "line": 25,
+          "text": "Then I should be on the Connect page",
+          "start": 104.60021789999999,
+          "end": 104.60391089999999,
+          "status": "passed"
+        },
+        {
+          "line": 26,
+          "text": "And Provider should have selected \u0022Azure OpenAI / Foundry\u0022",
+          "start": 106.42783539999999,
+          "end": 106.43736879999999,
+          "status": "passed"
+        },
+        {
+          "line": 27,
+          "text": "And Endpoint should be visible",
+          "start": 107.03673649999999,
+          "end": 107.04278459999999,
+          "status": "passed"
+        },
+        {
+          "line": 28,
+          "text": "And Model should be visible",
+          "start": 107.64551909999999,
+          "end": 107.65085959999999,
+          "status": "passed"
+        },
+        {
+          "line": 29,
+          "text": "And Api Key should be visible",
+          "start": 112.40765209999998,
+          "end": 112.41433529999999,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "There is no Kofflard server.",
+          "start": 98.36666639999999,
+          "end": 100.70666639999999
+        },
+        {
+          "text": "Bring your own AI.",
+          "start": 104.60017669999999,
+          "end": 106.42017669999998
+        },
+        {
+          "text": "Azure first; or OpenAI, Claude, Gemini, or a sign-in with OpenRouter.",
+          "start": 106.42780439999999,
+          "end": 112.40780439999999
+        },
+        {
+          "text": "Your key stays on your device.",
+          "start": 112.40763379999999,
+          "end": 114.88363379999998
+        },
+        {
+          "text": "Kofflard. Find the music you didn\u0027t know you were looking for.",
+          "start": 114.88388949999998,
+          "end": 118.25788949999998
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "252837543D73B3AD",
+      "interactions": [
+        {
+          "kind": "tap",
+          "at": 101.34411129999998,
+          "bounds": {
+            "x": 1520,
+            "y": 73,
+            "width": 95,
+            "height": 60
+          },
+          "duration": 0,
+          "label": "Search_Settings"
+        },
+        {
+          "kind": "tap",
+          "at": 103.27026139999998,
+          "bounds": {
+            "x": 63,
+            "y": 226,
+            "width": 763,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Settings_ChangeAi"
+        }
+      ],
+      "source": {
+        "x": 42,
+        "y": 33,
+        "width": 1582,
+        "height": 991
+      }
+    }
+  ]
+}

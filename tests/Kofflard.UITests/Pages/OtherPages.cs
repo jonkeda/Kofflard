@@ -14,6 +14,11 @@ public class SettingsPage(IMauiTestContext context) : PageObjectBase<SettingsPag
     /// <summary>The AI connection in one line.</summary>
     public Label<SettingsPage> Connection => new(this, "Settings_Connection");
 
+    /// <summary>Opens Connect, to change the AI.</summary>
+    [UatName("Change")]
+    [UatNavigatesTo(typeof(ConnectPage))]
+    public Button<SettingsPage> ChangeButton => new(this, "Settings_ChangeAi");
+
     /// <summary>YouTube, YouTube Music or Spotify.</summary>
     [UatName("Open With")]
     public Picker<SettingsPage> OpenWith => new(this, "Settings_OpenWith");
@@ -139,6 +144,10 @@ public class ConnectPage(IMauiTestContext context) : PageObjectBase<ConnectPage>
 
     /// <summary>The model, or Azure's deployment.</summary>
     public Entry<ConnectPage> Model => new(this, "Connect_Model");
+
+    /// <summary>"Sign in with OpenRouter", shown for OpenRouter only.</summary>
+    [UatName("Sign In")]
+    public Button<ConnectPage> SignInButton => new(this, "Connect_SignIn");
 
     /// <summary>The API key.</summary>
     [UatName("Api Key")]

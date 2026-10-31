@@ -33,7 +33,7 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
     [UatName("Go")]
     public Button<SearchPage> GoButton => new(this, "Search_Go");
 
-    /// <summary>"AI: Local (Ollama / LM Studio) · kofflard-test".</summary>
+    /// <summary>"AI: Azure OpenAI / Foundry · kofflard-test".</summary>
     public Label<SearchPage> Connection => new(this, "Search_Connection");
 
     /// <summary>Opens the saved musicians.</summary>

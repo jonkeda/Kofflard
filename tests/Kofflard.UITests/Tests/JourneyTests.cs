@@ -108,6 +108,22 @@ public sealed class JourneyTests
     }
 
     [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
+    [Trait("Journey", "DISC.06.1")]
+    public Task BackFromAnExploredMusician_KeepsTheEarlierSuggestions()
+    {
+        _fixture.Ai.Answer("Bill Fay", FakeAi.Canned("bill-fay"));
+        var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
+
+        results.Suggestions.Explore("Bill Fay").Suggestions.AssertCard("Judee Sill");
+        results.BackButton.Click();
+
+        var earlier = new Pages.ResultsPage(_fixture.Context);
+        earlier.Heading.AssertText("Like Nick Drake", timeoutMs: TestConstants.PageTimeoutMs);
+        earlier.WaitForSuggestions().Suggestions.AssertCard("Vashti Bunyan");
+        return Task.CompletedTask;
+    }
+
+    [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
     [Trait("Journey", "DISC.07.1")]
     public Task ARefusedKey_IsExplained()
     {
@@ -115,7 +131,7 @@ public sealed class JourneyTests
 
         var results = _fixture.Search.SearchFor("Nick Drake");
         results.State.AssertShowing(ResultsState.Error, timeoutMs: TestConstants.PageTimeoutMs);
-        results.ErrorMessage.AssertText("This key was not accepted by Local (Ollama / LM Studio).");
+        results.ErrorMessage.AssertText("This key was not accepted by Azure OpenAI / Foundry.");
         return Task.CompletedTask;
     }
 }

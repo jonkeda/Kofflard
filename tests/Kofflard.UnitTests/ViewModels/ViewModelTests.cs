@@ -186,6 +186,22 @@ public sealed class ViewModelTests
     }
 
     [Fact]
+    public async Task Card_SaysWhereItOpened_ForAFewSeconds()
+    {
+        Answers(Ok(("Vashti Bunyan", Lane.Close)));
+        var results = Results();
+        await results.LoadAsync("Nick Drake", Adventure.Default, cached: false);
+        var card = results.Items[0];
+
+        await card.OpenCommand.ExecuteAsync(null);
+        Assert.Equal("Opened in YouTube ✓", card.OpenedText);
+
+        _time.Advance(SuggestionViewModel.OpenedShownFor);
+        await Task.Yield();
+        Assert.False(card.HasOpenedText);
+    }
+
+    [Fact]
     public async Task Card_Save_TogglesSaved()
     {
         Answers(Ok(("Vashti Bunyan", Lane.Close)));

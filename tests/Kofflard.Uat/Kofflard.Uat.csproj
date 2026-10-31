@@ -18,6 +18,9 @@
     <None Update="Features\**\*.feature.md" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Features\**\*.steps.md" CopyToOutputDirectory="PreserveNewest" />
     <None Update="TestSettings\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Video scripts (BRUINET_RECORD names one) and how the narrator says the suite's names. -->
+    <None Update="VideoScripts\**\*.video.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="pronunciations.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

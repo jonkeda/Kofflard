@@ -1,0 +1,104 @@
+1
+00:00:00,009 --> 00:00:03,509
+Kofflard starts with one question: who do you like?
+
+2
+00:00:04,138 --> 00:00:05,958
+Say, Nick Drake.
+
+3
+00:00:05,964 --> 00:00:10,200
+Kofflard asks an AI for musicians you may not know yet.
+
+4
+00:00:10,208 --> 00:00:13,870
+Twelve of them, in three lanes.
+
+5
+00:00:17,442 --> 00:00:23,150
+Close ones first. Then stretches. Then a few leaps.
+
+6
+00:00:27,047 --> 00:00:30,467
+Close: the same quiet folk, well chosen.
+
+7
+00:00:30,471 --> 00:00:34,467
+A stretch: less known, another year, the same feeling.
+
+8
+00:00:34,473 --> 00:00:37,781
+And a leap: Ali Farka Touré, from Mali.
+
+9
+00:00:37,865 --> 00:00:42,005
+Every leap says why: the same soft, looping fingerpicking.
+
+10
+00:00:42,014 --> 00:00:46,058
+Relevance first. Surprise, but never out of the blue.
+
+11
+00:00:50,007 --> 00:00:52,125
+One tap opens YouTube.
+
+12
+00:00:52,132 --> 00:00:54,856
+Or Spotify, or YouTube Music.
+
+13
+00:00:54,865 --> 00:01:01,613
+On a phone, in the app. On Windows, in the browser.
+
+14
+00:01:06,114 --> 00:01:07,934
+Like Bill Fay?
+
+15
+00:01:07,983 --> 00:01:11,099
+Follow him, and the next twelve start from there.
+
+16
+00:01:11,431 --> 00:01:15,333
+Even a leap to Talk Talk, by way of the same hymn-like piano.
+
+17
+00:01:17,739 --> 00:01:19,559
+Some names are shared.
+
+18
+00:01:20,370 --> 00:01:22,646
+Kofflard asks which one you mean.
+
+19
+00:01:22,658 --> 00:01:27,166
+Genesis Owusu, then.
+
+20
+00:01:29,758 --> 00:01:31,578
+Spotify more your thing?
+
+21
+00:01:36,239 --> 00:01:38,355
+Make it the main button, everywhere.
+
+22
+00:01:38,366 --> 00:01:40,706
+There is no Kofflard server.
+
+23
+00:01:44,600 --> 00:01:46,420
+Bring your own AI.
+
+24
+00:01:46,427 --> 00:01:52,407
+Azure first; or OpenAI, Claude, Gemini, or a sign-in with OpenRouter.
+
+25
+00:01:52,407 --> 00:01:54,883
+Your key stays on your device.
+
+26
+00:01:54,883 --> 00:01:58,257
+Kofflard. Find the music you didn't know you were looking for.
+

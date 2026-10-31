@@ -75,7 +75,8 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
     public async Task TestAsync(AiConnection connection, string? secret, CancellationToken cancellationToken = default)
     {
         using var client = clients.Create(connection, secret);
-        var options = new ChatOptions { MaxOutputTokens = 16 };
+        // Room for a reasoning model's thinking before its "OK": with a tight cap it answers with nothing.
+        var options = new ChatOptions { MaxOutputTokens = 1024 };
         var text = await AskAsync(client, connection, [new ChatMessage(ChatRole.User, "Reply with OK.")], options, cancellationToken);
         if (string.IsNullOrWhiteSpace(text))
         {

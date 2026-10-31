@@ -24,6 +24,8 @@ public sealed class SuggestionViewModel : ParentViewModel
 
     private Verification _verification = Verification.Unverified;
     private bool _isSaved;
+    private string _openedText = string.Empty;
+    private int _opens;
 
     /// <summary>Creates a card.</summary>
     /// <param name="suggestion">What the card shows.</param>
@@ -59,6 +61,9 @@ public sealed class SuggestionViewModel : ParentViewModel
         SaveCommand = new TargetAsyncCommand(this, ToggleSavedAsync);
         ExploreCommand = new TargetAsyncCommand(this, () => _explore(this));
     }
+
+    /// <summary>How long "Opened in YouTube ✓" stays on the card.</summary>
+    public static readonly TimeSpan OpenedShownFor = TimeSpan.FromSeconds(3);
 
     /// <summary>The suggestion.</summary>
     public Suggestion Suggestion { get; }
@@ -156,12 +161,46 @@ public sealed class SuggestionViewModel : ParentViewModel
     /// <summary>Searches from this musician.</summary>
     public IAsyncRelayCommand ExploreCommand { get; }
 
+    /// <summary>
+    /// "Opened in YouTube ✓" for a moment after an open, or "Couldn't open YouTube": the hand-off can be slow,
+    /// and on Windows the browser opens behind the app.
+    /// </summary>
+    public string OpenedText
+    {
+        get => _openedText;
+        private set
+        {
+            if (SetProperty(ref _openedText, value))
+            {
+                OnPropertyChanged(nameof(HasOpenedText));
+            }
+        }
+    }
+
+    /// <summary>Whether <see cref="OpenedText"/> is shown.</summary>
+    public bool HasOpenedText => _openedText.Length > 0;
+
     /// <summary>Opens the musician in <paramref name="service"/>, and remembers it was opened.</summary>
     public async Task<LaunchOutcome> OpenAsync(MusicService service)
     {
         var outcome = await _launcher.OpenAsync(Link(service));
         await _history.MarkOpenedAsync(Name, _time.GetUtcNow());
+
+        var name = MusicLinks.DisplayName(service);
+        OpenedText = outcome == LaunchOutcome.Failed ? $"Couldn't open {name}" : $"Opened in {name} ✓";
+        var open = ++_opens;
+        _ = ClearOpenedAsync(open);
         return outcome;
+    }
+
+    // Clears the line, unless another open has replaced it since.
+    private async Task ClearOpenedAsync(int open)
+    {
+        await Task.Delay(OpenedShownFor, _time);
+        if (open == _opens)
+        {
+            OpenedText = string.Empty;
+        }
     }
 
     private async Task ToggleSavedAsync()

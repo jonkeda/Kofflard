@@ -34,6 +34,11 @@
                    FontSize="12"
                    TextColor="{StaticResource Gray500}"
                    IsVisible="{Binding HasKnownFor}" />
+            <Label AutomationId="Suggestion_Opened"
+                   Text="{Binding OpenedText}"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource Primary}"
+                   IsVisible="{Binding HasOpenedText}" />
             <Label AutomationId="Suggestion_NotFound"
                    Text="Couldn't confirm this artist"
                    FontSize="12"
