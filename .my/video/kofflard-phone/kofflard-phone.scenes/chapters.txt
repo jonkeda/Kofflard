@@ -1,0 +1,26 @@
+;FFMETADATA1
+title=Kofflard on a phone
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=0
+END=26333
+title=Who do you like?
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=26333
+END=42866
+title=Follow the thread
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=42866
+END=64266
+title=As wild as you like
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=64266
+END=92533
+title=Keep what you like

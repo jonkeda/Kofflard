@@ -1,0 +1,160 @@
+{
+  "number": 1,
+  "name": "Who do you like?",
+  "scenario": "Features/VID.02-the-tour.feature.md#VID.02.1-De-Dijk-from-safe-to-wild",
+  "video": "video.mp4",
+  "duration": 28.9333333,
+  "status": "passed",
+  "steps": [
+    {
+      "line": 22,
+      "text": "Given the AI answers \u0022De Dijk\u0022 with \u0022de-dijk\u0022",
+      "start": 3.5052064,
+      "end": 3.5057976,
+      "status": "passed"
+    },
+    {
+      "line": 23,
+      "text": "And I am on the Search page",
+      "start": 4.1142186,
+      "end": 4.1247838,
+      "status": "passed"
+    },
+    {
+      "line": 24,
+      "text": "When I search for \u0022De Dijk\u0022",
+      "start": 4.7394138,
+      "end": 6.1721511,
+      "status": "passed"
+    },
+    {
+      "line": 25,
+      "text": "Then the lanes should become \u0022Safe 6 \u00B7 Curious 4 \u00B7 Wild 1\u0022",
+      "start": 6.8000483,
+      "end": 6.998425,
+      "status": "passed"
+    },
+    {
+      "line": 26,
+      "text": "When I look at \u0022Doe Maar\u0022",
+      "start": 13.5708828,
+      "end": 14.4808462,
+      "status": "passed"
+    },
+    {
+      "line": 27,
+      "text": "And I look at \u0022Boudewijn de Groot\u0022",
+      "start": 16.8167433,
+      "end": 18.9388559,
+      "status": "passed"
+    },
+    {
+      "line": 28,
+      "text": "And I look at \u0022Solomon Burke\u0022",
+      "start": 21.0625019,
+      "end": 23.4172993,
+      "status": "passed"
+    },
+    {
+      "line": 29,
+      "text": "Then \u0022Solomon Burke\u0022 should be a \u0022Wild\u0022 suggestion",
+      "start": 24.4005968,
+      "end": 26.4876508,
+      "status": "passed"
+    }
+  ],
+  "clips": [
+    {
+      "text": "Kofflard starts with one question: who do you like?",
+      "wav": "intro.wav",
+      "start": 0,
+      "end": 3.5
+    },
+    {
+      "text": "Say, De Dijk.",
+      "wav": "line-24.wav",
+      "start": 4.7394026,
+      "end": 6.7914026
+    },
+    {
+      "text": "Eleven musicians, side by side: safe, curious and wild, and a map of how they connect.",
+      "wav": "line-25.wav",
+      "start": 6.8000241,
+      "end": 13.5660241
+    },
+    {
+      "text": "Safe: Doe Maar, from the same Dutch stages.",
+      "wav": "line-26.wav",
+      "start": 13.5708222,
+      "end": 16.8068222
+    },
+    {
+      "text": "Curious: Boudewijn de Groot, older and quieter.",
+      "wav": "line-27.wav",
+      "start": 16.8167253,
+      "end": 21.052725300000002
+    },
+    {
+      "text": "And wild: Solomon Burke, American soul.",
+      "wav": "line-28.wav",
+      "start": 21.0624554,
+      "end": 24.394455400000002
+    },
+    {
+      "text": "Every wild one says why: he made a whole album with De Dijk.",
+      "wav": "line-29.wav",
+      "start": 24.4005112,
+      "end": 28.8925112
+    }
+  ],
+  "warnings": [
+    "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+  ],
+  "width": 1582,
+  "height": 990,
+  "hash": "D0515E4CAC5514D7",
+  "interactions": [
+    {
+      "kind": "clear",
+      "at": 4.7462114,
+      "bounds": {
+        "x": 390,
+        "y": 529,
+        "width": 196,
+        "height": 55
+      },
+      "duration": 0,
+      "label": "Search_Name"
+    },
+    {
+      "kind": "type",
+      "at": 4.75157,
+      "bounds": {
+        "x": 390,
+        "y": 529,
+        "width": 196,
+        "height": 55
+      },
+      "duration": 0,
+      "label": "Search_Name"
+    },
+    {
+      "kind": "tap",
+      "at": 5.4502933,
+      "bounds": {
+        "x": 300,
+        "y": 720,
+        "width": 375,
+        "height": 65
+      },
+      "duration": 0,
+      "label": "Search_Go"
+    }
+  ],
+  "source": {
+    "x": 269,
+    "y": 260,
+    "width": 1582,
+    "height": 991
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "number": 3,
+  "name": "As wild as you like",
+  "scenario": "Features/VID.02-the-tour.feature.md#VID.02.3-Eminem-as-wild-as-you-like",
+  "video": "video.mp4",
+  "duration": 21.4,
+  "status": "passed",
+  "steps": [
+    {
+      "line": 53,
+      "text": "Given the AI answers \u0022Eminem\u0022 with \u0022eminem\u0022",
+      "start": 0,
+      "end": 0,
+      "status": "passed"
+    },
+    {
+      "line": 54,
+      "text": "And I am on the Search page",
+      "start": 0.5952475,
+      "end": 0.6062388,
+      "status": "passed"
+    },
+    {
+      "line": 55,
+      "text": "When I search for \u0022Eminem\u0022",
+      "start": 1.2103796,
+      "end": 2.6323573,
+      "status": "passed"
+    },
+    {
+      "line": 56,
+      "text": "Then the lanes should become \u0022Safe 5 \u00B7 Curious 4 \u00B7 Wild 3\u0022",
+      "start": 3.2371547,
+      "end": 4.1189721,
+      "status": "passed"
+    },
+    {
+      "line": 57,
+      "text": "When I look at \u0022Dido\u0022",
+      "start": 4.7210374,
+      "end": 6.2518868,
+      "status": "passed"
+    },
+    {
+      "line": 58,
+      "text": "Then \u0022Dido\u0022 should be a \u0022Wild\u0022 suggestion",
+      "start": 6.8598999,
+      "end": 8.8595671,
+      "status": "passed"
+    },
+    {
+      "line": 59,
+      "text": "When I toggle \u0022Wild\u0022",
+      "start": 9.4625332,
+      "end": 10.1653988,
+      "status": "passed"
+    },
+    {
+      "line": 60,
+      "text": "Then the lanes should become \u0022Safe 5 \u00B7 Curious 4\u0022",
+      "start": 10.7779178,
+      "end": 12.7860292,
+      "status": "passed"
+    },
+    {
+      "line": 61,
+      "text": "When I toggle \u0022Wild\u0022",
+      "start": 14.4025541,
+      "end": 15.1181307,
+      "status": "passed"
+    },
+    {
+      "line": 62,
+      "text": "Then the lanes should become \u0022Safe 5 \u00B7 Curious 4 \u00B7 Wild 3\u0022",
+      "start": 15.7268957,
+      "end": 16.5123033,
+      "status": "passed"
+    },
+    {
+      "line": 63,
+      "text": "When I open \u0022Kendrick Lamar\u0022",
+      "start": 17.115641,
+      "end": 17.2961868,
+      "status": "passed"
+    },
+    {
+      "line": 64,
+      "text": "Then \u0022Kendrick Lamar\u0022 should say \u0022Opened in YouTube\u0022",
+      "start": 17.8987066,
+      "end": 18.0161589,
+      "status": "passed"
+    }
+  ],
+  "clips": [
+    {
+      "text": "Something else entirely: Eminem.",
+      "wav": "line-55.wav",
+      "start": 1.2103451,
+      "end": 3.7743451
+    },
+    {
+      "text": "Dido? He built Stan on her song.",
+      "wav": "line-57.wav",
+      "start": 4.7210237,
+      "end": 7.7410236999999995
+    },
+    {
+      "text": "Too wild today? Switch Wild off, and the wild ones step aside.",
+      "wav": "line-59.wav",
+      "start": 9.4624986,
+      "end": 14.402498600000001
+    },
+    {
+      "text": "And back on, when you are curious again.",
+      "wav": "line-61.wav",
+      "start": 14.4024755,
+      "end": 16.870475499999998
+    },
+    {
+      "text": "One tap opens YouTube, or Spotify, or YouTube Music.",
+      "wav": "line-63.wav",
+      "start": 17.1155929,
+      "end": 21.385592799999998
+    }
+  ],
+  "warnings": [
+    "The window changed size to 520x1091: the video stays 520x1090, cropped or padded."
+  ],
+  "width": 520,
+  "height": 1090,
+  "hash": "2E456A042A1B6107",
+  "interactions": [
+    {
+      "kind": "clear",
+      "at": 1.2269834,
+      "bounds": {
+        "x": 214,
+        "y": 1164,
+        "width": 358,
+        "height": 60
+      },
+      "duration": 0,
+      "label": "Search_Name"
+    },
+    {
+      "kind": "type",
+      "at": 1.2325972,
+      "bounds": {
+        "x": 214,
+        "y": 1164,
+        "width": 358,
+        "height": 60
+      },
+      "duration": 0,
+      "label": "Search_Name"
+    },
+    {
+      "kind": "tap",
+      "at": 1.9259173,
+      "bounds": {
+        "x": 604,
+        "y": 1161,
+        "width": 65,
+        "height": 65
+      },
+      "duration": 0,
+      "label": "Search_Go"
+    },
+    {
+      "kind": "tap",
+      "at": 9.4768931,
+      "bounds": {
+        "x": 518,
+        "y": 1089,
+        "width": 151,
+        "height": 60
+      },
+      "duration": 0,
+      "label": "Lane_Wild"
+    },
+    {
+      "kind": "tap",
+      "at": 14.4301364,
+      "bounds": {
+        "x": 518,
+        "y": 1089,
+        "width": 151,
+        "height": 60
+      },
+      "duration": 0,
+      "label": "Lane_Wild"
+    },
+    {
+      "kind": "tap",
+      "at": 17.2730923,
+      "bounds": {
+        "x": 193,
+        "y": 931,
+        "width": 478,
+        "height": 46
+      },
+      "duration": 0
+    }
+  ],
+  "source": {
+    "x": 172,
+    "y": 163,
+    "width": 520,
+    "height": 1091
+  }
+}

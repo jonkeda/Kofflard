@@ -1,0 +1,858 @@
+{
+  "title": "Kofflard on the desktop",
+  "scenes": [
+    {
+      "number": 1,
+      "name": "Who do you like?",
+      "scenario": "Features/VID.02-the-tour.feature.md#VID.02.1-De-Dijk-from-safe-to-wild",
+      "duration": 28.9333333,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 22,
+          "text": "Given the AI answers \u0022De Dijk\u0022 with \u0022de-dijk\u0022",
+          "start": 3.5052064,
+          "end": 3.5057976,
+          "status": "passed"
+        },
+        {
+          "line": 23,
+          "text": "And I am on the Search page",
+          "start": 4.1142186,
+          "end": 4.1247838,
+          "status": "passed"
+        },
+        {
+          "line": 24,
+          "text": "When I search for \u0022De Dijk\u0022",
+          "start": 4.7394138,
+          "end": 6.1721511,
+          "status": "passed"
+        },
+        {
+          "line": 25,
+          "text": "Then the lanes should become \u0022Safe 6 \u00B7 Curious 4 \u00B7 Wild 1\u0022",
+          "start": 6.8000483,
+          "end": 6.998425,
+          "status": "passed"
+        },
+        {
+          "line": 26,
+          "text": "When I look at \u0022Doe Maar\u0022",
+          "start": 13.5708828,
+          "end": 14.4808462,
+          "status": "passed"
+        },
+        {
+          "line": 27,
+          "text": "And I look at \u0022Boudewijn de Groot\u0022",
+          "start": 16.8167433,
+          "end": 18.9388559,
+          "status": "passed"
+        },
+        {
+          "line": 28,
+          "text": "And I look at \u0022Solomon Burke\u0022",
+          "start": 21.0625019,
+          "end": 23.4172993,
+          "status": "passed"
+        },
+        {
+          "line": 29,
+          "text": "Then \u0022Solomon Burke\u0022 should be a \u0022Wild\u0022 suggestion",
+          "start": 24.4005968,
+          "end": 26.4876508,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "Kofflard starts with one question: who do you like?",
+          "start": 0,
+          "end": 3.5
+        },
+        {
+          "text": "Say, De Dijk.",
+          "start": 4.7394026,
+          "end": 6.7914026
+        },
+        {
+          "text": "Eleven musicians, side by side: safe, curious and wild, and a map of how they connect.",
+          "start": 6.8000241,
+          "end": 13.5660241
+        },
+        {
+          "text": "Safe: Doe Maar, from the same Dutch stages.",
+          "start": 13.5708222,
+          "end": 16.8068222
+        },
+        {
+          "text": "Curious: Boudewijn de Groot, older and quieter.",
+          "start": 16.8167253,
+          "end": 21.052725300000002
+        },
+        {
+          "text": "And wild: Solomon Burke, American soul.",
+          "start": 21.0624554,
+          "end": 24.394455400000002
+        },
+        {
+          "text": "Every wild one says why: he made a whole album with De Dijk.",
+          "start": 24.4005112,
+          "end": 28.8925112
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "D0515E4CAC5514D7",
+      "interactions": [
+        {
+          "kind": "clear",
+          "at": 4.7462114,
+          "bounds": {
+            "x": 390,
+            "y": 529,
+            "width": 196,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 4.75157,
+          "bounds": {
+            "x": 390,
+            "y": 529,
+            "width": 196,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 5.4502933,
+          "bounds": {
+            "x": 300,
+            "y": 720,
+            "width": 375,
+            "height": 65
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        }
+      ],
+      "source": {
+        "x": 269,
+        "y": 260,
+        "width": 1582,
+        "height": 991
+      }
+    },
+    {
+      "number": 2,
+      "name": "Follow the thread",
+      "scenario": "Features/VID.02-the-tour.feature.md#VID.02.2-Following-De-Dijk-to-Doe-Maar-and-back",
+      "duration": 16.6666666,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 36,
+          "text": "Given the AI answers \u0022De Dijk\u0022 with \u0022de-dijk\u0022",
+          "start": 28.9333333,
+          "end": 28.9333333,
+          "status": "passed"
+        },
+        {
+          "line": 37,
+          "text": "And the AI answers \u0022Doe Maar\u0022 with \u0022doe-maar\u0022",
+          "start": 29.5419868,
+          "end": 29.5424787,
+          "status": "passed"
+        },
+        {
+          "line": 38,
+          "text": "And I am on the Search page",
+          "start": 30.1482338,
+          "end": 30.1658462,
+          "status": "passed"
+        },
+        {
+          "line": 39,
+          "text": "When I search for \u0022De Dijk\u0022",
+          "start": 30.7738917,
+          "end": 32.2042323,
+          "status": "passed"
+        },
+        {
+          "line": 40,
+          "text": "And I follow \u0022Doe Maar\u0022",
+          "start": 32.8168977,
+          "end": 34.631074500000004,
+          "status": "passed"
+        },
+        {
+          "line": 41,
+          "text": "Then Heading should equal \u0022Like Doe Maar\u0022",
+          "start": 35.9245076,
+          "end": 35.9293795,
+          "status": "passed"
+        },
+        {
+          "line": 42,
+          "text": "And Trail should equal \u0022\u2039 De Dijk\u0022",
+          "start": 36.5349578,
+          "end": 36.542956000000004,
+          "status": "passed"
+        },
+        {
+          "line": 43,
+          "text": "When I look at \u0022The Specials\u0022",
+          "start": 38.2061743,
+          "end": 39.2992629,
+          "status": "passed"
+        },
+        {
+          "line": 44,
+          "text": "Then \u0022The Specials\u0022 should be a \u0022Wild\u0022 suggestion",
+          "start": 39.9092766,
+          "end": 40.474321700000004,
+          "status": "passed"
+        },
+        {
+          "line": 45,
+          "text": "When I go back along the trail",
+          "start": 42.5461578,
+          "end": 43.3004496,
+          "status": "passed"
+        },
+        {
+          "line": 46,
+          "text": "Then Heading should equal \u0022Like De Dijk\u0022",
+          "start": 43.9044535,
+          "end": 43.9141715,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "Follow one, and the page starts again from there.",
+          "start": 32.816876900000004,
+          "end": 35.9168769
+        },
+        {
+          "text": "Now everything starts from Doe Maar.",
+          "start": 35.924490500000005,
+          "end": 38.2004904
+        },
+        {
+          "text": "And the wild ones lead to their roots: the ska of The Specials.",
+          "start": 38.20616,
+          "end": 42.538160000000005
+        },
+        {
+          "text": "One tap takes you back to De Dijk.",
+          "start": 42.5461229,
+          "end": 45.5581229
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "FB5BA53F4BCB9300",
+      "interactions": [
+        {
+          "kind": "clear",
+          "at": 30.782085000000002,
+          "bounds": {
+            "x": 390,
+            "y": 529,
+            "width": 196,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 30.787197600000002,
+          "bounds": {
+            "x": 390,
+            "y": 529,
+            "width": 196,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 31.481993600000003,
+          "bounds": {
+            "x": 300,
+            "y": 720,
+            "width": 375,
+            "height": 65
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        },
+        {
+          "kind": "tap",
+          "at": 33.9090216,
+          "bounds": {
+            "x": 986,
+            "y": 585,
+            "width": 84,
+            "height": 44
+          },
+          "duration": 0,
+          "label": "Suggestion_Explore"
+        },
+        {
+          "kind": "tap",
+          "at": 42.5610469,
+          "bounds": {
+            "x": 736,
+            "y": 384,
+            "width": 114,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Discover_Back"
+        }
+      ],
+      "source": {
+        "x": 269,
+        "y": 260,
+        "width": 1582,
+        "height": 991
+      }
+    },
+    {
+      "number": 3,
+      "name": "As wild as you like",
+      "scenario": "Features/VID.02-the-tour.feature.md#VID.02.3-Eminem-as-wild-as-you-like",
+      "duration": 20.4333333,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 53,
+          "text": "Given the AI answers \u0022Eminem\u0022 with \u0022eminem\u0022",
+          "start": 45.5999999,
+          "end": 45.5999999,
+          "status": "passed"
+        },
+        {
+          "line": 54,
+          "text": "And I am on the Search page",
+          "start": 46.2073782,
+          "end": 46.2194961,
+          "status": "passed"
+        },
+        {
+          "line": 55,
+          "text": "When I search for \u0022Eminem\u0022",
+          "start": 46.8335384,
+          "end": 48.2685553,
+          "status": "passed"
+        },
+        {
+          "line": 56,
+          "text": "Then the lanes should become \u0022Safe 5 \u00B7 Curious 4 \u00B7 Wild 3\u0022",
+          "start": 48.8689468,
+          "end": 49.0060759,
+          "status": "passed"
+        },
+        {
+          "line": 57,
+          "text": "When I look at \u0022Dido\u0022",
+          "start": 49.618791200000004,
+          "end": 51.69339,
+          "status": "passed"
+        },
+        {
+          "line": 58,
+          "text": "Then \u0022Dido\u0022 should be a \u0022Wild\u0022 suggestion",
+          "start": 52.2986402,
+          "end": 54.2107624,
+          "status": "passed"
+        },
+        {
+          "line": 59,
+          "text": "When I toggle \u0022Wild\u0022",
+          "start": 54.8137064,
+          "end": 55.5284933,
+          "status": "passed"
+        },
+        {
+          "line": 60,
+          "text": "Then the lanes should become \u0022Safe 5 \u00B7 Curious 4\u0022",
+          "start": 56.1356267,
+          "end": 56.2291161,
+          "status": "passed"
+        },
+        {
+          "line": 61,
+          "text": "When I toggle \u0022Wild\u0022",
+          "start": 59.2560606,
+          "end": 59.9567738,
+          "status": "passed"
+        },
+        {
+          "line": 62,
+          "text": "Then the lanes should become \u0022Safe 5 \u00B7 Curious 4 \u00B7 Wild 3\u0022",
+          "start": 60.5709511,
+          "end": 60.7805795,
+          "status": "passed"
+        },
+        {
+          "line": 63,
+          "text": "When I open \u0022Kendrick Lamar\u0022",
+          "start": 61.7355492,
+          "end": 62.883798299999995,
+          "status": "passed"
+        },
+        {
+          "line": 64,
+          "text": "Then \u0022Kendrick Lamar\u0022 should say \u0022Opened in YouTube\u0022",
+          "start": 63.491496,
+          "end": 63.8357114,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "Something else entirely: Eminem.",
+          "start": 46.8335238,
+          "end": 49.3975238
+        },
+        {
+          "text": "Dido? He built Stan on her song.",
+          "start": 49.6187802,
+          "end": 52.6387802
+        },
+        {
+          "text": "Too wild today? Click the Wild header, and the wild ones step aside.",
+          "start": 54.8136325,
+          "end": 59.2416325
+        },
+        {
+          "text": "And back on, when you are curious again.",
+          "start": 59.2560525,
+          "end": 61.7240525
+        },
+        {
+          "text": "One tap opens YouTube, or Spotify, or YouTube Music.",
+          "start": 61.7355382,
+          "end": 66.0055381
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "A1E8D120B65F4182",
+      "interactions": [
+        {
+          "kind": "clear",
+          "at": 46.867311,
+          "bounds": {
+            "x": 390,
+            "y": 529,
+            "width": 196,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 46.8746313,
+          "bounds": {
+            "x": 390,
+            "y": 529,
+            "width": 196,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 47.5416997,
+          "bounds": {
+            "x": 300,
+            "y": 720,
+            "width": 375,
+            "height": 65
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        },
+        {
+          "kind": "tap",
+          "at": 54.8313723,
+          "bounds": {
+            "x": 1475,
+            "y": 585,
+            "width": 345,
+            "height": 31
+          },
+          "duration": 0,
+          "label": "Lane_Wild"
+        },
+        {
+          "kind": "tap",
+          "at": 59.272833,
+          "bounds": {
+            "x": 1475,
+            "y": 585,
+            "width": 345,
+            "height": 31
+          },
+          "duration": 0,
+          "label": "Lane_Wild"
+        },
+        {
+          "kind": "tap",
+          "at": 62.1818629,
+          "bounds": {
+            "x": 738,
+            "y": 1181,
+            "width": 343,
+            "height": 49
+          },
+          "duration": 0,
+          "label": "Suggestion_Card"
+        }
+      ],
+      "source": {
+        "x": 269,
+        "y": 260,
+        "width": 1582,
+        "height": 991
+      }
+    },
+    {
+      "number": 4,
+      "name": "Keep what you like",
+      "scenario": "Features/VID.02-the-tour.feature.md#VID.02.4-Keep-what-you-like-and-find-it-in-Favourites",
+      "duration": 33.5,
+      "status": "passed",
+      "steps": [
+        {
+          "line": 71,
+          "text": "Given the AI answers \u0022De Dijk\u0022 with \u0022de-dijk\u0022",
+          "start": 66.0431851,
+          "end": 66.0473899,
+          "status": "passed"
+        },
+        {
+          "line": 72,
+          "text": "And the AI answers \u0022Eminem\u0022 with \u0022eminem\u0022",
+          "start": 66.6534755,
+          "end": 66.6544237,
+          "status": "passed"
+        },
+        {
+          "line": 73,
+          "text": "And I am on the Search page",
+          "start": 67.2643773,
+          "end": 67.2893739,
+          "status": "passed"
+        },
+        {
+          "line": 74,
+          "text": "When I search for \u0022De Dijk\u0022",
+          "start": 67.9020832,
+          "end": 69.3622075,
+          "status": "passed"
+        },
+        {
+          "line": 75,
+          "text": "And I add \u0022Doe Maar\u0022 to favourites",
+          "start": 69.9647042,
+          "end": 71.4917469,
+          "status": "passed"
+        },
+        {
+          "line": 76,
+          "text": "And I add \u0022Solomon Burke\u0022 to favourites",
+          "start": 72.0992921,
+          "end": 75.5713916,
+          "status": "passed"
+        },
+        {
+          "line": 77,
+          "text": "And I add \u0022Ramses Shaffy\u0022 to favourites",
+          "start": 76.171837,
+          "end": 79.9697468,
+          "status": "passed"
+        },
+        {
+          "line": 78,
+          "text": "When I search for \u0022Eminem\u0022",
+          "start": 80.583213,
+          "end": 82.1290703,
+          "status": "passed"
+        },
+        {
+          "line": 79,
+          "text": "And I add \u0022Kendrick Lamar\u0022 to favourites",
+          "start": 82.7339455,
+          "end": 84.09856070000001,
+          "status": "passed"
+        },
+        {
+          "line": 80,
+          "text": "And I add \u0022Danny Brown\u0022 to favourites",
+          "start": 84.7131571,
+          "end": 87.44463089999999,
+          "status": "passed"
+        },
+        {
+          "line": 81,
+          "text": "And I add \u0022Dido\u0022 to favourites",
+          "start": 88.0548921,
+          "end": 91.0794755,
+          "status": "passed"
+        },
+        {
+          "line": 82,
+          "text": "And I tap Favourites",
+          "start": 91.67895730000001,
+          "end": 92.4019946,
+          "status": "passed"
+        },
+        {
+          "line": 83,
+          "text": "Then I should be on the Saved page",
+          "start": 93.00272290000001,
+          "end": 93.0081844,
+          "status": "passed"
+        },
+        {
+          "line": 84,
+          "text": "And Saved should include \u0022Doe Maar\u0022",
+          "start": 93.6120071,
+          "end": 93.6387571,
+          "status": "passed"
+        },
+        {
+          "line": 85,
+          "text": "And Saved should include \u0022Solomon Burke\u0022",
+          "start": 94.2485394,
+          "end": 94.2669614,
+          "status": "passed"
+        },
+        {
+          "line": 86,
+          "text": "And Saved should include \u0022Dido\u0022",
+          "start": 94.87270000000001,
+          "end": 94.9236628,
+          "status": "passed"
+        }
+      ],
+      "clips": [
+        {
+          "text": "Like one? Star it.",
+          "start": 69.9644282,
+          "end": 72.2424282
+        },
+        {
+          "text": "Wherever your search takes you.",
+          "start": 80.5831556,
+          "end": 82.4431556
+        },
+        {
+          "text": "And find them all again in your favourites.",
+          "start": 91.6789064,
+          "end": 93.9009064
+        },
+        {
+          "text": "Kofflard. Find the music you did not know you were looking for.",
+          "start": 95.5327857,
+          "end": 99.5127857
+        }
+      ],
+      "warnings": [
+        "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+      ],
+      "width": 1582,
+      "height": 990,
+      "hash": "5A3DDDC391328DEB",
+      "interactions": [
+        {
+          "kind": "clear",
+          "at": 67.9217435,
+          "bounds": {
+            "x": 390,
+            "y": 529,
+            "width": 196,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 67.94444610000001,
+          "bounds": {
+            "x": 390,
+            "y": 529,
+            "width": 196,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 68.6341881,
+          "bounds": {
+            "x": 300,
+            "y": 720,
+            "width": 375,
+            "height": 65
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        },
+        {
+          "kind": "tap",
+          "at": 70.6246493,
+          "bounds": {
+            "x": 748,
+            "y": 651,
+            "width": 55,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Suggestion_Save"
+        },
+        {
+          "kind": "tap",
+          "at": 73.5422012,
+          "bounds": {
+            "x": 1486,
+            "y": 585,
+            "width": 55,
+            "height": 14
+          },
+          "duration": 0,
+          "label": "Suggestion_Save"
+        },
+        {
+          "kind": "tap",
+          "at": 77.656118,
+          "bounds": {
+            "x": 1118,
+            "y": 1036,
+            "width": 55,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Suggestion_Save"
+        },
+        {
+          "kind": "clear",
+          "at": 80.5929306,
+          "bounds": {
+            "x": 390,
+            "y": 529,
+            "width": 196,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "type",
+          "at": 80.62173920000001,
+          "bounds": {
+            "x": 390,
+            "y": 529,
+            "width": 196,
+            "height": 55
+          },
+          "duration": 0,
+          "label": "Search_Name"
+        },
+        {
+          "kind": "tap",
+          "at": 81.3072428,
+          "bounds": {
+            "x": 300,
+            "y": 720,
+            "width": 375,
+            "height": 65
+          },
+          "duration": 0,
+          "label": "Search_Go"
+        },
+        {
+          "kind": "tap",
+          "at": 83.0820152,
+          "bounds": {
+            "x": 748,
+            "y": 1186,
+            "width": 55,
+            "height": 44
+          },
+          "duration": 0,
+          "label": "Suggestion_Save"
+        },
+        {
+          "kind": "tap",
+          "at": 85.8693287,
+          "bounds": {
+            "x": 1118,
+            "y": 585,
+            "width": 55,
+            "height": 44
+          },
+          "duration": 0,
+          "label": "Suggestion_Save"
+        },
+        {
+          "kind": "tap",
+          "at": 89.2774316,
+          "bounds": {
+            "x": 1486,
+            "y": 585,
+            "width": 55,
+            "height": 44
+          },
+          "duration": 0,
+          "label": "Suggestion_Save"
+        },
+        {
+          "kind": "tap",
+          "at": 91.6886575,
+          "bounds": {
+            "x": 1598,
+            "y": 300,
+            "width": 130,
+            "height": 60
+          },
+          "duration": 0,
+          "label": "Search_Saved"
+        }
+      ],
+      "source": {
+        "x": 269,
+        "y": 260,
+        "width": 1582,
+        "height": 991
+      }
+    }
+  ]
+}

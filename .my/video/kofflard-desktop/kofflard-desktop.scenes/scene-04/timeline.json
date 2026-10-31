@@ -1,0 +1,318 @@
+{
+  "number": 4,
+  "name": "Keep what you like",
+  "scenario": "Features/VID.02-the-tour.feature.md#VID.02.4-Keep-what-you-like-and-find-it-in-Favourites",
+  "video": "video.mp4",
+  "duration": 33.5,
+  "status": "passed",
+  "steps": [
+    {
+      "line": 71,
+      "text": "Given the AI answers \u0022De Dijk\u0022 with \u0022de-dijk\u0022",
+      "start": 0.0098519,
+      "end": 0.0140567,
+      "status": "passed"
+    },
+    {
+      "line": 72,
+      "text": "And the AI answers \u0022Eminem\u0022 with \u0022eminem\u0022",
+      "start": 0.6201423,
+      "end": 0.6210905,
+      "status": "passed"
+    },
+    {
+      "line": 73,
+      "text": "And I am on the Search page",
+      "start": 1.2310441,
+      "end": 1.2560407,
+      "status": "passed"
+    },
+    {
+      "line": 74,
+      "text": "When I search for \u0022De Dijk\u0022",
+      "start": 1.86875,
+      "end": 3.3288743,
+      "status": "passed"
+    },
+    {
+      "line": 75,
+      "text": "And I add \u0022Doe Maar\u0022 to favourites",
+      "start": 3.931371,
+      "end": 5.4584137,
+      "status": "passed"
+    },
+    {
+      "line": 76,
+      "text": "And I add \u0022Solomon Burke\u0022 to favourites",
+      "start": 6.0659589,
+      "end": 9.5380584,
+      "status": "passed"
+    },
+    {
+      "line": 77,
+      "text": "And I add \u0022Ramses Shaffy\u0022 to favourites",
+      "start": 10.1385038,
+      "end": 13.9364136,
+      "status": "passed"
+    },
+    {
+      "line": 78,
+      "text": "When I search for \u0022Eminem\u0022",
+      "start": 14.5498798,
+      "end": 16.0957371,
+      "status": "passed"
+    },
+    {
+      "line": 79,
+      "text": "And I add \u0022Kendrick Lamar\u0022 to favourites",
+      "start": 16.7006123,
+      "end": 18.0652275,
+      "status": "passed"
+    },
+    {
+      "line": 80,
+      "text": "And I add \u0022Danny Brown\u0022 to favourites",
+      "start": 18.6798239,
+      "end": 21.4112977,
+      "status": "passed"
+    },
+    {
+      "line": 81,
+      "text": "And I add \u0022Dido\u0022 to favourites",
+      "start": 22.0215589,
+      "end": 25.0461423,
+      "status": "passed"
+    },
+    {
+      "line": 82,
+      "text": "And I tap Favourites",
+      "start": 25.6456241,
+      "end": 26.3686614,
+      "status": "passed"
+    },
+    {
+      "line": 83,
+      "text": "Then I should be on the Saved page",
+      "start": 26.9693897,
+      "end": 26.9748512,
+      "status": "passed"
+    },
+    {
+      "line": 84,
+      "text": "And Saved should include \u0022Doe Maar\u0022",
+      "start": 27.5786739,
+      "end": 27.6054239,
+      "status": "passed"
+    },
+    {
+      "line": 85,
+      "text": "And Saved should include \u0022Solomon Burke\u0022",
+      "start": 28.2152062,
+      "end": 28.2336282,
+      "status": "passed"
+    },
+    {
+      "line": 86,
+      "text": "And Saved should include \u0022Dido\u0022",
+      "start": 28.8393668,
+      "end": 28.8903296,
+      "status": "passed"
+    }
+  ],
+  "clips": [
+    {
+      "text": "Like one? Star it.",
+      "wav": "line-75.wav",
+      "start": 3.931095,
+      "end": 6.209095
+    },
+    {
+      "text": "Wherever your search takes you.",
+      "wav": "line-78.wav",
+      "start": 14.5498224,
+      "end": 16.4098224
+    },
+    {
+      "text": "And find them all again in your favourites.",
+      "wav": "line-82.wav",
+      "start": 25.6455732,
+      "end": 27.867573200000002
+    },
+    {
+      "text": "Kofflard. Find the music you did not know you were looking for.",
+      "wav": "outro.wav",
+      "start": 29.4994525,
+      "end": 33.4794525
+    }
+  ],
+  "warnings": [
+    "The window changed size to 1582x991: the video stays 1582x990, cropped or padded."
+  ],
+  "width": 1582,
+  "height": 990,
+  "hash": "5A3DDDC391328DEB",
+  "interactions": [
+    {
+      "kind": "clear",
+      "at": 1.8884103,
+      "bounds": {
+        "x": 390,
+        "y": 529,
+        "width": 196,
+        "height": 55
+      },
+      "duration": 0,
+      "label": "Search_Name"
+    },
+    {
+      "kind": "type",
+      "at": 1.9111129,
+      "bounds": {
+        "x": 390,
+        "y": 529,
+        "width": 196,
+        "height": 55
+      },
+      "duration": 0,
+      "label": "Search_Name"
+    },
+    {
+      "kind": "tap",
+      "at": 2.6008549,
+      "bounds": {
+        "x": 300,
+        "y": 720,
+        "width": 375,
+        "height": 65
+      },
+      "duration": 0,
+      "label": "Search_Go"
+    },
+    {
+      "kind": "tap",
+      "at": 4.5913161,
+      "bounds": {
+        "x": 748,
+        "y": 651,
+        "width": 55,
+        "height": 55
+      },
+      "duration": 0,
+      "label": "Suggestion_Save"
+    },
+    {
+      "kind": "tap",
+      "at": 7.508868,
+      "bounds": {
+        "x": 1486,
+        "y": 585,
+        "width": 55,
+        "height": 14
+      },
+      "duration": 0,
+      "label": "Suggestion_Save"
+    },
+    {
+      "kind": "tap",
+      "at": 11.6227848,
+      "bounds": {
+        "x": 1118,
+        "y": 1036,
+        "width": 55,
+        "height": 55
+      },
+      "duration": 0,
+      "label": "Suggestion_Save"
+    },
+    {
+      "kind": "clear",
+      "at": 14.5595974,
+      "bounds": {
+        "x": 390,
+        "y": 529,
+        "width": 196,
+        "height": 55
+      },
+      "duration": 0,
+      "label": "Search_Name"
+    },
+    {
+      "kind": "type",
+      "at": 14.588406,
+      "bounds": {
+        "x": 390,
+        "y": 529,
+        "width": 196,
+        "height": 55
+      },
+      "duration": 0,
+      "label": "Search_Name"
+    },
+    {
+      "kind": "tap",
+      "at": 15.2739096,
+      "bounds": {
+        "x": 300,
+        "y": 720,
+        "width": 375,
+        "height": 65
+      },
+      "duration": 0,
+      "label": "Search_Go"
+    },
+    {
+      "kind": "tap",
+      "at": 17.048682,
+      "bounds": {
+        "x": 748,
+        "y": 1186,
+        "width": 55,
+        "height": 44
+      },
+      "duration": 0,
+      "label": "Suggestion_Save"
+    },
+    {
+      "kind": "tap",
+      "at": 19.8359955,
+      "bounds": {
+        "x": 1118,
+        "y": 585,
+        "width": 55,
+        "height": 44
+      },
+      "duration": 0,
+      "label": "Suggestion_Save"
+    },
+    {
+      "kind": "tap",
+      "at": 23.2440984,
+      "bounds": {
+        "x": 1486,
+        "y": 585,
+        "width": 55,
+        "height": 44
+      },
+      "duration": 0,
+      "label": "Suggestion_Save"
+    },
+    {
+      "kind": "tap",
+      "at": 25.6553243,
+      "bounds": {
+        "x": 1598,
+        "y": 300,
+        "width": 130,
+        "height": 60
+      },
+      "duration": 0,
+      "label": "Search_Saved"
+    }
+  ],
+  "source": {
+    "x": 269,
+    "y": 260,
+    "width": 1582,
+    "height": 991
+  }
+}

@@ -1,0 +1,26 @@
+;FFMETADATA1
+title=Kofflard on the desktop
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=0
+END=28933
+title=Who do you like?
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=28933
+END=45599
+title=Follow the thread
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=45599
+END=66033
+title=As wild as you like
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=66033
+END=99533
+title=Keep what you like

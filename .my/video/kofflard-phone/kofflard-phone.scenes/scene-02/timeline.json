@@ -1,0 +1,187 @@
+{
+  "number": 2,
+  "name": "Follow the thread",
+  "scenario": "Features/VID.02-the-tour.feature.md#VID.02.2-Following-De-Dijk-to-Doe-Maar-and-back",
+  "video": "video.mp4",
+  "duration": 16.5333333,
+  "status": "passed",
+  "steps": [
+    {
+      "line": 36,
+      "text": "Given the AI answers \u0022De Dijk\u0022 with \u0022de-dijk\u0022",
+      "start": 0,
+      "end": 0,
+      "status": "passed"
+    },
+    {
+      "line": 37,
+      "text": "And the AI answers \u0022Doe Maar\u0022 with \u0022doe-maar\u0022",
+      "start": 0.6046913,
+      "end": 0.6050536,
+      "status": "passed"
+    },
+    {
+      "line": 38,
+      "text": "And I am on the Search page",
+      "start": 1.2125051,
+      "end": 1.2376626,
+      "status": "passed"
+    },
+    {
+      "line": 39,
+      "text": "When I search for \u0022De Dijk\u0022",
+      "start": 1.8481104,
+      "end": 3.3828134,
+      "status": "passed"
+    },
+    {
+      "line": 40,
+      "text": "And I follow \u0022Doe Maar\u0022",
+      "start": 3.986485,
+      "end": 5.6952575,
+      "status": "passed"
+    },
+    {
+      "line": 41,
+      "text": "Then Heading should equal \u0022Like Doe Maar\u0022",
+      "start": 6.8788695,
+      "end": 6.8854138,
+      "status": "passed"
+    },
+    {
+      "line": 42,
+      "text": "And Trail should equal \u0022\u2039 De Dijk\u0022",
+      "start": 7.4919959,
+      "end": 7.5061075,
+      "status": "passed"
+    },
+    {
+      "line": 43,
+      "text": "When I look at \u0022The Specials\u0022",
+      "start": 9.1588718,
+      "end": 10.6399637,
+      "status": "passed"
+    },
+    {
+      "line": 44,
+      "text": "Then \u0022The Specials\u0022 should be a \u0022Wild\u0022 suggestion",
+      "start": 11.2483643,
+      "end": 12.6144639,
+      "status": "passed"
+    },
+    {
+      "line": 45,
+      "text": "When I go back along the trail",
+      "start": 13.496965,
+      "end": 14.2262789,
+      "status": "passed"
+    },
+    {
+      "line": 46,
+      "text": "Then Heading should equal \u0022Like De Dijk\u0022",
+      "start": 14.8353778,
+      "end": 14.8448183,
+      "status": "passed"
+    }
+  ],
+  "clips": [
+    {
+      "text": "Tap More, and the list starts again from there.",
+      "wav": "line-40.wav",
+      "start": 3.986452,
+      "end": 6.870452
+    },
+    {
+      "text": "Now everything starts from Doe Maar.",
+      "wav": "line-41.wav",
+      "start": 6.8788414,
+      "end": 9.1548413
+    },
+    {
+      "text": "And the wild ones lead to their roots: the ska of The Specials.",
+      "wav": "line-43.wav",
+      "start": 9.1588589,
+      "end": 13.4908589
+    },
+    {
+      "text": "One tap takes you back to De Dijk.",
+      "wav": "line-45.wav",
+      "start": 13.4969055,
+      "end": 16.5089055
+    }
+  ],
+  "warnings": [
+    "The window changed size to 520x1091: the video stays 520x1090, cropped or padded."
+  ],
+  "width": 520,
+  "height": 1090,
+  "hash": "D4F1292485F78630",
+  "interactions": [
+    {
+      "kind": "clear",
+      "at": 1.8746678,
+      "bounds": {
+        "x": 214,
+        "y": 1164,
+        "width": 358,
+        "height": 60
+      },
+      "duration": 0,
+      "label": "Search_Name"
+    },
+    {
+      "kind": "type",
+      "at": 1.8816806,
+      "bounds": {
+        "x": 214,
+        "y": 1164,
+        "width": 358,
+        "height": 60
+      },
+      "duration": 0,
+      "label": "Search_Name"
+    },
+    {
+      "kind": "tap",
+      "at": 2.573143,
+      "bounds": {
+        "x": 604,
+        "y": 1161,
+        "width": 65,
+        "height": 65
+      },
+      "duration": 0,
+      "label": "Search_Go"
+    },
+    {
+      "kind": "tap",
+      "at": 4.985619,
+      "bounds": {
+        "x": 575,
+        "y": 481,
+        "width": 84,
+        "height": 55
+      },
+      "duration": 0,
+      "label": "Suggestion_Explore"
+    },
+    {
+      "kind": "tap",
+      "at": 13.5152319,
+      "bounds": {
+        "x": 193,
+        "y": 268,
+        "width": 114,
+        "height": 55
+      },
+      "duration": 0,
+      "label": "Discover_Back"
+    }
+  ],
+  "source": {
+    "x": 172,
+    "y": 163,
+    "width": 520,
+    "height": 1091
+  }
+}
