@@ -9,9 +9,6 @@ namespace Kofflard.UITests.Containers;
 /// </summary>
 public sealed class SuggestionList : CollectionObjectBase<ResultsPage, SuggestionList, SuggestionCard>
 {
-    /// <inheritdoc />
-    /// <remarks>A grouped list: WinUI restarts PositionInSet in every lane (.my/rca/windows-vs-headless.md).</remarks>
-    protected override bool HasLogicalIndexes => false;
 
     // A card gone mid-read costs this, not a full default wait.
     private const int VanishedCardReadMs = 250;
@@ -44,7 +41,8 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
     /// <summary>The card of <paramref name="musician"/> as the lanes are now, without opening any.</summary>
     public SuggestionCard Shown(string musician)
     {
-        if (!RunWait(() => FindItem(card => TryReadName(card) == musician) is not null, TestConstants.PageTimeoutMs))
+        var budget = TestConstants.ListSearchMs(Context.Platform);
+        if (!RunWait(() => FindItem(card => TryReadName(card) == musician, budget) is not null, budget))
         {
             throw new AssertionException(
                 $"Expected a card for '{musician}'. Cards shown: {string.Join(", ", Names().Select(name => $"'{name}'"))}.");
@@ -233,9 +231,6 @@ public sealed class LaneHeaderList : CollectionObjectBase<ResultsPage, LaneHeade
     {
     }
 
-    /// <inheritdoc />
-    /// <remarks>A grouped list: WinUI restarts PositionInSet in every lane (.my/rca/windows-vs-headless.md).</remarks>
-    protected override bool HasLogicalIndexes => false;
 
     /// <summary>"Close 6 · Stretch 4 · Leap 2": each lane and its total, in order.</summary>
     public string Summary() => string.Join(" · ", Items.Select(header => $"{header.Name} {header.Total}"));
@@ -243,7 +238,8 @@ public sealed class LaneHeaderList : CollectionObjectBase<ResultsPage, LaneHeade
     /// <summary>The header of <paramref name="lane"/>.</summary>
     public LaneHeader Lane(string lane)
     {
-        if (!RunWait(() => FindItem(header => header.Name == lane) is not null, TestConstants.PageTimeoutMs))
+        var budget = TestConstants.ListSearchMs(Context.Platform);
+        if (!RunWait(() => FindItem(header => header.Name == lane, budget) is not null, budget))
         {
             throw new AssertionException($"Expected a lane '{lane}'. Lanes shown: {Summary()}.");
         }
@@ -282,9 +278,9 @@ public sealed class LaneHeaderList : CollectionObjectBase<ResultsPage, LaneHeade
     /// <summary>Opens every closed lane.</summary>
     public LaneHeaderList OpenAll()
     {
-        foreach (var name in Items.Select(header => header.Name).ToList())
+        foreach (var header in Present())
         {
-            Lane(name).SetOpen(true);
+            header.SetOpen(true);
         }
 
         return Self;
@@ -293,12 +289,25 @@ public sealed class LaneHeaderList : CollectionObjectBase<ResultsPage, LaneHeade
     /// <summary>Opens <paramref name="lane"/> and closes the others.</summary>
     public LaneHeaderList OpenOnly(string lane)
     {
-        foreach (var name in Items.Select(header => header.Name).ToList())
+        foreach (var header in Present())
         {
-            Lane(name).SetOpen(name == lane);
+            header.SetOpen(header.Name == lane);
         }
 
         return Self;
+    }
+
+    // Every lane by name, not only the headers realized now: on Android a header scrolled away is
+    // not in the tree. Last lane first, so the list ends near its top.
+    private IEnumerable<LaneHeader> Present()
+    {
+        foreach (var name in new[] { "Leap", "Stretch", "Close" })
+        {
+            if (FindItem(header => header.Name == name, TestConstants.ListSearchMs(Context.Platform)) is { } header)
+            {
+                yield return header;
+            }
+        }
     }
 }
 

@@ -124,7 +124,7 @@ A collection test that passes headless proves the page object's logic, not the s
 | B7 | A screenshot on failure for xUnit UI tests, as UAT scenarios have. | the MAUI test fixture base | Medium |
 | B8 | Check `ScrollToTop()` against the first row actually being on screen, not only the `ScrollPattern` percent. | `CollectionObjectBase.ScrollToTop` | Low |
 | B10 | Make `Text` mean the same on every head. On Windows, `FlaUIMauiElement.Text` falls back to the UI Automation name. For a button that is the `SemanticProperties.Description` when one is set, so the star read "Remove Vashti Bunyan from favourites" on Windows and "★" headless. Read the button's content (its text child) before the name, or offer the two as separate reads (`GetText`, `GetAccessibleName`). | `FlaUIMauiElement.Text` | Medium |
-| B11 | When several elements match a page's id, prefer the one on screen (not `IsOffscreen`), and log that there were several. `HasUsableBounds` alone does not tell a page under the Shell stack from the current one. | `PageObjectBase.FindContainerRootElement` | Medium, after confirming |
+| B11 | Superseded by [stacked-pages.md](stacked-pages.md), F1–F6: a page root counts as shown only while it is the page the app shows. | `PageObjectBase`, `FlaUIMauiElement`, the bridge | High |
 | B9 | A Bruinet sample and test: a grouped `CollectionView` with sticky headers, taller than the window, on the Windows head. With it, B1, B3 and B4 have a regression test. | `samples/Bruinet.Samples.Maui.App`, `tests/Bruinet.Maui.UITests` | High |
 
 ### Kofflard
@@ -143,8 +143,7 @@ With K1–K3 in place, the card lookups passed on Windows. Two more differences 
 - **The star's text.** Headless the star reads "★". On Windows it reads its screen-reader description, "Remove Vashti Bunyan from favourites" (B10). The page object now accepts either, with a comment.
 - **Two Windows tests fail only in a full run.** VID.01.3 failed in 2 of 3 full Windows UAT runs, and the lanes journey (RES.01.1) in 1 of 3 full UI runs. Run alone, each passed 5 of 5.
   - VID.01.3's error is the same "'Results_Items' was found but is not visible". It came on the results page that "More →" opened, which is the second results page on the Shell stack.
-  - **Suspected, not confirmed:** both results pages are in the Windows UI Automation tree with the same ids. A page's root is the first element with that id whose bounds look usable (`PageObjectBase.FindContainerRootElement`), so Bruinet can pick the hidden, earlier page, whose cards are all off-screen. Headless reports only the current page.
-  - If confirmed, the Bruinet fix is B11.
+  - **Confirmed** in [stacked-pages.md](stacked-pages.md): the UAT page object kept the covered results page for about a second after "More →". Worked around there; the Bruinet fix is in its Windows head (F1–F3).
 
 ## Lesson
 
