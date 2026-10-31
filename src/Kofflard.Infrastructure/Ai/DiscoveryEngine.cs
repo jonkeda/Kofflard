@@ -31,15 +31,17 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         string? secret,
         string artist,
         IReadOnlyCollection<string> exclude,
+        LaneMix? mix = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        mix ??= LaneMix.Even;
         using var client = clients.Create(connection, secret);
         var messages = new List<ChatMessage>
         {
             new(ChatRole.System, connection.Provider.StructuredOutput == AiStructuredOutput.JsonSchema
                 ? DiscoveryPrompt.System
                 : DiscoveryPrompt.System + "\n\nThe JSON schema of your answer:\n" + DiscoveryPrompt.Schema),
-            new(ChatRole.User, DiscoveryPrompt.User(artist, exclude)),
+            new(ChatRole.User, DiscoveryPrompt.User(artist, exclude, mix)),
         };
 
         var options = new ChatOptions
@@ -59,7 +61,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         string? streamed = null;
         if (!Unstreamable.ContainsKey(StreamKey(connection)))
         {
-            var answer = new StreamedAnswer(artist, exclude);
+            var answer = new StreamedAnswer(artist, exclude, mix);
             var text = new StringBuilder();
             for (var attempt = 0; attempt < 5; attempt++)
             {
@@ -120,7 +122,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
             }
         }
 
-        yield return new DiscoveryUpdate.Done(await ValidateAsync(client, connection, messages, options, artist, exclude, streamed, cancellationToken));
+        yield return new DiscoveryUpdate.Done(await ValidateAsync(client, connection, messages, options, artist, exclude, mix, streamed, cancellationToken));
     }
 
     // The whole answer, validated; one retry, without streaming, when it can't be used. With no streamed
@@ -132,13 +134,14 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         ChatOptions options,
         string artist,
         IReadOnlyCollection<string> exclude,
+        LaneMix mix,
         string? streamed,
         CancellationToken cancellationToken)
     {
         var text = streamed ?? await AskAsync(client, connection, messages, options, cancellationToken);
         try
         {
-            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(text), artist, exclude);
+            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(text), artist, exclude, mix);
         }
         catch (DiscoveryAnswerException problem)
         {
@@ -149,7 +152,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         var retried = await AskAsync(client, connection, messages, options, cancellationToken);
         try
         {
-            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(retried), artist, exclude);
+            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(retried), artist, exclude, mix);
         }
         catch (DiscoveryAnswerException problem)
         {

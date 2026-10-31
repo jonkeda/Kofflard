@@ -8,14 +8,20 @@ public partial class ResultsPage : ContentPage, IQueryAttributable
     private readonly ResultsViewModel _viewModel;
     private bool _searched;
 
-    public ResultsPage(ResultsViewModel viewModel)
+    /// <summary>
+    /// Shows the search the search page started, which opened this page on its first card
+    /// (.my/design/desktop-aurora-changes.md); or, with none handed over, the route's artist.
+    /// </summary>
+    public ResultsPage(RunningSearch running, IServiceProvider services)
     {
         InitializeComponent();
-        BindingContext = _viewModel = viewModel;
+        var search = running.Take();
+        _searched = search is not null;
+        BindingContext = _viewModel = search ?? services.GetRequiredService<ResultsViewModel>();
         PageAutomation.Declare(this);
     }
 
-    /// <summary>Searches the route's artist, once.</summary>
+    /// <summary>Searches the route's artist, once, unless the page was handed a running search.</summary>
     /// <remarks>
     /// Shell applies the query again when the user comes back to this page (from an explored musician);
     /// searching again then would exclude everything this page shows and come back empty.

@@ -1,4 +1,5 @@
 using Kofflard.Core.Models;
+using Kofflard.Core.Rules;
 
 namespace Kofflard.Core.Ai;
 
@@ -66,6 +67,7 @@ public interface IDiscoveryEngine
         string? secret,
         string artist,
         IReadOnlyCollection<string> exclude,
+        LaneMix? mix = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>One tiny request that shows the connection works (design §6.2).</summary>

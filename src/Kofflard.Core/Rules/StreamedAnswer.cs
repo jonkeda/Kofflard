@@ -11,8 +11,9 @@ namespace Kofflard.Core.Rules;
 /// as this does, and only adds to it (<see cref="SuggestionValidator"/>). Picks are held back until the
 /// answer says it is "ok", so nothing shows for a name the model did not know.
 /// </remarks>
-public sealed class StreamedAnswer(string artist, IReadOnlyCollection<string> exclude)
+public sealed class StreamedAnswer(string artist, IReadOnlyCollection<string> exclude, LaneMix? mix = null)
 {
+    private readonly LaneMix _mix = mix ?? LaneMix.Even;
     private readonly DiscoveryAnswerReader _reader = new();
     private readonly PickFilter _filter = new(artist, exclude);
     private readonly Dictionary<Lane, int> _shown = [];
@@ -68,7 +69,7 @@ public sealed class StreamedAnswer(string artist, IReadOnlyCollection<string> ex
         }
 
         var shown = _shown.GetValueOrDefault(suggestion.Lane);
-        if (shown < LaneMix.For(suggestion.Lane))
+        if (shown < _mix.Count(suggestion.Lane))
         {
             _shown[suggestion.Lane] = shown + 1;
             updates.Add(new DiscoveryUpdate.PickFound(suggestion));

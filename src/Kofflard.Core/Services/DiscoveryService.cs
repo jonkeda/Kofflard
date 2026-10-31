@@ -27,11 +27,13 @@ public sealed class DiscoveryService(
     /// Whether a result from the last 24 hours may be shown again: yes for a recent search opened again,
     /// no for a new search or "More like this", which ask the AI for musicians not shown yet.
     /// </param>
+    /// <param name="mix">How many of each lane to ask for; <see cref="LaneMix.Even"/> when null.</param>
     /// <param name="cancellationToken">Cancels the request.</param>
     /// <exception cref="AiException">No AI is connected, or the request failed.</exception>
     public async IAsyncEnumerable<DiscoveryUpdate> DiscoverAsync(
         string artist,
         bool useCache,
+        LaneMix? mix = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var name = Names.Clean(artist);
@@ -45,7 +47,8 @@ public sealed class DiscoveryService(
             throw new AiException(AiFailure.NotConnected, "Connect an AI first.");
         }
 
-        var key = CacheKey(name, connected.Connection);
+        mix ??= LaneMix.Even;
+        var key = CacheKey(name, connected.Connection, mix);
         var now = time.GetUtcNow();
         await history.AddSearchAsync(new RecentSearch(name, now));
 
@@ -56,7 +59,7 @@ public sealed class DiscoveryService(
         }
 
         var exclude = await history.ShownAsync(DiscoveryPrompt.MaxExclusions);
-        await foreach (var update in engine.DiscoverAsync(connected.Connection, connected.Secret, name, exclude, cancellationToken))
+        await foreach (var update in engine.DiscoverAsync(connected.Connection, connected.Secret, name, exclude, mix, cancellationToken))
         {
             // What was shown is remembered, and cached, once the whole answer is in; never half an answer.
             if (update is DiscoveryUpdate.Done { Result: { Status: DiscoveryStatus.Ok, Suggestions.Count: > 0 } result })
@@ -72,11 +75,15 @@ public sealed class DiscoveryService(
     /// <summary>The latest searches, newest first.</summary>
     public Task<IReadOnlyList<RecentSearch>> RecentAsync() => history.RecentSearchesAsync(RecentCount);
 
-    /// <summary>The cache key: the same name, provider and model give the same key.</summary>
-    public static string CacheKey(string artist, AiConnection connection)
-        => string.Join(
-            '|',
-            Names.Normalise(artist),
-            connection.ProviderId,
-            connection.Model);
+    /// <summary>Forgets every search of <paramref name="artist"/>; what was shown and the cache stay.</summary>
+    public Task ForgetSearchAsync(string artist) => history.RemoveSearchAsync(artist);
+
+    /// <summary>
+    /// The cache key: the same name, provider, model and mix give the same key. The even mix adds nothing,
+    /// so results cached before the phone's lanes still match.
+    /// </summary>
+    public static string CacheKey(string artist, AiConnection connection, LaneMix? mix = null)
+        => mix is null || mix == LaneMix.Even
+            ? string.Join('|', Names.Normalise(artist), connection.ProviderId, connection.Model)
+            : string.Join('|', Names.Normalise(artist), connection.ProviderId, connection.Model, mix);
 }

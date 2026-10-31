@@ -9,9 +9,10 @@ using Kofflard.Core.Services;
 namespace Kofflard.Core.ViewModels;
 
 /// <summary>
-/// The results page: the suggestions in their lanes, Safe, Curious and Wild, or who the user may have meant
+/// The results: the suggestions in their lanes, Safe, Curious and Wild, or who the user may have meant
 /// (design §3.1, .my/design/adventure-as-outcomes.md). Cards come in one by one as the AI writes them
-/// (.my/design/streaming-answers.md).
+/// (.my/design/streaming-answers.md). On the desktop design it is the results page; on a phone, the list of
+/// the one page, filtered by the lane toggles (.my/design/single-page-phone.md).
 /// </summary>
 public sealed class ResultsViewModel : ParentViewModel
 {
@@ -30,6 +31,9 @@ public sealed class ResultsViewModel : ParentViewModel
     /// <summary>The state after a failure.</summary>
     public const string ErrorState = "Error";
 
+    /// <summary>On a card while its "More →" waits for the first card.</summary>
+    public const string Searching = "Searching…";
+
     private readonly DiscoveryService _discovery;
     private readonly ISettingsStore _settings;
     private readonly ISavedStore _saved;
@@ -37,8 +41,13 @@ public sealed class ResultsViewModel : ParentViewModel
     private readonly SuggestionCards _cards;
     private readonly AiConnections _connections;
     private readonly INavigator _navigator;
+    private readonly SearchLauncher _launcher;
+    private readonly Dictionary<Lane, List<SuggestionViewModel>> _byLane = [];
 
     private CancellationTokenSource? _work;
+    private CancellationTokenSource? _extra;
+    private CancellationTokenSource? _exploring;
+    private LaneSet _shown = LaneSet.All;
     private string _artist = string.Empty;
     private string _stateKey = LoadingState;
     private string _summary = string.Empty;
@@ -58,7 +67,8 @@ public sealed class ResultsViewModel : ParentViewModel
         IArtistVerifier verifier,
         SuggestionCards cards,
         AiConnections connections,
-        INavigator navigator)
+        INavigator navigator,
+        SearchLauncher launcher)
     {
         _discovery = discovery;
         _settings = settings;
@@ -67,6 +77,7 @@ public sealed class ResultsViewModel : ParentViewModel
         _cards = cards;
         _connections = connections;
         _navigator = navigator;
+        _launcher = launcher;
 
         RetryCommand = new TargetAsyncCommand(this, () => SearchAsync(useCache: false));
         MoreCommand = new TargetAsyncCommand(this, () => SearchAsync(useCache: false));
@@ -76,6 +87,50 @@ public sealed class ResultsViewModel : ParentViewModel
 
     /// <summary>"Like Nick Drake".</summary>
     public string Heading => $"Like {_artist}";
+
+    /// <summary>The musician searched for.</summary>
+    public string Artist => _artist;
+
+    /// <summary>How many of each lane a search and "More like this" ask for: 4 + 4 + 4 unless a phone's toggles say otherwise.</summary>
+    public LaneMix Mix { get; set; } = LaneMix.Even;
+
+    /// <summary>
+    /// Where a card's "More →" goes: on a phone the one page loads it in place. Null on the desktop design,
+    /// where it opens a results page on the first card.
+    /// </summary>
+    public ISearchFlow? Flow { get; set; }
+
+    /// <summary>
+    /// The lanes shown; the cards of the others are kept, hidden. Every lane on the desktop design; on a
+    /// phone, the toggles that are on.
+    /// </summary>
+    public LaneSet Shown
+    {
+        get => _shown;
+        set
+        {
+            if (_shown == value)
+            {
+                return;
+            }
+
+            _shown = value;
+            Lanes.Clear();
+            foreach (var lane in Enum.GetValues<Lane>().Where(lane => value.Contains(lane) && _byLane.TryGetValue(lane, out var cards) && cards.Count > 0))
+            {
+                Lanes.Add(new LaneGroupViewModel(lane, _byLane[lane]));
+            }
+
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(CountText));
+        }
+    }
+
+    /// <summary>"8 of 12": the cards shown of those found.</summary>
+    public string CountText => $"{Lanes.Sum(lane => lane.Count)} of {_byLane.Values.Sum(cards => cards.Count)}";
+
+    /// <summary>Whether <paramref name="lane"/> has cards, shown or not.</summary>
+    public bool Has(Lane lane) => _byLane.TryGetValue(lane, out var cards) && cards.Count > 0;
 
     /// <summary>The musician searched for, in one line: "English folk singer-songwriter, 1969–74".</summary>
     public string Summary
@@ -176,8 +231,8 @@ public sealed class ResultsViewModel : ParentViewModel
     /// <summary>The lanes that have suggestions, in order.</summary>
     public ObservableCollection<LaneGroupViewModel> Lanes { get; } = [];
 
-    /// <summary>Every card, in lane order.</summary>
-    public IEnumerable<SuggestionViewModel> Cards => Lanes.SelectMany(lane => lane.Cards);
+    /// <summary>Every card, in lane order, shown or not.</summary>
+    public IEnumerable<SuggestionViewModel> Cards => Enum.GetValues<Lane>().Where(_byLane.ContainsKey).SelectMany(lane => _byLane[lane]);
 
     /// <summary>Who the user may have meant.</summary>
     public ObservableCollection<Musician> Candidates { get; } = [];
@@ -233,17 +288,89 @@ public sealed class ResultsViewModel : ParentViewModel
         return SearchAsync(cached);
     }
 
-    /// <summary>Stops the verification when the page goes away for good.</summary>
-    public void Stop() => _work?.Cancel();
+    /// <summary>Stops the search and the verification when the page goes away for good.</summary>
+    public void Stop()
+    {
+        _work?.Cancel();
+        _extra?.Cancel();
+        _exploring?.Cancel();
+    }
+
+    /// <summary>
+    /// Asks for <see cref="LaneMix.OneLane"/> picks of <paramref name="lane"/> alone, for a phone toggle turned
+    /// on with no cards in that lane yet; they stream into its section and the other cards stay
+    /// (.my/design/single-page-phone.md). Nothing happens without results, or when the lane has cards.
+    /// </summary>
+    public async Task AskForAsync(Lane lane)
+    {
+        if (!HasContent || Has(lane))
+        {
+            return;
+        }
+
+        _extra?.Cancel();
+        _extra = new CancellationTokenSource();
+        var token = _extra.Token;
+
+        var settings = await _settings.LoadAsync();
+        var saved = await _saved.NamesAsync();
+        var mix = LaneMix.Only(lane);
+        var shown = Cards.Select(card => Names.Normalise(card.Name)).ToHashSet();
+        var added = 0;
+        void Show(Suggestion suggestion)
+        {
+            if (suggestion.Lane == lane && added < mix.Sum && shown.Add(Names.Normalise(suggestion.Name)))
+            {
+                added++;
+                AddCard(_cards.Create(suggestion, settings.OpenWith, saved.Contains(Names.Normalise(suggestion.Name)), ExploreAsync));
+            }
+        }
+
+        IsStreaming = true;
+        StreamError = null;
+        try
+        {
+            await foreach (var update in _discovery.DiscoverAsync(_artist, useCache: false, mix, token))
+            {
+                switch (update)
+                {
+                    case DiscoveryUpdate.PickFound pick:
+                        Show(pick.Suggestion);
+                        break;
+                    case DiscoveryUpdate.Done { Result.Status: DiscoveryStatus.Ok } done:
+                        done.Result.Suggestions.ToList().ForEach(Show);
+                        break;
+                }
+            }
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (AiException failure)
+        {
+            StreamError = failure.Message;
+        }
+        finally
+        {
+            if (!token.IsCancellationRequested)
+            {
+                IsStreaming = false;
+            }
+        }
+    }
 
     private async Task SearchAsync(bool useCache)
     {
         _work?.Cancel();
+        _extra?.Cancel();
         _work = new CancellationTokenSource();
         var token = _work.Token;
 
         State = LoadingState;
         Lanes.Clear();
+        _byLane.Clear();
+        OnPropertyChanged(nameof(CountText));
         Candidates.Clear();
         Summary = string.Empty;
         IsStreaming = false;
@@ -257,7 +384,7 @@ public sealed class ResultsViewModel : ParentViewModel
         DiscoveryResult? result = null;
         try
         {
-            await foreach (var update in _discovery.DiscoverAsync(_artist, useCache, token))
+            await foreach (var update in _discovery.DiscoverAsync(_artist, useCache, Mix, token))
             {
                 switch (update)
                 {
@@ -303,6 +430,7 @@ public sealed class ResultsViewModel : ParentViewModel
         if (result.Status != DiscoveryStatus.Ok)
         {
             Lanes.Clear();
+            _byLane.Clear();
             ShowCandidates(result);
             return;
         }
@@ -311,7 +439,7 @@ public sealed class ResultsViewModel : ParentViewModel
         var shown = Cards.Select(card => Names.Normalise(card.Name)).ToHashSet();
         foreach (var suggestion in result.Suggestions.Where(suggestion => !shown.Contains(Names.Normalise(suggestion.Name))))
         {
-            if (shown.Count >= LaneMix.Total)
+            if (shown.Count >= Mix.Sum)
             {
                 break;
             }
@@ -320,7 +448,7 @@ public sealed class ResultsViewModel : ParentViewModel
             Show(suggestion);
         }
 
-        if (Lanes.Count == 0)
+        if (_byLane.Count == 0)
         {
             State = EmptyState;
             return;
@@ -334,18 +462,29 @@ public sealed class ResultsViewModel : ParentViewModel
         }
     }
 
-    // Into its lane, after the cards already there; a lane is added, in lane order, with its first card.
+    // Into its lane, after the cards already there; a shown lane is added, in lane order, with its first card.
     private void AddCard(SuggestionViewModel card)
     {
         var lane = card.Lane;
-        if (Lanes.FirstOrDefault(group => group.Lane == lane) is { } group)
+        if (!_byLane.TryGetValue(lane, out var cards))
         {
-            group.Add(card);
-            return;
+            _byLane[lane] = cards = [];
         }
 
-        var index = Lanes.Count(other => other.Lane < lane);
-        Lanes.Insert(index, new LaneGroupViewModel(lane, [card]));
+        cards.Add(card);
+        if (_shown.Contains(lane))
+        {
+            if (Lanes.FirstOrDefault(group => group.Lane == lane) is { } group)
+            {
+                group.Add(card);
+            }
+            else
+            {
+                Lanes.Insert(Lanes.Count(other => other.Lane < lane), new LaneGroupViewModel(lane, [card]));
+            }
+        }
+
+        OnPropertyChanged(nameof(CountText));
     }
 
     private void ShowCandidates(DiscoveryResult result)
@@ -409,6 +548,28 @@ public sealed class ResultsViewModel : ParentViewModel
         return SearchAsync(useCache: false);
     }
 
-    private Task ExploreAsync(SuggestionViewModel card)
-        => _navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(card.Name));
+    // On a phone the page loads it in place. On the desktop design the card says "Searching…" until the
+    // first card opens the next results page, or says what came of it (.my/design/desktop-aurora-changes.md).
+    private async Task ExploreAsync(SuggestionViewModel card)
+    {
+        if (Flow is { } flow)
+        {
+            await flow.ShowAsync(card.Name, cached: false);
+            return;
+        }
+
+        _exploring?.Cancel();
+        _exploring = new CancellationTokenSource();
+        var token = _exploring.Token;
+
+        card.ExploreNote = Searching;
+        var search = await _launcher.StartAsync(card.Name, cached: false, token);
+        if (token.IsCancellationRequested)
+        {
+            card.ExploreNote = string.Empty;
+            return;
+        }
+
+        card.ExploreNote = search is null ? string.Empty : SearchLauncher.NothingFound(search);
+    }
 }

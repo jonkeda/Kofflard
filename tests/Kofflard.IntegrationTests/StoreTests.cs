@@ -24,7 +24,10 @@ public sealed class StoreTests : IDisposable
         var store = new SqliteSettingsStore(_database);
         Assert.Equal(AppSettings.Default, await store.LoadAsync());
 
-        var changed = new AppSettings(new AiConnection("azure", "https://res.openai.azure.com", "gpt-4.1-mini"), MusicService.Spotify, true);
+        var changed = new AppSettings(new AiConnection("azure", "https://res.openai.azure.com", "gpt-4.1-mini"), MusicService.Spotify, true)
+        {
+            Lanes = new LaneSet(false, true, true),
+        };
         await store.SaveAsync(changed);
 
         Assert.Equal(changed, await new SqliteSettingsStore(_database).LoadAsync());
@@ -49,6 +52,21 @@ public sealed class StoreTests : IDisposable
         var recent = await history.RecentSearchesAsync(20);
 
         Assert.Equal(["nick drake", "Khruangbin"], recent.Select(r => r.Artist));
+    }
+
+    [Fact]
+    public async Task History_RemovingASearch_ForgetsThatName_AndKeepsTheOthersAndTheCache()
+    {
+        var history = new SqliteHistoryStore(_database);
+        await history.AddSearchAsync(new RecentSearch("Nick Drake", Now));
+        await history.AddSearchAsync(new RecentSearch("Khruangbin", Now.AddMinutes(1)));
+        var result = new DiscoveryResult(DiscoveryStatus.Ok, null, [], []);
+        await history.CacheAsync("nick drake|azure|gpt", result, Now);
+
+        await history.RemoveSearchAsync("NICK DRAKE");
+
+        Assert.Equal(["Khruangbin"], (await history.RecentSearchesAsync(20)).Select(r => r.Artist));
+        Assert.NotNull(await history.CachedAsync("nick drake|azure|gpt", Now.AddHours(-1)));
     }
 
     [Fact]

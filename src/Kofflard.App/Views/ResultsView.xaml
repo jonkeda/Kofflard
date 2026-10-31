@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    The results list and its states, shared by the desktop design's results page and the phone's one page
+    (.my/design/single-page-phone.md), so both draw the same cards with the same ids. The suggestions are
+    grouped by lane, Safe, Curious and Wild (.my/design/adventure-as-outcomes.md).
+    Results_State is a CommunityToolkit StateContainer, as Todo's list: its default content is the
+    suggestions; Loading, Empty, Error and Candidates each carry their own AutomationId, which is how
+    Bruinet's StateContainer control tells which one is showing.
+-->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:Kofflard.Core.ViewModels;assembly=Kofflard.Core"
+             xmlns:models="clr-namespace:Kofflard.Core.Models;assembly=Kofflard.Core"
+             xmlns:views="clr-namespace:Kofflard.App.Views"
+             x:Class="Kofflard.App.Views.ResultsView"
+             x:DataType="vm:ResultsViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto,Auto" Padding="16,8" RowSpacing="8">
+
+        <Label AutomationId="Results_Summary" Text="{Binding Summary}" Style="{StaticResource Muted}" FontSize="15" />
+
+        <Grid Grid.Row="1"
+              AutomationId="Results_State"
+              toolkit:StateContainer.CurrentState="{Binding StateKey}">
+
+            <toolkit:StateContainer.StateViews>
+                <VerticalStackLayout toolkit:StateView.StateKey="Loading"
+                                     AutomationId="Results_Loading"
+                                     Spacing="8"
+                                     VerticalOptions="Center">
+                    <ActivityIndicator IsRunning="True" />
+                    <Label Text="Asking the AI…" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout toolkit:StateView.StateKey="Empty"
+                                     AutomationId="Results_Empty"
+                                     VerticalOptions="Center">
+                    <Label AutomationId="Results_EmptyLabel"
+                           Text="The AI had no new musicians to suggest. Try again."
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout toolkit:StateView.StateKey="Error"
+                                     AutomationId="Results_Error"
+                                     Spacing="12"
+                                     VerticalOptions="Center">
+                    <Label AutomationId="Results_ErrorLabel"
+                           Text="{Binding ErrorMessage}"
+                           HorizontalTextAlignment="Center" />
+                    <Label AutomationId="Results_Connection"
+                           Text="{Binding ConnectionLine}"
+                           Style="{StaticResource Faint}"
+                           HorizontalTextAlignment="Center" />
+                    <Button AutomationId="Results_Retry"
+                            Text="Try again"
+                            Command="{Binding RetryCommand}"
+                            HorizontalOptions="Center" />
+                    <Button AutomationId="Results_FixConnection"
+                            Text="Fix the AI connection"
+                            Command="{Binding FixConnectionCommand}"
+                            Style="{StaticResource SoftButton}"
+                            IsVisible="{Binding CanFixConnection}"
+                            HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <Grid toolkit:StateView.StateKey="Candidates"
+                      AutomationId="Results_Candidates"
+                      RowDefinitions="Auto,*"
+                      RowSpacing="8">
+                    <Label AutomationId="Results_CandidatesTitle" Text="{Binding CandidatesTitle}" Style="{StaticResource Heading}" />
+                    <CollectionView Grid.Row="1"
+                                    AutomationId="Results_CandidateList"
+                                    ItemsSource="{Binding Candidates}"
+                                    SelectionMode="Single"
+                                    SelectedItem="{Binding SelectedCandidate}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Musician">
+                                <VerticalStackLayout AutomationId="CandidateRow" Padding="8">
+                                    <Label AutomationId="CandidateRow_Name" Text="{Binding Name}" Style="{StaticResource Heading}" FontSize="16" />
+                                    <Label AutomationId="CandidateRow_Summary" Text="{Binding Summary}" Style="{StaticResource Muted}" FontSize="12" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </toolkit:StateContainer.StateViews>
+
+            <!-- A click on a card selects it, which opens it (.my/rca/card-click.md). -->
+            <CollectionView AutomationId="Results_Items"
+                            ItemsSource="{Binding Lanes}"
+                            IsGrouped="True"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedCard}">
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate x:DataType="vm:LaneGroupViewModel">
+                        <!-- The lane's name in its colour: amber Safe, teal Curious, violet Wild. -->
+                        <Grid AutomationId="LaneHeader" Padding="4,14,0,2">
+                            <Label AutomationId="LaneHeader_Name"
+                                   Text="{Binding HeaderText}"
+                                   FontAttributes="Bold"
+                                   FontSize="15"
+                                   CharacterSpacing="1"
+                                   TextColor="{AppThemeBinding Light={StaticResource SafeTextLight}, Dark={StaticResource SafeTextDark}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding Name}" Value="Curious">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource CuriousTextLight}, Dark={StaticResource CuriousTextDark}}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding Name}" Value="Wild">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WildTextLight}, Dark={StaticResource WildTextDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SuggestionViewModel">
+                        <VerticalStackLayout AutomationId="Suggestion">
+                            <views:SuggestionCardView />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+        <!--
+            While the AI is still writing: the cards so far show above, and this says more are coming
+            (.my/design/streaming-answers.md). If the answer breaks off, what went wrong shows here instead.
+        -->
+        <VerticalStackLayout Grid.Row="2" Spacing="4">
+            <HorizontalStackLayout AutomationId="Results_Streaming"
+                                   Spacing="8"
+                                   HorizontalOptions="Center"
+                                   IsVisible="{Binding IsStreaming}">
+                <ActivityIndicator IsRunning="{Binding IsStreaming}" HeightRequest="20" WidthRequest="20" />
+                <Label Text="More on the way…" Style="{StaticResource Muted}" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+            <Label AutomationId="Results_StreamError"
+                   Text="{Binding StreamError}"
+                   Style="{StaticResource Error}"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding HasStreamError}" />
+        </VerticalStackLayout>
+
+        <Button Grid.Row="3"
+                AutomationId="Results_More"
+                Text="More like this…"
+                HeightRequest="52"
+                CornerRadius="26"
+                Command="{Binding MoreCommand}"
+                IsVisible="{Binding CanAskMore}" />
+    </Grid>
+</ContentView>

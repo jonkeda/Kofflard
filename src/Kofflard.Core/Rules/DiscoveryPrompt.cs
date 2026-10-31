@@ -91,12 +91,14 @@ public static class DiscoveryPrompt
     /// <summary>The user message for one search.</summary>
     /// <param name="artist">The musician's name, already cleaned (<see cref="Names.Clean"/>).</param>
     /// <param name="exclude">Musicians already shown, newest first; at most <see cref="MaxExclusions"/> are sent.</param>
+    /// <param name="mix">How many of each lane; <see cref="LaneMix.Even"/> when null.</param>
     /// <param name="language">The UI language for "why" and "bridge", e.g. "en".</param>
-    public static string User(string artist, IReadOnlyCollection<string> exclude, string language = "en")
+    public static string User(string artist, IReadOnlyCollection<string> exclude, LaneMix? mix = null, string language = "en")
     {
+        mix ??= LaneMix.Even;
         var builder = new StringBuilder();
         builder.AppendLine($"Musician: \"{artist.Replace('"', '\'')}\"");
-        builder.AppendLine($"Suggest exactly {LaneMix.For(Lane.Safe)} close, {LaneMix.For(Lane.Curious)} stretch and {LaneMix.For(Lane.Wild)} leap musicians.");
+        builder.AppendLine(Ask(mix));
 
         var excluded = exclude.Take(MaxExclusions).ToList();
         builder.AppendLine(excluded.Count == 0
@@ -106,6 +108,27 @@ public static class DiscoveryPrompt
         builder.AppendLine($"Write \"why\" and \"bridge\" in language: {language}.");
         builder.Append("Answer with JSON matching the schema.");
         return builder.ToString();
+    }
+
+    // "Suggest exactly 4 close, 4 stretch and 4 leap musicians.", or for a phone with lanes off
+    // "Suggest exactly 6 close and 6 stretch musicians, and no leap musicians."
+    private static string Ask(LaneMix mix)
+    {
+        static string Word(Lane lane) => lane switch
+        {
+            Lane.Safe => "close",
+            Lane.Curious => "stretch",
+            _ => "leap",
+        };
+
+        var lanes = Enum.GetValues<Lane>();
+        var asked = lanes.Where(lane => mix.Count(lane) > 0).Select(lane => $"{mix.Count(lane)} {Word(lane)}").ToList();
+        var none = lanes.Where(lane => mix.Count(lane) == 0).Select(Word).ToList();
+
+        var ask = asked.Count == 1 ? asked[0] : $"{string.Join(", ", asked[..^1])} and {asked[^1]}";
+        return none.Count == 0
+            ? $"Suggest exactly {ask} musicians."
+            : $"Suggest exactly {ask} musicians, and no {string.Join(" or ", none)} musicians.";
     }
 
     /// <summary>The temperature: one search asks for every lane, so one value in the middle.</summary>

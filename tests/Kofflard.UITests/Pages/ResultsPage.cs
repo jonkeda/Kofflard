@@ -14,6 +14,12 @@ public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>
     /// <summary>"Like Nick Drake": the title bar's text, the page has no heading of its own.</summary>
     public Label<AppRoot> Heading => new(_appRoot, "title");
 
+    /// <summary>
+    /// "Like Nick Drake" as this design shows it: the title bar's on the desktop design; the phone's one page
+    /// has a label (<see cref="PhoneResults"/>).
+    /// </summary>
+    public virtual Label<ResultsPage> PageHeading => new(this, "title");
+
     /// <summary>The searched musician in one line.</summary>
     public Label<ResultsPage> Summary => new(this, "Results_Summary");
 

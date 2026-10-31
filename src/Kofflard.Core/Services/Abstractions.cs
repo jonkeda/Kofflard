@@ -14,6 +14,9 @@ public sealed record AppSettings(
     MusicService OpenWith,
     bool CheckNames)
 {
+    /// <summary>The lanes a phone asks for and shows (.my/design/single-page-phone.md).</summary>
+    public LaneSet Lanes { get; init; } = LaneSet.Default;
+
     /// <summary>A new install's settings.</summary>
     public static AppSettings Default { get; } = new(null, MusicService.YouTube, false);
 }
@@ -44,6 +47,9 @@ public interface IHistoryStore
 
     /// <summary>The latest searches, newest first, one per name.</summary>
     Task<IReadOnlyList<RecentSearch>> RecentSearchesAsync(int count);
+
+    /// <summary>Forgets every search of <paramref name="artist"/>; what was shown and the cache stay.</summary>
+    Task RemoveSearchAsync(string artist);
 
     /// <summary>Remembers that these musicians were shown.</summary>
     Task MarkShownAsync(IEnumerable<string> names, DateTimeOffset at);
@@ -126,6 +132,16 @@ public interface INavigator
     Task GoBackAsync();
 }
 
+/// <summary>
+/// Where a search is shown on a phone: the one page loads it in place (.my/design/single-page-phone.md). The
+/// desktop design has none; its searches open a results page.
+/// </summary>
+public interface ISearchFlow
+{
+    /// <summary>Shows a search for <paramref name="artist"/>; <paramref name="cached"/> for a recent one.</summary>
+    Task ShowAsync(string artist, bool cached);
+}
+
 /// <summary>Dialogs, so view models do not know about <c>DisplayAlert</c>.</summary>
 public interface IDialogs
 {
@@ -159,6 +175,7 @@ public static class KofflardRoutes
 
     /// <summary>"true" when a cached result may be shown (a recent search opened again).</summary>
     public const string CachedParameter = "cached";
+
 
     /// <summary>The parameters of a search.</summary>
     public static IReadOnlyDictionary<string, object> ForSearch(string artist, bool cached = false)

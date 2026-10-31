@@ -26,6 +26,25 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
     [UatName("Go")]
     public Button<SearchPage> GoButton => new(this, "Search_Go");
 
+    /// <summary>"No musicians found like …" or an error: what came of a search that opened no page.</summary>
+    [UatName("Message")]
+    public Label<SearchPage> Message => new(this, "Search_Message");
+
+    /// <summary>Offered under the message when the connection is the cause.</summary>
+    [UatName("Fix Connection")]
+    [UatNavigatesTo(typeof(ConnectPage))]
+    public Button<SearchPage> FixConnection => new(this, "Search_FixConnection");
+
+    /// <summary>"Which Genesis do you mean?".</summary>
+    [UatName("Candidates Title")]
+    public Label<SearchPage> CandidatesTitle => new(this, "Search_CandidatesTitle");
+
+    /// <summary>One of the "Did you mean" candidates.</summary>
+    public Button<SearchPage> Candidate(string name) => new(this, $"Candidate_{name}");
+
+    /// <summary>The ✕ on a recent search's chip.</summary>
+    public Button<SearchPage> RemoveRecentButton(string artist) => new(this, $"RecentRow_Remove_{artist}");
+
     /// <summary>Opens the favourites: the star.</summary>
     [UatName("Favourites")]
     [UatNavigatesTo(typeof(SavedPage))]
@@ -42,6 +61,31 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
         NameEntry.SetText(musician);
         GoButton.Click();
         return ResultsPage.Arrived(Context);
+    }
+
+    /// <summary>Searches for <paramref name="musician"/> where no results page opens: nobody found, an error, or "Did you mean".</summary>
+    [BddWhen("I search for {musician} and stay")]
+    public SearchPage SearchAndStay(string musician)
+    {
+        NameEntry.SetText(musician);
+        GoButton.Click();
+        return this;
+    }
+
+    /// <summary>Picks a "Did you mean" candidate, which searches it.</summary>
+    [BddWhen("I choose {name}")]
+    public ResultsPage ChooseCandidate(string name)
+    {
+        Candidate(name).Click();
+        return ResultsPage.Arrived(Context);
+    }
+
+    /// <summary>Forgets a recent search with the ✕ on its chip.</summary>
+    [BddWhen("I remove {artist} from recent")]
+    public SearchPage RemoveRecent(string artist)
+    {
+        RemoveRecentButton(artist).Click();
+        return this;
     }
 
     /// <summary>Opens the settings.</summary>

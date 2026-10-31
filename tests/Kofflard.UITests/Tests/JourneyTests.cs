@@ -116,11 +116,10 @@ public sealed class JourneyTests
             .Answer("Genesis", FakeAi.Canned("genesis-ambiguous"))
             .Answer("Genesis Owusu", FakeAi.Canned("genesis-owusu"));
 
-        var results = _fixture.Search.SearchFor("Genesis");
-        results.State.AssertShowing(ResultsState.Candidates, timeoutMs: TestConstants.PageTimeoutMs);
-        results.CandidatesTitle.AssertText("Which Genesis do you mean?");
+        var search = _fixture.Search.SearchAndStay("Genesis");
+        search.CandidatesTitle.AssertText("Which Genesis do you mean?", timeoutMs: TestConstants.PageTimeoutMs);
 
-        results.Candidates.Choose("Genesis Owusu").WaitForSuggestions();
+        var results = search.ChooseCandidate("Genesis Owusu").WaitForSuggestions();
         results.Heading.AssertText("Like Genesis Owusu");
         results.Suggestions.AssertCard("Little Simz");
         return Task.CompletedTask;
@@ -159,10 +158,33 @@ public sealed class JourneyTests
     {
         _fixture.Ai.FailWith(401);
 
-        var results = _fixture.Search.SearchFor("Nick Drake");
-        results.State.AssertShowing(ResultsState.Error, timeoutMs: TestConstants.PageTimeoutMs);
-        results.ErrorMessage.AssertText("This key was not accepted by Azure OpenAI / Foundry.");
-        results.Connection.AssertTextStartsWith("AI: Azure OpenAI / Foundry");
+        var search = _fixture.Search.SearchAndStay("Nick Drake");
+        search.Message.AssertText("This key was not accepted by Azure OpenAI / Foundry.", timeoutMs: TestConstants.PageTimeoutMs);
+        search.FixConnection.AssertVisible();
+        return Task.CompletedTask;
+    }
+
+    [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
+    [Trait("Journey", "DISC.04.2")]
+    public Task AnUnknownName_StaysOnTheSearchPage_AndSaysSo()
+    {
+        _fixture.Ai.Answer("Xyzzy", FakeAi.Canned("unknown"));
+
+        var search = _fixture.Search.SearchAndStay("Xyzzy");
+        search.Message.AssertText("No musician called Xyzzy is known. Check the spelling and try again.", timeoutMs: TestConstants.PageTimeoutMs);
+        search.AssertLoaded(true);
+        return Task.CompletedTask;
+    }
+
+    [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
+    [Trait("Journey", "DISC.07.1")]
+    public Task TheCross_OnARecentSearch_RemovesIt()
+    {
+        var search = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions().Back();
+        search.RemoveRecentButton("Nick Drake").AssertExists(true, timeoutMs: TestConstants.PageTimeoutMs);
+
+        search.RemoveRecent("Nick Drake");
+        search.RemoveRecentButton("Nick Drake").AssertExists(false, "Nick Drake should be gone from Recent.", TestConstants.PageTimeoutMs);
         return Task.CompletedTask;
     }
 }

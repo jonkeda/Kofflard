@@ -33,5 +33,5 @@ Given I am on the Search page
 When I search for "Nick Drake"
 Then I should be on the Results page
 When I open "Vashti Bunyan" in "Spotify"
-Then "Vashti Bunyan" should say "Opened in Spotify ✓"
+Then "Vashti Bunyan" should say "Opened in Spotify"
 ```

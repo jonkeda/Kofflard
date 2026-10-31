@@ -34,10 +34,12 @@ public static class SuggestionValidator
     /// <param name="answer">The parsed answer.</param>
     /// <param name="artist">The name that was searched.</param>
     /// <param name="exclude">Names already shown.</param>
+    /// <param name="mix">How many of each lane were asked for; <see cref="LaneMix.Even"/> when null.</param>
     public static DiscoveryResult Validate(
         DiscoveryAnswer answer,
         string artist,
-        IReadOnlyCollection<string> exclude)
+        IReadOnlyCollection<string> exclude,
+        LaneMix? mix = null)
     {
         var status = answer.Status switch
         {
@@ -66,7 +68,7 @@ public static class SuggestionValidator
         filter.Searched(searched?.Name);
         var usable = (answer.Suggestions ?? []).Select(filter.Accept).OfType<Suggestion>().ToList();
 
-        return new DiscoveryResult(status, searched, Balance(usable), candidates);
+        return new DiscoveryResult(status, searched, Balance(usable, mix ?? LaneMix.Even), candidates);
     }
 
     /// <summary>Whether <paramref name="bridge"/> names a concrete link rather than a vague likeness.</summary>
@@ -81,19 +83,19 @@ public static class SuggestionValidator
     }
 
     // Each lane's share first, in lane order; then whatever is still short from the leftovers, in the
-    // model's order. A pick keeps the lane the model gave it.
-    private static List<Suggestion> Balance(List<Suggestion> usable)
+    // model's order, from the lanes asked for only. A pick keeps the lane the model gave it.
+    private static List<Suggestion> Balance(List<Suggestion> usable, LaneMix mix)
     {
         var chosen = new List<Suggestion>();
         foreach (var lane in Enum.GetValues<Lane>())
         {
-            chosen.AddRange(usable.Where(suggestion => suggestion.Lane == lane).Take(LaneMix.For(lane)));
+            chosen.AddRange(usable.Where(suggestion => suggestion.Lane == lane).Take(mix.Count(lane)));
         }
 
-        var leftovers = usable.Where(suggestion => !chosen.Contains(suggestion));
-        chosen.AddRange(leftovers.Take(Math.Max(0, LaneMix.Total - chosen.Count)));
+        var leftovers = usable.Where(suggestion => !chosen.Contains(suggestion) && mix.Count(suggestion.Lane) > 0);
+        chosen.AddRange(leftovers.Take(Math.Max(0, mix.Sum - chosen.Count)));
 
-        return [.. chosen.OrderBy(suggestion => suggestion.Lane).Take(LaneMix.Total)];
+        return [.. chosen.OrderBy(suggestion => suggestion.Lane).Take(mix.Sum)];
     }
 
     internal static Suggestion? ToSuggestion(DiscoveryAnswer.Pick pick)

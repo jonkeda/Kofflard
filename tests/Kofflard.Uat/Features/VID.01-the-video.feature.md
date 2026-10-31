@@ -36,9 +36,9 @@ When I enter "Nick Drake" into Name
 And I tap Go
 Then I should be on the Results page
 When I open "Vashti Bunyan"
-Then "Vashti Bunyan" should say "Opened in YouTube ✓"
+Then "Vashti Bunyan" should say "Opened in YouTube"
 When I open "Vashti Bunyan" in "Spotify"
-Then "Vashti Bunyan" should say "Opened in Spotify ✓"
+Then "Vashti Bunyan" should say "Opened in Spotify"
 ```
 
 @VID.01.3 @maui @video

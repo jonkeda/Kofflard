@@ -7,6 +7,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Kofflard.Core.ViewModels;assembly=Kofflard.Core"
              xmlns:services="clr-namespace:Kofflard.Core.Services;assembly=Kofflard.Core"
+             xmlns:models="clr-namespace:Kofflard.Core.Models;assembly=Kofflard.Core"
              x:Class="Kofflard.App.Pages.SearchPage"
              x:DataType="vm:SearchViewModel"
              AutomationId="SearchPage"
@@ -82,19 +83,62 @@
                    HorizontalOptions="Center"
                    IsVisible="{Binding HasNameError}" />
 
-            <Button AutomationId="Search_Go"
-                    Text="Find musicians"
-                    FontSize="18"
-                    HeightRequest="56"
-                    CornerRadius="28"
-                    Command="{Binding SearchCommand}">
-                <Button.Shadow>
-                    <Shadow Brush="{AppThemeBinding Light={StaticResource Ring2Light}, Dark={StaticResource Ring2Dark}}"
-                            Radius="20"
-                            Opacity="0.45"
-                            Offset="0,6" />
-                </Button.Shadow>
-            </Button>
+            <!-- A search waits here for its first card; "Searching…" until then (.my/design/desktop-aurora-changes.md). -->
+            <Grid>
+                <Button AutomationId="Search_Go"
+                        Text="{Binding GoButtonText}"
+                        IsEnabled="{Binding CanSearch}"
+                        FontSize="18"
+                        HeightRequest="56"
+                        CornerRadius="28"
+                        Command="{Binding SearchCommand}">
+                    <Button.Shadow>
+                        <Shadow Brush="{AppThemeBinding Light={StaticResource Ring2Light}, Dark={StaticResource Ring2Dark}}"
+                                Radius="20"
+                                Opacity="0.45"
+                                Offset="0,6" />
+                    </Button.Shadow>
+                </Button>
+                <ActivityIndicator AutomationId="Search_Busy"
+                                   IsRunning="{Binding IsWaiting}"
+                                   IsVisible="{Binding IsWaiting}"
+                                   HeightRequest="22"
+                                   WidthRequest="22"
+                                   Margin="0,0,24,0"
+                                   Color="White"
+                                   HorizontalOptions="End"
+                                   InputTransparent="True" />
+            </Grid>
+
+            <!-- What came of a search that opened no page: nobody found, or an error. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasMessage}">
+                <Label AutomationId="Search_Message"
+                       Text="{Binding Message}"
+                       HorizontalTextAlignment="Center" />
+                <Button AutomationId="Search_FixConnection"
+                        Text="Fix connection"
+                        Style="{StaticResource SoftButton}"
+                        HorizontalOptions="Center"
+                        Command="{Binding FixConnectionCommand}"
+                        IsVisible="{Binding CanFixConnection}" />
+            </VerticalStackLayout>
+
+            <!-- "Did you mean…": a question about the name, so it is asked here. -->
+            <VerticalStackLayout AutomationId="Search_Candidates" Spacing="4" IsVisible="{Binding HasCandidates}">
+                <Label AutomationId="Search_CandidatesTitle" Text="{Binding CandidatesTitle}" Style="{StaticResource Heading}" />
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Candidates}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:Musician">
+                            <Button AutomationId="{Binding Name, StringFormat='Candidate_{0}'}"
+                                    Text="{Binding Name}"
+                                    Style="{StaticResource LinkButton}"
+                                    HorizontalOptions="Start"
+                                    Command="{Binding ChooseCandidateCommand, Source={RelativeSource AncestorType={x:Type vm:SearchViewModel}}}"
+                                    CommandParameter="{Binding .}" />
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
 
             <Label Text="RECENT" Style="{StaticResource Faint}" CharacterSpacing="1.5" IsVisible="{Binding HasRecent}" />
         </VerticalStackLayout>
@@ -107,13 +151,25 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:RecentSearch">
                     <Grid AutomationId="RecentRow" Padding="0,4">
-                        <Border Padding="16,10"
+                        <Border Padding="16,0,4,0"
                                 HorizontalOptions="Start"
                                 StrokeShape="RoundRectangle 20"
                                 StrokeThickness="1"
                                 Stroke="{AppThemeBinding Light={StaticResource ChipEdgeLight}, Dark={StaticResource ChipEdgeDark}}"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource ChipLight}, Dark={StaticResource ChipDark}}">
-                            <Label AutomationId="RecentRow_Artist" Text="{Binding Artist}" />
+                            <HorizontalStackLayout Spacing="2">
+                                <Label AutomationId="RecentRow_Artist" Text="{Binding Artist}" VerticalOptions="Center" />
+                                <!-- ✕ forgets the search; its own button, so it doesn't select the chip (.my/design/desktop-aurora-changes.md). -->
+                                <Button AutomationId="{Binding Artist, StringFormat='RecentRow_Remove_{0}'}"
+                                        Text="✕"
+                                        Style="{StaticResource LinkButton}"
+                                        FontSize="14"
+                                        Padding="10,0"
+                                        MinimumHeightRequest="40"
+                                        SemanticProperties.Description="{Binding Artist, StringFormat='Remove {0} from recent'}"
+                                        Command="{Binding RemoveRecentCommand, Source={RelativeSource AncestorType={x:Type vm:SearchViewModel}}}"
+                                        CommandParameter="{Binding .}" />
+                            </HorizontalStackLayout>
                         </Border>
                     </Grid>
                 </DataTemplate>

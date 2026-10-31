@@ -108,6 +108,10 @@ public static class KofflardServiceCollectionExtensions
 
         services.AddSingleton<SearchViewModel>();
         services.AddTransient<ResultsViewModel>();
+        services.AddSingleton<Func<ResultsViewModel>>(provider => provider.GetRequiredService<ResultsViewModel>);
+        services.AddSingleton<SearchLauncher>();
+        services.AddSingleton<RunningSearch>();
+        services.AddSingleton<DiscoverViewModel>();
         services.AddTransient<ConnectViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<SavedViewModel>();

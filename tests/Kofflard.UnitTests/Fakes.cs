@@ -38,6 +38,12 @@ internal sealed class MemoryHistory : IHistoryStore
 
     public Task<IReadOnlyList<RecentSearch>> RecentSearchesAsync(int count) => Task.FromResult<IReadOnlyList<RecentSearch>>([.. Searches.Take(count)]);
 
+    public Task RemoveSearchAsync(string artist)
+    {
+        Searches.RemoveAll(s => Names.Same(s.Artist, artist));
+        return Task.CompletedTask;
+    }
+
     public Task MarkShownAsync(IEnumerable<string> names, DateTimeOffset at)
     {
         Shown.InsertRange(0, names);

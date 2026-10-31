@@ -19,6 +19,7 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
     private const string ModelKey = "ai.model";
     private const string OpenWithKey = "open_with";
     private const string CheckNamesKey = "check_names";
+    private const string LanesKey = "lanes";
 
     /// <inheritdoc />
     public async Task<AppSettings> LoadAsync()
@@ -44,7 +45,10 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
                 ? new AiConnection(provider, values.GetValueOrDefault(EndpointKey) is { Length: > 0 } endpoint ? endpoint : null, model)
                 : null,
             values.TryGetValue(OpenWithKey, out var openWith) && Enum.TryParse<MusicService>(openWith, out var service) ? service : defaults.OpenWith,
-            values.TryGetValue(CheckNamesKey, out var check) ? check == "true" : defaults.CheckNames);
+            values.TryGetValue(CheckNamesKey, out var check) ? check == "true" : defaults.CheckNames)
+        {
+            Lanes = LaneSet.Parse(values.GetValueOrDefault(LanesKey)) ?? defaults.Lanes,
+        };
     }
 
     /// <inheritdoc />
@@ -54,6 +58,7 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
         {
             [OpenWithKey] = settings.OpenWith.ToString(),
             [CheckNamesKey] = settings.CheckNames ? "true" : "false",
+            [LanesKey] = settings.Lanes.ToString(),
         };
 
         if (settings.Connection is { } ai)
@@ -115,6 +120,14 @@ public sealed class SqliteHistoryStore(KofflardDatabase database) : IHistoryStor
         }
 
         return searches;
+    }
+
+    /// <inheritdoc />
+    public async Task RemoveSearchAsync(string artist)
+    {
+        await using var connection = await database.OpenAsync();
+        await using var command = connection.Command("DELETE FROM searches WHERE normalised = $normalised;", ("$normalised", Names.Normalise(artist)));
+        await command.ExecuteNonQueryAsync();
     }
 
     /// <inheritdoc />

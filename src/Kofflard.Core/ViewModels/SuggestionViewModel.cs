@@ -25,6 +25,7 @@ public sealed class SuggestionViewModel : ParentViewModel
     private Verification _verification = Verification.Unverified;
     private bool _isSaved;
     private string _openedText = string.Empty;
+    private string _exploreNote = string.Empty;
     private int _opens;
     private bool _showsOtherServices;
 
@@ -64,7 +65,7 @@ public sealed class SuggestionViewModel : ParentViewModel
         ExploreCommand = new TargetAsyncCommand(this, () => _explore(this));
     }
 
-    /// <summary>How long "Opened in YouTube ✓" stays on the card.</summary>
+    /// <summary>How long "Opened in YouTube" stays on the card.</summary>
     public static readonly TimeSpan OpenedShownFor = TimeSpan.FromSeconds(3);
 
     /// <summary>The suggestion.</summary>
@@ -108,7 +109,6 @@ public sealed class SuggestionViewModel : ParentViewModel
         {
             if (SetProperty(ref _verification, value))
             {
-                OnPropertyChanged(nameof(VerifiedMark));
                 OnPropertyChanged(nameof(IsVerified));
                 OnPropertyChanged(nameof(IsNotFound));
                 OnPropertyChanged(nameof(Opacity));
@@ -121,9 +121,6 @@ public sealed class SuggestionViewModel : ParentViewModel
 
     /// <summary>Whether MusicBrainz did not know the name.</summary>
     public bool IsNotFound => _verification.State == VerificationState.NotFound;
-
-    /// <summary>"✓" once verified, else empty.</summary>
-    public string VerifiedMark => IsVerified ? "✓" : string.Empty;
 
     /// <summary>A card MusicBrainz did not know is dimmed.</summary>
     public double Opacity => IsNotFound ? 0.5 : 1.0;
@@ -178,7 +175,26 @@ public sealed class SuggestionViewModel : ParentViewModel
     public IAsyncRelayCommand ExploreCommand { get; }
 
     /// <summary>
-    /// "Opened in YouTube ✓" for a moment after an open, or "Couldn't open YouTube": the hand-off can be slow,
+    /// "Searching…" while "More →" waits for its first card, then what came of it when no page opened:
+    /// "Nothing found like Vashti Bunyan" (.my/design/desktop-aurora-changes.md). Empty otherwise.
+    /// </summary>
+    public string ExploreNote
+    {
+        get => _exploreNote;
+        internal set
+        {
+            if (SetProperty(ref _exploreNote, value))
+            {
+                OnPropertyChanged(nameof(HasExploreNote));
+            }
+        }
+    }
+
+    /// <summary>Whether <see cref="ExploreNote"/> is shown.</summary>
+    public bool HasExploreNote => _exploreNote.Length > 0;
+
+    /// <summary>
+    /// "Opened in YouTube" for a moment after an open, or "Couldn't open YouTube": the hand-off can be slow,
     /// and on Windows the browser opens behind the app.
     /// </summary>
     public string OpenedText
@@ -204,7 +220,7 @@ public sealed class SuggestionViewModel : ParentViewModel
         await _history.MarkOpenedAsync(Name, _time.GetUtcNow());
 
         var name = MusicLinks.DisplayName(service);
-        OpenedText = outcome == LaunchOutcome.Failed ? $"Couldn't open {name}" : $"Opened in {name} ✓";
+        OpenedText = outcome == LaunchOutcome.Failed ? $"Couldn't open {name}" : $"Opened in {name}";
         var open = ++_opens;
         _ = ClearOpenedAsync(open);
         return outcome;

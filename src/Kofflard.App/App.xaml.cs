@@ -19,6 +19,12 @@ public partial class App : Application
     {
         InitializeComponent();
         _shell = shell;
+
+        // On Android the page shrinks above the keyboard, so the phone's dock sits on it
+        // (.my/design/single-page-phone.md). iOS scrolls the focused field into view by itself.
+        Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific.Application.SetWindowSoftInputModeAdjust(
+            this,
+            Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific.WindowSoftInputModeAdjust.Resize);
     }
 
     /// <summary>

@@ -43,11 +43,17 @@ public class KofflardAppFixture : MauiTestFixtureBase
 
     private Arrangement? _arrangement;
 
-    /// <summary>Launches the app and waits for the search page.</summary>
+    /// <summary>Launches the app and waits for its first page.</summary>
     public KofflardAppFixture()
     {
-        SearchPage.Arrived(Context);
+        Arrived();
     }
+
+    /// <summary>
+    /// The design the app shows. The desktop one (Aurora D) for this suite, on every head, a phone's
+    /// included; <see cref="PhoneAppFixture"/> shows the phone's (.my/design/single-page-phone.md).
+    /// </summary>
+    protected virtual KofflardLayout Layout => KofflardLayout.Desktop;
 
     /// <summary>The fake AI the app is connected to, unless the run is live.</summary>
     public FakeAi Ai => Arranged.Ai;
@@ -70,6 +76,16 @@ public class KofflardAppFixture : MauiTestFixtureBase
     /// <summary>Puts back what earlier tests may have changed outside the app, and returns to the search page.</summary>
     public SearchPage StartTest()
     {
+        Reset();
+        return ReturnToSearch();
+    }
+
+    /// <summary>Waits for the app's first page.</summary>
+    protected virtual void Arrived() => SearchPage.Arrived(Context);
+
+    /// <summary>Puts back what earlier tests may have changed outside the app: the AI, the history, the settings, the launch log.</summary>
+    protected void Reset()
+    {
         LetTheLastTestFinish();
         Ai.Reset();
         ForgetHistory();
@@ -78,8 +94,6 @@ public class KofflardAppFixture : MauiTestFixtureBase
         {
             File.Delete(Arranged.LaunchLog);
         }
-
-        return ReturnToSearch();
     }
 
     /// <summary>Waits until the launch log holds a line starting with <paramref name="start"/>.</summary>
@@ -248,6 +262,7 @@ public class KofflardAppFixture : MauiTestFixtureBase
             // Nothing listens there: name checks are off by default, and a test that turns them on gets "unverified".
             MusicBrainzBaseUrl = "http://127.0.0.1:1/",
             LaunchLog = Path.Combine(folder, "opened.txt"),
+            Layout = Layout,
         };
 
         _arrangement = new Arrangement(folder, ai, settings, settings.LaunchLog, live);

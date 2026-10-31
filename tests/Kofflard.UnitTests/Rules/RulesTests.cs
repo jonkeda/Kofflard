@@ -7,6 +7,31 @@ namespace Kofflard.UnitTests.Rules;
 public sealed class LaneMixTests
 {
     [Fact]
+    public void APhone_SplitsTwelve_BetweenTheLanesThatAreOn()
+    {
+        Assert.Equal(new LaneMix(12, 0, 0), LaneMix.For(new LaneSet(true, false, false)));
+        Assert.Equal(new LaneMix(6, 0, 6), LaneMix.For(new LaneSet(true, false, true)));
+        Assert.Equal(new LaneMix(4, 4, 4), LaneMix.For(LaneSet.All));
+        Assert.Equal(new LaneMix(0, 0, 4), LaneMix.Only(Lane.Wild));
+    }
+
+    [Fact]
+    public void ThePrompt_AsksForTheMix_AndNoneOfALaneThatIsOff()
+    {
+        Assert.Contains("Suggest exactly 4 close, 4 stretch and 4 leap musicians.", DiscoveryPrompt.User("Nick Drake", []));
+        Assert.Contains("Suggest exactly 6 close and 6 stretch musicians, and no leap musicians.", DiscoveryPrompt.User("Nick Drake", [], new LaneMix(6, 6, 0)));
+        Assert.Contains("Suggest exactly 4 leap musicians, and no close or stretch musicians.", DiscoveryPrompt.User("Nick Drake", [], LaneMix.Only(Lane.Wild)));
+    }
+
+    [Fact]
+    public void TheLaneSetting_ReadsBackWhatItWrote()
+    {
+        Assert.Equal(LaneSet.Default, LaneSet.Parse(LaneSet.Default.ToString()));
+        Assert.Equal(new LaneSet(false, false, true), LaneSet.Parse("Wild"));
+        Assert.Null(LaneSet.Parse(""));
+    }
+
+    [Fact]
     public void EveryLane_GetsFour_OfTwelve()
     {
         Assert.All(Enum.GetValues<Lane>(), lane => Assert.Equal(4, LaneMix.For(lane)));

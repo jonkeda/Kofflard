@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kofflard phone, first open</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; color: #EEE8FF; font-family: Outfit, system-ui, sans-serif; background: radial-gradient(420px 180px at 30% -40px, rgba(122, 82, 255, 0.6), transparent 70%), radial-gradient(300px 160px at 90% -20px, rgba(56, 214, 196, 0.35), transparent 70%), radial-gradient(400px 400px at 0% 70%, rgba(90, 40, 170, 0.35), transparent 70%), #0A0617; display: flex; flex-direction: column">
+
+  <header style="display: flex; align-items: center; gap: 4px; height: 52px; padding: 8px 10px 0 18px">
+    <span style="flex: 1; font-size: 24px; font-weight: 600; color: #FFFFFF; text-shadow: 0 0 18px rgba(185, 140, 255, 0.55)">Kofflard</span>
+    <button aria-label="Favourites" style="width: 44px; height: 44px; border: 0; background: transparent; color: #FFFFFF; display: grid; place-items: center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"></path></svg>
+    </button>
+    <button aria-label="Settings" style="width: 44px; height: 44px; border: 0; background: transparent; color: #FFFFFF; display: grid; place-items: center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+    </button>
+  </header>
+
+  <main style="flex: 1; min-height: 0; padding: 0 18px; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-bottom: 28px; text-align: center">
+      <div aria-hidden="true" style="width: 150px; height: 150px; border-radius: 75px; padding: 3px; background: linear-gradient(120deg, #3FD6C4, #B98CFF 55%, #F472B6); box-shadow: 0 0 40px rgba(185, 140, 255, 0.45), 0 0 90px rgba(63, 214, 196, 0.2)">
+        <div style="width: 100%; height: 100%; border-radius: 75px; background: radial-gradient(circle at 40% 35%, rgba(185, 140, 255, 0.35), #140C30 70%)"></div>
+      </div>
+      <h1 style="margin: 8px 0 0; font-size: 30px; font-weight: 500; color: #FFFFFF; text-shadow: 0 0 18px rgba(185, 140, 255, 0.55)">Who do you like?</h1>
+      <p style="margin: 0; max-width: 280px; font-size: 15px; line-height: 1.4; color: #C9BEEA">Name a musician or band below, and find who to listen to next.</p>
+    </div>
+
+    <h2 style="margin: 0 2px; font-size: 12px; font-weight: 600; letter-spacing: 1.6px; color: #BDB2DD">RECENT</h2>
+    <ul aria-label="Recent searches" style="list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px">
+      <li style="display: flex; align-items: center; border-radius: 22px; border: 1px solid rgba(190, 170, 255, 0.35); background: rgba(30, 18, 70, 0.5)">
+        <button style="min-height: 44px; padding: 0 4px 0 16px; border: 0; background: transparent; color: #EEE8FF; font: 400 15px Outfit, sans-serif">Nick Drake</button>
+        <button aria-label="Remove Nick Drake from recent" style="width: 40px; height: 44px; border: 0; background: transparent; color: #C9BEEA; display: grid; place-items: center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </button>
+      </li>
+      <li style="display: flex; align-items: center; border-radius: 22px; border: 1px solid rgba(190, 170, 255, 0.35); background: rgba(30, 18, 70, 0.5)">
+        <button style="min-height: 44px; padding: 0 4px 0 16px; border: 0; background: transparent; color: #EEE8FF; font: 400 15px Outfit, sans-serif">Khruangbin</button>
+        <button aria-label="Remove Khruangbin from recent" style="width: 40px; height: 44px; border: 0; background: transparent; color: #C9BEEA; display: grid; place-items: center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </button>
+      </li>
+      <li style="display: flex; align-items: center; border-radius: 22px; border: 1px solid rgba(190, 170, 255, 0.35); background: rgba(30, 18, 70, 0.5)">
+        <button style="min-height: 44px; padding: 0 4px 0 16px; border: 0; background: transparent; color: #EEE8FF; font: 400 15px Outfit, sans-serif">Alice Coltrane</button>
+        <button aria-label="Remove Alice Coltrane from recent" style="width: 40px; height: 44px; border: 0; background: transparent; color: #C9BEEA; display: grid; place-items: center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </button>
+      </li>
+    </ul>
+  </main>
+
+  <footer style="flex: none; padding: 12px 16px 26px; display: flex; flex-direction: column; gap: 12px; background: rgba(16, 9, 38, 0.9); border-top: 1px solid rgba(190, 170, 255, 0.35); border-radius: 24px 24px 0 0; box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45)">
+    <div role="group" aria-label="Lanes to ask for and show" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <button aria-pressed="true" style="min-height: 44px; border-radius: 22px; border: 1px solid #F5B04C; background: #F5B04C; color: #1A1003; font: 600 15px Outfit, sans-serif; box-shadow: 0 0 16px rgba(245, 176, 76, 0.3)">Safe</button>
+      <button aria-pressed="true" style="min-height: 44px; border-radius: 22px; border: 1px solid #3FD6C4; background: #3FD6C4; color: #04201C; font: 600 15px Outfit, sans-serif; box-shadow: 0 0 16px rgba(63, 214, 196, 0.3)">Curious</button>
+      <button aria-pressed="false" style="min-height: 44px; border-radius: 22px; border: 1px solid rgba(185, 140, 255, 0.55); background: rgba(30, 18, 70, 0.5); color: #DCC8FF; font: 500 15px Outfit, sans-serif">Wild</button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <label style="flex: 1; min-width: 0; border-radius: 26px; padding: 2px; background: linear-gradient(120deg, #3FD6C4, #B98CFF 55%, #F472B6); box-shadow: 0 0 18px rgba(185, 140, 255, 0.45)">
+        <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Who do you like?</span>
+        <input type="text" placeholder="A musician or band" style="box-sizing: border-box; width: 100%; height: 48px; border: 0; border-radius: 24px; padding: 0 18px; background: #140C30; color: #FFFFFF; font: 400 17px Outfit, sans-serif; outline: none">
+      </label>
+      <button aria-label="Find musicians" style="flex: none; width: 52px; height: 52px; border: 0; border-radius: 26px; background: linear-gradient(120deg, #3FD6C4, #B98CFF 55%, #F472B6); color: #FFFFFF; display: grid; place-items: center; box-shadow: 0 0 18px rgba(185, 140, 255, 0.45)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </button>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

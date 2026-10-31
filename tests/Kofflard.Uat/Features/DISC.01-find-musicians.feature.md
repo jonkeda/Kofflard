@@ -48,11 +48,10 @@ And the AI answers "Genesis Owusu" with "genesis-owusu"
 And I am on the Search page
 When I enter "Genesis" into Name
 And I tap Go
-Then I should be on the Results page
-And Results should show the Candidates state
-And Candidates Title should equal "Which Genesis do you mean?"
+Then Candidates Title should equal "Which Genesis do you mean?"
 When I choose "Genesis Owusu"
-Then Heading should equal "Like Genesis Owusu"
+Then I should be on the Results page
+And Heading should equal "Like Genesis Owusu"
 And Suggestions should suggest "Little Simz"
 ```
 
@@ -64,8 +63,7 @@ Given the AI refuses the key
 And I am on the Search page
 When I enter "Nick Drake" into Name
 And I tap Go
-Then I should be on the Results page
-And Results should show the Error state
-And Error Message should equal "This key was not accepted by Azure OpenAI / Foundry."
-And Connection should contain "AI: Azure OpenAI / Foundry"
+Then Message should equal "This key was not accepted by Azure OpenAI / Foundry."
+And Fix Connection should be visible
+And I should be on the Search page
 ```

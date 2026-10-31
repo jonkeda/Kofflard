@@ -50,7 +50,7 @@
             </ContentView>
 
             <VerticalStackLayout Padding="8,4,8,14" Spacing="4" InputTransparent="True" CascadeInputTransparent="False">
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="2" InputTransparent="True" CascadeInputTransparent="False">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="2" InputTransparent="True" CascadeInputTransparent="False">
                     <Button AutomationId="Suggestion_Save"
                             Text="{Binding StarText}"
                             Command="{Binding SaveCommand}"
@@ -73,25 +73,7 @@
                            TextColor="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}"
                            VerticalOptions="Center"
                            InputTransparent="True" />
-                    <Label Grid.Column="2"
-                           AutomationId="Suggestion_Verified"
-                           Text="{Binding VerifiedMark}"
-                           TextColor="{AppThemeBinding Light={StaticResource SafeTextLight}, Dark={StaticResource SafeTextDark}}"
-                           FontAttributes="Bold"
-                           VerticalOptions="Center"
-                           SemanticProperties.Description="Confirmed by MusicBrainz"
-                           IsVisible="{Binding IsVerified}"
-                           InputTransparent="True">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding LaneName}" Value="Curious">
-                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource CuriousTextLight}, Dark={StaticResource CuriousTextDark}}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding LaneName}" Value="Wild">
-                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WildTextLight}, Dark={StaticResource WildTextDark}}" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
-                    <Button Grid.Column="3"
+                    <Button Grid.Column="2"
                             AutomationId="Suggestion_Explore"
                             Text="More →"
                             Command="{Binding ExploreCommand}"
@@ -114,6 +96,11 @@
                            FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource AccentLight}, Dark={StaticResource AccentDark}}"
                            IsVisible="{Binding HasOpenedText}" />
+                    <!-- "Searching…" while "More →" waits for its first card, then "Nothing found like …" (.my/design/desktop-aurora-changes.md). -->
+                    <Label AutomationId="Suggestion_ExploreNote"
+                           Text="{Binding ExploreNote}"
+                           Style="{StaticResource Muted}"
+                           IsVisible="{Binding HasExploreNote}" />
                     <Label AutomationId="Suggestion_NotFound"
                            Text="Couldn't confirm this artist"
                            Style="{StaticResource Faint}"

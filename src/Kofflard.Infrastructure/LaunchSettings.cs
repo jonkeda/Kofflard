@@ -44,6 +44,12 @@ public sealed record LaunchSettings
     /// <summary>The window's size on Windows, as <c>1280x800</c>: the same frame in every recorded take. Read by the app.</summary>
     public const string WindowVariable = "KOFFLARD_WINDOW";
 
+    /// <summary>
+    /// "phone" or "desktop": which design the app shows, whatever the device (.my/design/single-page-phone.md).
+    /// Unset, a phone shows the phone design and everything else the desktop one.
+    /// </summary>
+    public const string LayoutVariable = "KOFFLARD_LAYOUT";
+
     /// <summary>The model a pre-connected fake AI is asked for.</summary>
     public const string TestModel = "kofflard-test";
 
@@ -74,6 +80,9 @@ public sealed record LaunchSettings
     /// <summary>The launch log; null to open links for real.</summary>
     public string? LaunchLog { get; init; }
 
+    /// <summary>The design to show, from <see cref="LayoutVariable"/>; null to go by the device.</summary>
+    public KofflardLayout? Layout { get; init; }
+
     /// <summary>How long an AI request may take.</summary>
     public TimeSpan AiTimeout { get; init; } = TimeSpan.FromSeconds(60);
 
@@ -99,6 +108,7 @@ public sealed record LaunchSettings
             MusicBrainzBaseUrl = Value(read, MusicBrainzBaseUrlVariable) ?? defaults.MusicBrainzBaseUrl,
             OpenRouterBaseUrl = Value(read, OpenRouterBaseUrlVariable) ?? defaults.OpenRouterBaseUrl,
             LaunchLog = Value(read, LaunchLogVariable),
+            Layout = Enum.TryParse<KofflardLayout>(Value(read, LayoutVariable), ignoreCase: true, out var layout) ? layout : null,
         };
     }
 
@@ -114,6 +124,7 @@ public sealed record LaunchSettings
         Add(values, MusicBrainzBaseUrlVariable, MusicBrainzBaseUrl);
         Add(values, OpenRouterBaseUrlVariable, OpenRouterBaseUrl);
         Add(values, LaunchLogVariable, LaunchLog);
+        Add(values, LayoutVariable, Layout?.ToString().ToLowerInvariant());
         return values;
     }
 
@@ -127,4 +138,14 @@ public sealed record LaunchSettings
             values[name] = value;
         }
     }
+}
+
+/// <summary>Kofflard's two designs (.my/design/single-page-phone.md).</summary>
+public enum KofflardLayout
+{
+    /// <summary>Android and iOS phones: one page, the search at the bottom.</summary>
+    Phone,
+
+    /// <summary>Windows and tablets: Aurora D, a search page that pushes a results page.</summary>
+    Desktop,
 }

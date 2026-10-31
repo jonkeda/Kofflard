@@ -20,7 +20,15 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
                ItemStrategy.ByAutomationId("Suggestion"),
                (collection, itemRoot, index) => new SuggestionCard(collection, itemRoot, index))
     {
+        _onPhone = parentScope is PhoneResults;
     }
+
+    // Whether the list is on the phone's one page rather than the desktop's results page.
+    private readonly bool _onPhone;
+
+    // A fresh page object each time, so it finds the page shown now: after "More →" the page this list was
+    // made on may be covered by the next one (.my/rca/stacked-pages.md).
+    private ResultsPage Results => _onPhone ? new PhoneResults(Context) : new ResultsPage(Context);
 
     /// <summary>The names of the cards, in the order shown.</summary>
     public IReadOnlyList<string> Names() => [.. Items.Select(card => TryReadName(card) ?? string.Empty)];
@@ -33,7 +41,7 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
     /// </remarks>
     public SuggestionCard Card(string musician)
     {
-        new ResultsPage(Context).WaitForSuggestions();
+        Results.WaitForSuggestions();
         return Shown(musician);
     }
 
@@ -66,7 +74,7 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
     [BddThen("{item} should be a {value} suggestion")]
     public SuggestionList AssertLane(string musician, string lane)
     {
-        var results = new ResultsPage(Context).WaitForSuggestions();
+        var results = Results.WaitForSuggestions();
         Shown(musician);
         var place = Names().ToList().IndexOf(musician);
         var end = 0;
@@ -88,7 +96,7 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
     public SuggestionList AssertOpensFirstIn(string musician, string service)
     {
         Select(musician);
-        Card(musician).Opened.AssertText($"Opened in {service} ✓", timeoutMs: TestConstants.PageTimeoutMs);
+        Card(musician).Opened.AssertText($"Opened in {service}", timeoutMs: TestConstants.PageTimeoutMs);
         return Self;
     }
 
@@ -100,7 +108,7 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
         return Self;
     }
 
-    /// <summary>Asserts <paramref name="musician"/>'s card says <paramref name="text"/> after an open: "Opened in YouTube ✓".</summary>
+    /// <summary>Asserts <paramref name="musician"/>'s card says <paramref name="text"/> after an open: "Opened in YouTube".</summary>
     [BddThen("{item} should say {value}")]
     public SuggestionList AssertSays(string musician, string text)
     {
@@ -214,11 +222,11 @@ public sealed class SuggestionCard : ItemObjectBase<SuggestionList, SuggestionCa
     /// <summary>Why it fits, or "Bridge: …" for a leap.</summary>
     public Label<SuggestionCard> Why => new(this, "Suggestion_Why");
 
-    /// <summary>"Opened in YouTube ✓" for a moment after an open.</summary>
+    /// <summary>"Opened in YouTube" for a moment after an open.</summary>
     public Label<SuggestionCard> Opened => new(this, "Suggestion_Opened");
 
-    /// <summary>"✓" once MusicBrainz confirmed the name.</summary>
-    public Label<SuggestionCard> Verified => new(this, "Suggestion_Verified");
+    /// <summary>"Searching…" while "More →" waits for its first card, then "Nothing found like …".</summary>
+    public Label<SuggestionCard> ExploreNote => new(this, "Suggestion_ExploreNote");
 
     /// <summary>The card itself: a tap opens the Open with service, a long press offers the others.</summary>
     public CardSurface<SuggestionCard> Surface => new(this, "Suggestion_Card");

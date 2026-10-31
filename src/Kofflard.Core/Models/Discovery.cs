@@ -17,6 +17,62 @@ public enum Lane
     Wild,
 }
 
+/// <summary>
+/// The lanes a phone search asks for and shows, chosen with the Safe, Curious and Wild toggles
+/// (.my/design/single-page-phone.md). At least one is on.
+/// </summary>
+/// <param name="Safe">Whether Safe is on.</param>
+/// <param name="Curious">Whether Curious is on.</param>
+/// <param name="Wild">Whether Wild is on.</param>
+public readonly record struct LaneSet(bool Safe, bool Curious, bool Wild)
+{
+    /// <summary>Every lane: what the desktop design asks for and shows.</summary>
+    public static LaneSet All { get; } = new(true, true, true);
+
+    /// <summary>A new install: Safe and Curious, so far picks come only when asked for (design §2).</summary>
+    public static LaneSet Default { get; } = new(true, true, false);
+
+    /// <summary>The lanes that are on, in lane order.</summary>
+    public IReadOnlyList<Lane> Lanes => [.. Enum.GetValues<Lane>().Where(Contains)];
+
+    /// <summary>How many lanes are on.</summary>
+    public int Count => Lanes.Count;
+
+    /// <summary>Whether <paramref name="lane"/> is on.</summary>
+    public bool Contains(Lane lane) => lane switch
+    {
+        Lane.Safe => Safe,
+        Lane.Curious => Curious,
+        _ => Wild,
+    };
+
+    /// <summary>This set with <paramref name="lane"/> turned on or off.</summary>
+    public LaneSet With(Lane lane, bool on) => lane switch
+    {
+        Lane.Safe => this with { Safe = on },
+        Lane.Curious => this with { Curious = on },
+        _ => this with { Wild = on },
+    };
+
+    /// <summary>"Safe,Curious", as the setting stores it.</summary>
+    public override string ToString() => string.Join(',', Lanes);
+
+    /// <summary>Reads <see cref="ToString"/>; null when it names no lane.</summary>
+    public static LaneSet? Parse(string? text)
+    {
+        var set = new LaneSet(false, false, false);
+        foreach (var part in (text ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (Enum.TryParse<Lane>(part, out var lane))
+            {
+                set = set.With(lane, true);
+            }
+        }
+
+        return set.Count == 0 ? null : set;
+    }
+}
+
 /// <summary>How the model answered the name it was given.</summary>
 public enum DiscoveryStatus
 {
