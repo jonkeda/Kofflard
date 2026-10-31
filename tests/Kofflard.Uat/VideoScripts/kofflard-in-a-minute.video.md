@@ -19,7 +19,7 @@ Kofflard starts with one question: who do you like?
 | And I tap Go | Kofflard asks an AI for musicians you may not know yet. |
 | Then I should be on the Results page | Twelve of them, in three lanes. |
 
-Safe ones first. Slide, and the curious ones show. Then the wild ones.
+Safe ones first. Then curious ones. Then a few wild ones.
 
 ## Scene: Three lanes
 

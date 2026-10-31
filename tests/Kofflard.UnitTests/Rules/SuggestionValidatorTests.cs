@@ -8,28 +8,16 @@ public sealed class SuggestionValidatorTests
     private const string GoodBridge = "Both recorded with producer Joe Boyd at Sound Techniques";
 
     [Fact]
-    public void Validate_KeepsEachLanesShare_OfTheEvenMix()
+    public void Validate_KeepsFourOfEachLane()
     {
         var answer = Answer(Picks(Lane.Safe, 8).Concat(Picks(Lane.Curious, 6)).Concat(Picks(Lane.Wild, 6)));
 
-        var result = SuggestionValidator.Validate(answer, "Nick Drake", LaneMix.Even, []);
+        var result = SuggestionValidator.Validate(answer, "Nick Drake", []);
 
         Assert.Equal(4, result.Count(Lane.Safe));
         Assert.Equal(4, result.Count(Lane.Curious));
         Assert.Equal(4, result.Count(Lane.Wild));
         Assert.Equal(LaneMix.Total, result.Suggestions.Count);
-    }
-
-    [Fact]
-    public void Validate_KeepsEachLanesShare_LeaningWild()
-    {
-        var answer = Answer(Picks(Lane.Safe, 8).Concat(Picks(Lane.Curious, 6)).Concat(Picks(Lane.Wild, 6)));
-
-        var result = SuggestionValidator.Validate(answer, "Nick Drake", Lane.Wild, []);
-
-        Assert.Equal(2, result.Count(Lane.Safe));
-        Assert.Equal(4, result.Count(Lane.Curious));
-        Assert.Equal(6, result.Count(Lane.Wild));
     }
 
     [Fact]
@@ -43,7 +31,7 @@ public sealed class SuggestionValidatorTests
             new DiscoveryAnswer.Pick("Someone", "wild", "why", GoodBridge, [], null),
         ]);
 
-        var result = SuggestionValidator.Validate(answer, "Nick Drake", LaneMix.Even, []);
+        var result = SuggestionValidator.Validate(answer, "Nick Drake", []);
 
         Assert.Equal([Lane.Safe, Lane.Curious, Lane.Wild], result.Suggestions.Select(s => s.Lane));
     }
@@ -53,7 +41,7 @@ public sealed class SuggestionValidatorTests
     {
         var answer = Answer(Picks(Lane.Safe, 3).Concat(Picks(Lane.Curious, 9)).Concat(Picks(Lane.Wild, 2)));
 
-        var result = SuggestionValidator.Validate(answer, "Nick Drake", LaneMix.Even, []);
+        var result = SuggestionValidator.Validate(answer, "Nick Drake", []);
 
         Assert.Equal(3, result.Count(Lane.Safe));
         Assert.Equal(7, result.Count(Lane.Curious));
@@ -63,7 +51,7 @@ public sealed class SuggestionValidatorTests
     [Fact]
     public void Validate_NeverPads_WhenTheModelGaveTooFew()
     {
-        var result = SuggestionValidator.Validate(Answer(Picks(Lane.Safe, 2)), "Nick Drake", LaneMix.Even, []);
+        var result = SuggestionValidator.Validate(Answer(Picks(Lane.Safe, 2)), "Nick Drake", []);
 
         Assert.Equal(2, result.Suggestions.Count);
     }
@@ -80,7 +68,7 @@ public sealed class SuggestionValidatorTests
             Pick("Vashti Bunyan", Lane.Safe),
         ]);
 
-        var result = SuggestionValidator.Validate(answer, "nick drake", LaneMix.Even, ["JOHN MARTYN"]);
+        var result = SuggestionValidator.Validate(answer, "nick drake", ["JOHN MARTYN"]);
 
         Assert.Equal(["björk", "Vashti Bunyan"], result.Suggestions.Select(s => s.Name));
     }
@@ -94,7 +82,7 @@ public sealed class SuggestionValidatorTests
     {
         var leap = new DiscoveryAnswer.Pick("Ali Farka Touré", "leap", "Desert blues", bridge, ["blues"], null);
 
-        var result = SuggestionValidator.Validate(Answer([leap]), "Nick Drake", LaneMix.Even, []);
+        var result = SuggestionValidator.Validate(Answer([leap]), "Nick Drake", []);
 
         Assert.Empty(result.Suggestions);
     }
@@ -104,7 +92,7 @@ public sealed class SuggestionValidatorTests
     {
         var answer = Answer([Pick("Ali Farka Touré", Lane.Wild, GoodBridge), Pick("Vashti Bunyan", Lane.Safe, GoodBridge)]);
 
-        var result = SuggestionValidator.Validate(answer, "Nick Drake", LaneMix.Even, []);
+        var result = SuggestionValidator.Validate(answer, "Nick Drake", []);
 
         Assert.Equal(GoodBridge, result.Suggestions.Single(s => s.Lane == Lane.Wild).Bridge);
         Assert.Null(result.Suggestions.Single(s => s.Lane == Lane.Safe).Bridge);
@@ -120,7 +108,7 @@ public sealed class SuggestionValidatorTests
             Pick("Vashti Bunyan", Lane.Safe),
         ]);
 
-        var result = SuggestionValidator.Validate(answer, "Nick Drake", LaneMix.Even, []);
+        var result = SuggestionValidator.Validate(answer, "Nick Drake", []);
 
         Assert.Equal("Vashti Bunyan", Assert.Single(result.Suggestions).Name);
     }
@@ -134,7 +122,7 @@ public sealed class SuggestionValidatorTests
             [Pick("Ignored", Lane.Safe)],
             [new("Genesis", "English prog rock band"), new("Genesis", "English prog rock band"), new("Genesis Owusu", "Australian rapper")]);
 
-        var result = SuggestionValidator.Validate(answer, "Genesis", LaneMix.Even, []);
+        var result = SuggestionValidator.Validate(answer, "Genesis", []);
 
         Assert.Equal(DiscoveryStatus.Ambiguous, result.Status);
         Assert.Empty(result.Suggestions);
@@ -146,7 +134,7 @@ public sealed class SuggestionValidatorTests
     {
         var answer = Answer([new DiscoveryAnswer.Pick("Vashti Bunyan", "close", "why", null, ["folk", " ", "1970", "UK", "pastoral"], null)]);
 
-        var result = SuggestionValidator.Validate(answer, "Nick Drake", LaneMix.Even, []);
+        var result = SuggestionValidator.Validate(answer, "Nick Drake", []);
 
         Assert.Equal(["folk", "1970", "UK"], result.Suggestions.Single().Tags);
     }

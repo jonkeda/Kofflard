@@ -33,12 +33,10 @@ public static class SuggestionValidator
     /// <summary>Validates <paramref name="answer"/> for a search on <paramref name="artist"/>.</summary>
     /// <param name="answer">The parsed answer.</param>
     /// <param name="artist">The name that was searched.</param>
-    /// <param name="lean">Which lane the mix leans to, which sets each lane's share.</param>
     /// <param name="exclude">Names already shown.</param>
     public static DiscoveryResult Validate(
         DiscoveryAnswer answer,
         string artist,
-        Lane lean,
         IReadOnlyCollection<string> exclude)
     {
         var status = answer.Status switch
@@ -81,7 +79,7 @@ public static class SuggestionValidator
             usable.Add(suggestion);
         }
 
-        return new DiscoveryResult(status, searched, Balance(usable, lean), candidates);
+        return new DiscoveryResult(status, searched, Balance(usable), candidates);
     }
 
     /// <summary>Whether <paramref name="bridge"/> names a concrete link rather than a vague likeness.</summary>
@@ -97,12 +95,12 @@ public static class SuggestionValidator
 
     // Each lane's share first, in lane order; then whatever is still short from the leftovers, in the
     // model's order. A pick keeps the lane the model gave it.
-    private static List<Suggestion> Balance(List<Suggestion> usable, Lane lean)
+    private static List<Suggestion> Balance(List<Suggestion> usable)
     {
         var chosen = new List<Suggestion>();
         foreach (var lane in Enum.GetValues<Lane>())
         {
-            chosen.AddRange(usable.Where(suggestion => suggestion.Lane == lane).Take(LaneMix.For(lean, lane)));
+            chosen.AddRange(usable.Where(suggestion => suggestion.Lane == lane).Take(LaneMix.For(lane)));
         }
 
         var leftovers = usable.Where(suggestion => !chosen.Contains(suggestion));

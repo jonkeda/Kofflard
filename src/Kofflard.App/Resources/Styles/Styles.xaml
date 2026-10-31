@@ -173,17 +173,4 @@
         <Setter Property="ThumbColor" Value="White" />
     </Style>
 
-    <!--
-        One adventure choice: a stop on the results' slider (.my/design/aurora.md). The template only gives it room;
-        the content draws the dot and the name, and follows IsChosen itself.
-    -->
-    <ControlTemplate x:Key="AdventureChoice">
-        <Border StrokeThickness="0"
-                BackgroundColor="Transparent"
-                Padding="0"
-                MinimumHeightRequest="48">
-            <ContentPresenter />
-        </Border>
-    </ControlTemplate>
-
 </ResourceDictionary>

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
     The results (design §3.1, .my/design/results-list-changes.md). "Like Genesis" is the title bar's;
-    the suggestions are grouped by lane, Safe, Curious and Wild, and the slider above them shows the lanes up
-    to how adventurous the user wants to go (.my/design/adventure-as-outcomes.md). Results_State is a CommunityToolkit StateContainer, as Todo's list: its
-    default content is the suggestions; Loading, Empty, Error and Candidates each carry their own
+    the suggestions are grouped by lane, Safe, Curious and Wild (.my/design/adventure-as-outcomes.md).
+    Results_State is a CommunityToolkit StateContainer, as Todo's list: its default content is the suggestions; Loading, Empty, Error and Candidates each carry their own
     AutomationId, which is how Bruinet's StateContainer control tells which one is showing.
 -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -17,94 +16,11 @@
              AutomationId="ResultsPage"
              Title="{Binding Heading}">
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="16,8" RowSpacing="8">
+    <Grid RowDefinitions="Auto,*,Auto" Padding="16,8" RowSpacing="8">
 
         <Label AutomationId="Results_Summary" Text="{Binding Summary}" Style="{StaticResource Muted}" FontSize="15" />
 
-        <!--
-            How adventurous: three stops on a track, the chosen one glowing. It shows the lanes up to the chosen
-            one; nothing is asked again (.my/design/adventure-as-outcomes.md).
-        -->
-        <VerticalStackLayout Grid.Row="1" Spacing="8" MaximumWidthRequest="420" IsVisible="{Binding HasContent}">
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Text="How adventurous?" Style="{StaticResource Muted}" FontSize="15" VerticalOptions="End" />
-                <Label Grid.Column="1" Text="{Binding AdventureName}" Style="{StaticResource Heading}" VerticalOptions="End" />
-            </Grid>
-            <Grid>
-                <Grid ColumnDefinitions="*,4*,*" InputTransparent="True">
-                    <BoxView Grid.Column="1"
-                             HeightRequest="2"
-                             VerticalOptions="Start"
-                             Margin="0,17,0,0"
-                             Color="{AppThemeBinding Light={StaticResource TrackLight}, Dark={StaticResource TrackDark}}" />
-                </Grid>
-                <Grid AutomationId="Results_Adventure"
-                      ColumnDefinitions="*,*,*"
-                      RadioButtonGroup.GroupName="Adventure"
-                      BindableLayout.ItemsSource="{Binding AdventureOptions}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="vm:AdventureOptionViewModel">
-                            <RadioButton AutomationId="{Binding Name, StringFormat='Adventure_{0}'}"
-                                         Grid.Column="{Binding Column}"
-                                         Value="{Binding Lane}"
-                                         IsChecked="{Binding IsChosen}"
-                                         ControlTemplate="{StaticResource AdventureChoice}"
-                                         HorizontalOptions="Center"
-                                         SemanticProperties.Description="{Binding Name}">
-                                <RadioButton.Content>
-                                    <!--
-                                        The content of a templated RadioButton does not get the option as its
-                                        binding context (on Windows its bindings came up empty), so it takes
-                                        it from the radio button explicitly.
-                                    -->
-                                    <VerticalStackLayout Spacing="4"
-                                                         HorizontalOptions="Center"
-                                                         BindingContext="{Binding Source={RelativeSource AncestorType={x:Type vm:AdventureOptionViewModel}}}">
-                                        <Grid HeightRequest="36" WidthRequest="44" HorizontalOptions="Center">
-                                            <!-- The chosen stop's halo, in place of a Shadow (square on Windows). -->
-                                            <Ellipse WidthRequest="34"
-                                                     HeightRequest="34"
-                                                     HorizontalOptions="Center"
-                                                     VerticalOptions="Center"
-                                                     Opacity="0.3"
-                                                     IsVisible="{Binding IsChosen}"
-                                                     Fill="{AppThemeBinding Light={StaticResource DotOnLight}, Dark={StaticResource WildDark}}" />
-                                            <Ellipse WidthRequest="12"
-                                                     HeightRequest="12"
-                                                     HorizontalOptions="Center"
-                                                     VerticalOptions="Center"
-                                                     Fill="{AppThemeBinding Light={StaticResource DotOffLight}, Dark={StaticResource DotOffDark}}">
-                                                <Ellipse.Triggers>
-                                                    <DataTrigger TargetType="Ellipse" Binding="{Binding IsChosen}" Value="True">
-                                                        <Setter Property="WidthRequest" Value="22" />
-                                                        <Setter Property="HeightRequest" Value="22" />
-                                                        <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource DotOnLight}, Dark={StaticResource DotOnDark}}" />
-                                                    </DataTrigger>
-                                                </Ellipse.Triggers>
-                                            </Ellipse>
-                                        </Grid>
-                                        <Label AutomationId="{Binding Name, StringFormat='Adventure_{0}_Name'}"
-                                               Text="{Binding Name}"
-                                               FontSize="12"
-                                               HorizontalOptions="Center"
-                                               TextColor="{AppThemeBinding Light={StaticResource FaintLight}, Dark={StaticResource FaintDark}}">
-                                            <Label.Triggers>
-                                                <DataTrigger TargetType="Label" Binding="{Binding IsChosen}" Value="True">
-                                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource StrongLight}, Dark={StaticResource StrongDark}}" />
-                                                    <Setter Property="FontAttributes" Value="Bold" />
-                                                </DataTrigger>
-                                            </Label.Triggers>
-                                        </Label>
-                                    </VerticalStackLayout>
-                                </RadioButton.Content>
-                            </RadioButton>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </Grid>
-            </Grid>
-        </VerticalStackLayout>
-
-        <Grid Grid.Row="2"
+        <Grid Grid.Row="1"
               AutomationId="Results_State"
               toolkit:StateContainer.CurrentState="{Binding StateKey}">
 
@@ -206,7 +122,7 @@
             </CollectionView>
         </Grid>
 
-        <Button Grid.Row="3"
+        <Button Grid.Row="2"
                 AutomationId="Results_More"
                 Text="More like this…"
                 HeightRequest="52"

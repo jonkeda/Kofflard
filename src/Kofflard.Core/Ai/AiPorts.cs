@@ -62,7 +62,6 @@ public interface IDiscoveryEngine
         AiConnection connection,
         string? secret,
         string artist,
-        Lane lean,
         IReadOnlyCollection<string> exclude,
         CancellationToken cancellationToken = default);
 

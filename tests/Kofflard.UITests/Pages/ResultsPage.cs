@@ -3,10 +3,7 @@ using Kofflard.UITests.Containers;
 
 namespace Kofflard.UITests.Pages;
 
-/// <summary>
-/// Page object for the results: the cards in lanes, the slider that shows them up to how adventurous, or who
-/// the user may have meant.
-/// </summary>
+/// <summary>Page object for the results: the cards in lanes, Safe, Curious and Wild, or who the user may have meant.</summary>
 public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>(context)
 {
     private readonly AppRoot _appRoot = new(context);
@@ -61,17 +58,8 @@ public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>
         ? new(_appRoot, Locator.ByAccessibilityId("Navigate up"))
         : new(_appRoot, "NavigationViewBackButton");
 
-    /// <summary>The slider's stops, Safe to Wild; each shows the lanes up to it.</summary>
-    public static readonly IReadOnlyList<string> Adventures = ["Safe", "Curious", "Wild"];
-
-    /// <summary>One stop on the slider: "Curious".</summary>
-    public RadioButton<ResultsPage> Adventure(string name) => new(this, $"Adventure_{name}");
-
-    /// <summary>The name under a stop.</summary>
-    public Label<ResultsPage> AdventureName(string name) => new(this, $"Adventure_{name}_Name");
-
-    /// <summary>The chosen stop: "Curious".</summary>
-    public string? ChosenAdventure() => Adventures.SingleOrDefault(name => Adventure(name).IsChecked() == true);
+    /// <summary>The lanes, in the order they show.</summary>
+    public static readonly IReadOnlyList<string> Lanes = ["Safe", "Curious", "Wild"];
 
     /// <summary>Asserts each lane and its total, in order: "Safe 6 · Curious 4 · Wild 2".</summary>
     [BddThen("the lanes should be {lanes}")]
@@ -79,29 +67,6 @@ public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>
     {
         WaitForSuggestions();
         Assert.Equal(lanes, LaneHeaders.Summary());
-        return this;
-    }
-
-    /// <summary>Slides to <paramref name="adventure"/>: Safe, Curious or Wild. The lanes up to it show.</summary>
-    [BddWhen("I choose {adventure} adventure")]
-    public ResultsPage ChooseAdventure(string adventure)
-    {
-        WaitForSuggestions();
-        if (ChosenAdventure() != adventure)
-        {
-            Adventure(adventure).Click();
-            Adventure(adventure).AssertSelected(true, timeoutMs: TestConstants.PageTimeoutMs);
-        }
-
-        return this;
-    }
-
-    /// <summary>Asserts the slider's stop.</summary>
-    [BddThen("{adventure} adventure should be chosen")]
-    public ResultsPage AssertAdventure(string adventure)
-    {
-        WaitForSuggestions();
-        Assert.Equal(adventure, ChosenAdventure());
         return this;
     }
 

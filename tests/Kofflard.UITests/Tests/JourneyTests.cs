@@ -37,19 +37,13 @@ public sealed class JourneyTests
 
     [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
     [Trait("Journey", "RES.01.1")]
-    public Task OnlySafeShowsAtFirst_AndTheSliderStaysWhereItWas_OnTheNextSearch()
+    public Task EveryLaneShows_SafeFirst()
     {
-        _fixture.Ai.Answer("Bill Fay", FakeAi.Canned("bill-fay"));
         var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
 
-        results.AssertAdventure("Safe");
-        results.Suggestions.AssertShown("Vashti Bunyan").AssertNotShown("Bill Fay").AssertNotShown("Ali Farka Touré");
-
-        results.ChooseAdventure("Curious");
-        results.Suggestions.AssertShown("Bill Fay").AssertNotShown("Ali Farka Touré");
-
-        var next = results.Back().SearchFor("Bill Fay").WaitForSuggestions();
-        next.AssertAdventure("Curious");
+        Assert.Equal(["Safe", "Curious", "Wild"], results.LaneHeaders.Totals().Select(lane => lane.Name));
+        Assert.Equal("Vashti Bunyan", results.Suggestions.Names()[0]);
+        results.Suggestions.Shown("Ali Farka Touré");
         return Task.CompletedTask;
     }
 

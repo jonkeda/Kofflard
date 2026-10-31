@@ -71,7 +71,7 @@ public sealed class ViewModelTests
     }
 
     [Fact]
-    public async Task Results_ShowTheCards_InLanes_OnlySafeAtFirst_WithTheirTotals()
+    public async Task Results_ShowTheCards_InLanes_WithTheirTotals()
     {
         Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Ali Farka Touré", Lane.Wild), ("Bridget St John", Lane.Curious), ("Linda Perhacs", Lane.Safe)));
         var results = Results();
@@ -81,9 +81,6 @@ public sealed class ViewModelTests
         Assert.Equal(ResultsViewModel.ContentState, results.State);
         Assert.Equal(["Vashti Bunyan", "Linda Perhacs", "Bridget St John", "Ali Farka Touré"], results.Cards.Select(i => i.Name));
         Assert.Equal(["Safe (2)", "Curious (1)", "Wild (1)"], results.Lanes.Select(l => l.HeaderText));
-        Assert.Equal([2, 0, 0], results.Lanes.Select(l => l.Count));
-        Assert.Equal(["Safe", "Curious", "Wild"], results.AdventureOptions.Select(o => o.Name));
-        Assert.Equal("Safe", Assert.Single(results.AdventureOptions, o => o.IsChosen).Name);
         Assert.Equal("Like Nick Drake", results.Heading);
     }
 
@@ -99,59 +96,20 @@ public sealed class ViewModelTests
     }
 
     [Fact]
-    public async Task Results_SlidingToCurious_ShowsItsCards_WithNoNewRequest_AndTheNextResultsStartThere()
-    {
-        Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Bridget St John", Lane.Curious), ("Ali Farka Touré", Lane.Wild)));
-        var results = Results();
-        await results.LoadAsync("Nick Drake", cached: false);
-        _engine.ClearReceivedCalls();
-
-        results.AdventureOptions[1].IsChosen = true;
-        await results.Remembering;
-
-        Assert.Equal(Lane.Curious, results.Adventure);
-        Assert.Equal("Curious", results.AdventureName);
-        Assert.Equal(["Vashti Bunyan", "Bridget St John"], results.Lanes.SelectMany(l => l).Select(c => c.Name));
-        Assert.Equal(Lane.Curious, _settings.Current.Adventure);
-        await _engine.DidNotReceiveWithAnyArgs().DiscoverAsync(default!, default, default!, default, default!, default);
-
-        var next = Results();
-        await next.LoadAsync("Nick Drake", cached: true);
-        Assert.Equal([true, true, false], next.Lanes.Select(l => l.IsShown));
-        Assert.Equal("Curious", Assert.Single(next.AdventureOptions, o => o.IsChosen).Name);
-    }
-
-    [Fact]
-    public async Task Results_SlidingBackToSafe_HidesTheOthers_AndKeepsTheirTotals()
-    {
-        await _settings.SaveAsync(_settings.Current with { Adventure = Lane.Wild });
-        Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Bridget St John", Lane.Curious), ("Ali Farka Touré", Lane.Wild)));
-        var results = Results();
-        await results.LoadAsync("Nick Drake", cached: false);
-        Assert.Equal(3, results.Lanes.Sum(l => l.Count));
-
-        results.AdventureOptions[0].IsChosen = true;
-        await results.Remembering;
-
-        Assert.Equal([1, 0, 0], results.Lanes.Select(l => l.Count));
-        Assert.Equal(["Safe (1)", "Curious (1)", "Wild (1)"], results.Lanes.Select(l => l.HeaderText));
-        Assert.Equal(Lane.Safe, _settings.Current.Adventure);
-    }
-
-    [Fact]
-    public async Task Results_ASearch_AsksForTheEvenMix_AndMoreLeansToTheSlider()
+    public async Task Results_More_AsksAgain_ExcludingWhatWasShown()
     {
         Answers(Ok(("Vashti Bunyan", Lane.Safe)));
         var results = Results();
         await results.LoadAsync("Nick Drake", cached: false);
 
-        await _engine.Received().DiscoverAsync(Azure, "key", "Nick Drake", LaneMix.Even, Arg.Any<IReadOnlyCollection<string>>(), Arg.Any<CancellationToken>());
-
-        results.AdventureOptions[2].IsChosen = true;
         Answers(Ok(("Ali Farka Touré", Lane.Wild)));
         await results.MoreCommand.ExecuteAsync(null);
 
-        await _engine.Received().DiscoverAsync(Azure, "key", "Nick Drake", Lane.Wild, Arg.Any<IReadOnlyCollection<string>>(), Arg.Any<CancellationToken>());
+        Assert.Equal("Ali Farka Touré", Assert.Single(results.Cards).Name);
+        await _engine.Received().DiscoverAsync(
+            Azure, "key", "Nick Drake",
+            Arg.Is<IReadOnlyCollection<string>>(exclude => exclude.Contains("Vashti Bunyan")),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -164,7 +122,7 @@ public sealed class ViewModelTests
         await Results().LoadAsync("Nick Drake", cached: false);
 
         await _engine.Received().DiscoverAsync(
-            Azure, "key", "Nick Drake", LaneMix.Even,
+            Azure, "key", "Nick Drake",
             Arg.Is<IReadOnlyCollection<string>>(exclude => exclude.Contains("Vashti Bunyan")),
             Arg.Any<CancellationToken>());
     }
@@ -181,7 +139,7 @@ public sealed class ViewModelTests
         await again.LoadAsync("Nick Drake", cached: true);
 
         Assert.Equal("Vashti Bunyan", Assert.Single(again.Cards).Name);
-        await _engine.DidNotReceiveWithAnyArgs().DiscoverAsync(default!, default, default!, default, default!, default);
+        await _engine.DidNotReceiveWithAnyArgs().DiscoverAsync(default!, default, default!, default!, default);
     }
 
     [Fact]
@@ -204,7 +162,7 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Results_WhenTheKeyIsRefused_ShowTheError_AndOfferToFixIt()
     {
-        _engine.DiscoverAsync(default!, default, default!, default, default!, default)
+        _engine.DiscoverAsync(default!, default, default!, default!, default)
             .ReturnsForAnyArgs<Task<DiscoveryResult>>(_ => throw new AiException(AiFailure.InvalidKey, "This key was not accepted by Azure OpenAI / Foundry."));
         var results = Results();
 
@@ -412,7 +370,7 @@ public sealed class ViewModelTests
         => new(_connections, _engine, Substitute.For<IOpenRouterSignIn>(), _launcher, _navigator);
 
     private void Answers(DiscoveryResult result)
-        => _engine.DiscoverAsync(default!, default, default!, default, default!, default).ReturnsForAnyArgs(result);
+        => _engine.DiscoverAsync(default!, default, default!, default!, default).ReturnsForAnyArgs(result);
 
     private static DiscoveryResult Ok(params (string Name, Lane Lane)[] picks)
         => new(

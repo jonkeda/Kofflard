@@ -33,16 +33,6 @@ public static class MauiProgram
             nameof(IPicker.IsOpen),
             (handler, picker, map) => { });
 
-        // The adventure stops draw their own dot; WinUI's radio button kept room for its circle beside them,
-        // which pushed each stop off its column. The bare style is in Platforms\Windows\App.xaml.
-        Microsoft.Maui.Handlers.RadioButtonHandler.Mapper.AppendToMapping("BareRadioButton", (handler, view) =>
-        {
-            if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("BareRadioButton", out var style))
-            {
-                handler.PlatformView.Style = (Microsoft.UI.Xaml.Style)style;
-            }
-        });
-
         // A grouped list on Windows pins the current lane's header and clips the cards under it. UI Automation
         // then reports them off-screen, and scrolling one into view puts it right back under the header, so
         // automation cannot read it (.my/rca/windows-vs-headless.md). The lane headers scroll with their cards.

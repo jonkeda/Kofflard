@@ -24,31 +24,10 @@ public sealed class StoreTests : IDisposable
         var store = new SqliteSettingsStore(_database);
         Assert.Equal(AppSettings.Default, await store.LoadAsync());
 
-        var changed = new AppSettings(new AiConnection("azure", "https://res.openai.azure.com", "gpt-4.1-mini"), MusicService.Spotify, true, Lane.Wild);
+        var changed = new AppSettings(new AiConnection("azure", "https://res.openai.azure.com", "gpt-4.1-mini"), MusicService.Spotify, true);
         await store.SaveAsync(changed);
 
         Assert.Equal(changed, await new SqliteSettingsStore(_database).LoadAsync());
-    }
-
-    [Theory]
-    [InlineData("1", Lane.Safe)]
-    [InlineData("2", Lane.Curious)]
-    [InlineData("3", Lane.Curious)]
-    [InlineData("4", Lane.Wild)]
-    [InlineData("5", Lane.Wild)]
-    [InlineData("curious", Lane.Curious)]
-    [InlineData("Sideways", Lane.Safe)]
-    public async Task Settings_AnOldLevel_ReadsAsItsLane_AndABadValueAsSafe(string stored, Lane expected)
-    {
-        var store = new SqliteSettingsStore(_database);
-        await store.SaveAsync(AppSettings.Default);
-        await using (var connection = await _database.OpenAsync())
-        await using (var command = connection.Command("UPDATE settings SET value = $value WHERE key = 'adventure';", ("$value", stored)))
-        {
-            await command.ExecuteNonQueryAsync();
-        }
-
-        Assert.Equal(expected, (await store.LoadAsync()).Adventure);
     }
 
     [Fact]

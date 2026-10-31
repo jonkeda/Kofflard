@@ -89,15 +89,13 @@ public static class DiscoveryPrompt
 
     /// <summary>The user message for one search.</summary>
     /// <param name="artist">The musician's name, already cleaned (<see cref="Names.Clean"/>).</param>
-    /// <param name="lean">Which lane the mix leans to (<see cref="LaneMix"/>).</param>
     /// <param name="exclude">Musicians already shown, newest first; at most <see cref="MaxExclusions"/> are sent.</param>
     /// <param name="language">The UI language for "why" and "bridge", e.g. "en".</param>
-    public static string User(string artist, Lane lean, IReadOnlyCollection<string> exclude, string language = "en")
+    public static string User(string artist, IReadOnlyCollection<string> exclude, string language = "en")
     {
-        var mix = LaneMix.Of(lean);
         var builder = new StringBuilder();
         builder.AppendLine($"Musician: \"{artist.Replace('"', '\'')}\"");
-        builder.AppendLine($"Suggest exactly {mix[Lane.Safe]} close, {mix[Lane.Curious]} stretch and {mix[Lane.Wild]} leap musicians.");
+        builder.AppendLine($"Suggest exactly {LaneMix.For(Lane.Safe)} close, {LaneMix.For(Lane.Curious)} stretch and {LaneMix.For(Lane.Wild)} leap musicians.");
 
         var excluded = exclude.Take(MaxExclusions).ToList();
         builder.AppendLine(excluded.Count == 0

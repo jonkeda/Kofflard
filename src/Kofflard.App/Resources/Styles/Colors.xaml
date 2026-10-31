@@ -51,7 +51,7 @@
     <Color x:Key="OrbLight">#D9FFFFFF</Color>
     <Color x:Key="OrbDark">#5928165A</Color>
 
-    <!-- Glass: chips, the input, the adventure track. -->
+    <!-- Glass: chips and the input. -->
     <Color x:Key="ChipLight">#BFFFFFFF</Color>
     <Color x:Key="ChipDark">#801E1246</Color>
     <Color x:Key="ChipEdgeLight">#4D7C5CFF</Color>
@@ -60,12 +60,6 @@
     <Color x:Key="InputDark">#BF100A28</Color>
     <Color x:Key="InputEdgeLight">#B35B3FD9</Color>
     <Color x:Key="InputEdgeDark">#73C8B4FF</Color>
-    <Color x:Key="TrackLight">#385B5277</Color>
-    <Color x:Key="TrackDark">#40A08CDC</Color>
-    <Color x:Key="DotOnLight">#7C5CFF</Color>
-    <Color x:Key="DotOnDark">#E9DEFF</Color>
-    <Color x:Key="DotOffLight">#595B5277</Color>
-    <Color x:Key="DotOffDark">#73A08CDC</Color>
     <Color x:Key="GoTextLight">#140E2B</Color>
     <Color x:Key="GoTextDark">#FFFFFF</Color>
     <Color x:Key="CardEndLight">#EBFFFFFF</Color>

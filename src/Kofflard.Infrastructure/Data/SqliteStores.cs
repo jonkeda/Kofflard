@@ -19,7 +19,6 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
     private const string ModelKey = "ai.model";
     private const string OpenWithKey = "open_with";
     private const string CheckNamesKey = "check_names";
-    private const string AdventureKey = "adventure";
 
     /// <inheritdoc />
     public async Task<AppSettings> LoadAsync()
@@ -45,8 +44,7 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
                 ? new AiConnection(provider, values.GetValueOrDefault(EndpointKey) is { Length: > 0 } endpoint ? endpoint : null, model)
                 : null,
             values.TryGetValue(OpenWithKey, out var openWith) && Enum.TryParse<MusicService>(openWith, out var service) ? service : defaults.OpenWith,
-            values.TryGetValue(CheckNamesKey, out var check) ? check == "true" : defaults.CheckNames,
-            ReadAdventure(values.GetValueOrDefault(AdventureKey)) ?? defaults.Adventure);
+            values.TryGetValue(CheckNamesKey, out var check) ? check == "true" : defaults.CheckNames);
     }
 
     /// <inheritdoc />
@@ -56,7 +54,6 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
         {
             [OpenWithKey] = settings.OpenWith.ToString(),
             [CheckNamesKey] = settings.CheckNames ? "true" : "false",
-            [AdventureKey] = settings.Adventure.ToString(),
         };
 
         if (settings.Connection is { } ai)
@@ -80,23 +77,6 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
         }
 
         await transaction.CommitAsync();
-    }
-
-    // "Curious"; or a level of 1-5 from before the slider moved to the results: 1 is Safe, 2-3 Curious,
-    // 4-5 Wild (.my/design/adventure-as-outcomes.md). Anything else reads as not set.
-    private static Lane? ReadAdventure(string? value)
-    {
-        if (int.TryParse(value, CultureInfo.InvariantCulture, out var level))
-        {
-            return level switch
-            {
-                <= 1 => Lane.Safe,
-                <= 3 => Lane.Curious,
-                _ => Lane.Wild,
-            };
-        }
-
-        return Enum.TryParse<Lane>(value, ignoreCase: true, out var lane) && Enum.IsDefined(lane) ? lane : null;
     }
 }
 

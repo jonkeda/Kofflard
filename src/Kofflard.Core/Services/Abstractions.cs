@@ -9,18 +9,13 @@ namespace Kofflard.Core.Services;
 /// <param name="Connection">The AI connection, or null before one is set up.</param>
 /// <param name="OpenWith">The service a card's main button opens. YouTube by default.</param>
 /// <param name="CheckNames">Whether names are checked against MusicBrainz. Off by default: about a second per name.</param>
-/// <param name="Adventure">
-/// How adventurous the results are shown: every lane up to this one. Set on the results page's slider and
-/// remembered for the next search; Safe on a new install (.my/design/adventure-as-outcomes.md).
-/// </param>
 public sealed record AppSettings(
     AiConnection? Connection,
     MusicService OpenWith,
-    bool CheckNames,
-    Lane Adventure)
+    bool CheckNames)
 {
     /// <summary>A new install's settings.</summary>
-    public static AppSettings Default { get; } = new(null, MusicService.YouTube, false, Lane.Safe);
+    public static AppSettings Default { get; } = new(null, MusicService.YouTube, false);
 }
 
 /// <summary>Where the settings are kept: the app's own database.</summary>

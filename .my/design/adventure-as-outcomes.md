@@ -1,10 +1,20 @@
 # Change: adventure as an outcome, not an input
 
-Date: 2026-10-31. Status: agreed (answers under Decided), built on Windows and headless; Android and iOS not yet looked at.
+Date: 2026-10-31. Status: built, then changed: the slider was removed the same day (see [Update](#update-the-slider-goes)). Android and iOS not yet looked at.
 
 Today the user picks how adventurous a search is before asking (Safe … Wild), and the answer comes back sorted into three lanes (Close, Stretch, Leap) that fold open. Both say "how far from the artist you typed", in two sets of words. This change asks once, for every distance, and lets the user choose how far to look on the results, with the slider there. The three outcomes take the adventure words: **Safe, Curious, Wild**. Close, Stretch and Leap go from the screen.
 
 It changes design §3.1 (the search page), §3.2 (the lanes and the mix), §3.3 (settings) and §2's "the user turns adventurousness up" in [kofflard-design.md](kofflard-design.md), and replaces the lane headers of [results-list-changes.md](results-list-changes.md). It keeps the [Aurora](aurora.md) look.
+
+## Update: the slider goes
+
+Decided 2026-10-31, after it was built: the results page has no slider either. What is left:
+- Every search asks for 4 Safe, 4 Curious and 4 Wild, and the results show all three lanes, Safe first, each under "Safe (4)" in its colour. Nothing folds and nothing is hidden.
+- "More like this…" asks for the same even mix again, excluding what was shown.
+- There is no adventure setting at all: the `adventure` key is dropped on the next save, and an old level is no longer read.
+- The radio-button template (`AdventureChoice`), the slider's colours and the Windows `BareRadioButton` style are gone with it.
+
+The rest of this doc describes the slider as it was built; where it disagrees with this section, this section holds.
 
 ## The overlap today
 

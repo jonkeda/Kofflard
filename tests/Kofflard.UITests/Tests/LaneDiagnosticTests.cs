@@ -16,13 +16,7 @@ public sealed class LaneDiagnosticTests(KofflardAppFixture fixture, ITestOutputH
     public void WithEveryLaneShown_ACardFromEachLane_IsFound()
     {
         var results = fixture.StartTest().SearchFor("Nick Drake").WaitForSuggestions();
-        Report(results, "only Safe");
-
-        foreach (var adventure in new[] { "Curious", "Wild" })
-        {
-            results.ChooseAdventure(adventure);
-            Report(results, $"slid to {adventure}");
-        }
+        Report(results, "answered");
 
         // Wild and Curious first, so the list ends up scrolled away from the top.
         foreach (var musician in new[] { "Ali Farka Touré", "Bill Fay", "Vashti Bunyan" })

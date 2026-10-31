@@ -33,7 +33,7 @@ public sealed class LiveAiTests : IDisposable
     {
         var live = LiveAi.Load();
 
-        var result = await _engine.DiscoverAsync(live.Connection, live.Key, "Nick Drake", LaneMix.Even, []);
+        var result = await _engine.DiscoverAsync(live.Connection, live.Key, "Nick Drake", []);
 
         Assert.Equal(DiscoveryStatus.Ok, result.Status);
         Assert.InRange(result.Suggestions.Count, 8, 12);

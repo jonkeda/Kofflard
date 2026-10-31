@@ -24,7 +24,6 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         AiConnection connection,
         string? secret,
         string artist,
-        Lane lean,
         IReadOnlyCollection<string> exclude,
         CancellationToken cancellationToken = default)
     {
@@ -34,7 +33,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
             new(ChatRole.System, connection.Provider.StructuredOutput == AiStructuredOutput.JsonSchema
                 ? DiscoveryPrompt.System
                 : DiscoveryPrompt.System + "\n\nThe JSON schema of your answer:\n" + DiscoveryPrompt.Schema),
-            new(ChatRole.User, DiscoveryPrompt.User(artist, lean, exclude)),
+            new(ChatRole.User, DiscoveryPrompt.User(artist, exclude)),
         };
 
         var options = new ChatOptions
@@ -49,7 +48,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         var text = await AskAsync(client, connection, messages, options, cancellationToken);
         try
         {
-            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(text), artist, lean, exclude);
+            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(text), artist, exclude);
         }
         catch (DiscoveryAnswerException problem)
         {
@@ -60,7 +59,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         var retried = await AskAsync(client, connection, messages, options, cancellationToken);
         try
         {
-            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(retried), artist, lean, exclude);
+            return SuggestionValidator.Validate(DiscoveryAnswer.Parse(retried), artist, exclude);
         }
         catch (DiscoveryAnswerException problem)
         {

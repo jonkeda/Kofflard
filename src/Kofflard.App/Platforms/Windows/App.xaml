@@ -6,28 +6,4 @@
     xmlns:maui="using:Microsoft.Maui"
     xmlns:local="using:Kofflard.App.WinUI">
 
-    <maui:MauiWinUIApplication.Resources>
-        <!--
-            The only radio buttons are the adventure stops, which draw themselves (AdventureChoice). WinUI's own
-            template kept room for its circle on the left, which pushed each stop off its column and cut its
-            name short; this one is just the content. Automation still sees a radio button. MauiProgram sets it.
-        -->
-        <Style x:Key="BareRadioButton" TargetType="RadioButton">
-            <Setter Property="MinWidth" Value="0" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <ContentPresenter Background="Transparent"
-                                          Content="{TemplateBinding Content}"
-                                          ContentTemplate="{TemplateBinding ContentTemplate}"
-                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </maui:MauiWinUIApplication.Resources>
-
 </maui:MauiWinUIApplication>
