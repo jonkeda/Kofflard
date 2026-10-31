@@ -26,7 +26,9 @@ public sealed class LaneMixTests
     [Fact]
     public void TheLaneSetting_ReadsBackWhatItWrote()
     {
+        Assert.Equal(LaneSet.All, LaneSet.Default);
         Assert.Equal(LaneSet.Default, LaneSet.Parse(LaneSet.Default.ToString()));
+        Assert.Equal(new LaneSet(true, true, false), LaneSet.Parse("Safe,Curious"));
         Assert.Equal(new LaneSet(false, false, true), LaneSet.Parse("Wild"));
         Assert.Null(LaneSet.Parse(""));
     }

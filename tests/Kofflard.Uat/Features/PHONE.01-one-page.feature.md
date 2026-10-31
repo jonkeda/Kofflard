@@ -15,29 +15,33 @@ sections show. A card's "More →" replaces the list, and a trail goes back (.my
 | Tags | maui, phone |
 
 @PHONE.01.1 @phone @maui
-## Scenario: PHONE.01.1 A search shows on the same page, asking only for the lanes that are on
+## Scenario: PHONE.01.1 A search shows on the same page, every lane on
 
-A new install has Safe and Curious on, so nothing wild is asked for.
+A new install has every lane on, Wild too.
 
 ```gherkin
 Given I am on the Search page
 When I search for "Nick Drake"
 Then I should be on the Results page
 And Heading should equal "Like Nick Drake"
-And the lanes should become "Safe 6 · Curious 4"
-And Count should equal "10 of 10"
+And the lanes should become "Safe 6 · Curious 4 · Wild 2"
+And Count should equal "12 of 12"
 ```
 
 @PHONE.01.2 @phone @maui
-## Scenario: PHONE.01.2 Turning Wild on asks for the wild picks alone
+## Scenario: PHONE.01.2 With Wild off a search asks without it, and turning it on asks for the wild picks alone
 
 ```gherkin
-Given I am on the Search page
+Given the AI answers "De Dijk" with "de-dijk"
+And I am on the Search page
 When I search for "Nick Drake"
 And I toggle "Wild"
-Then the lanes should become "Safe 6 · Curious 4 · Wild 2"
-And Count should equal "12 of 12"
-And "Ali Farka Touré" should be a "Wild" suggestion
+And I search for "De Dijk"
+Then the lanes should become "Safe 6 · Curious 4"
+And Count should equal "10 of 10"
+When I toggle "Wild"
+Then the lanes should become "Safe 6 · Curious 4 · Wild 1"
+And "Solomon Burke" should be a "Wild" suggestion
 ```
 
 @PHONE.01.3 @phone @maui
@@ -47,8 +51,8 @@ And "Ali Farka Touré" should be a "Wild" suggestion
 Given I am on the Search page
 When I search for "Nick Drake"
 And I toggle "Safe"
-Then the lanes should become "Curious 4"
-And Count should equal "4 of 10"
+Then the lanes should become "Curious 4 · Wild 2"
+And Count should equal "6 of 12"
 ```
 
 @PHONE.01.4 @phone @maui

@@ -167,8 +167,7 @@ What differs from the plan above:
 - **The map's dots** are round `Border`s with a tap; a `Button` was drawn square on Windows.
 - **A lane turned on while a search runs** is asked for once the search ends. Found by PHONE.01.2: the search
   step no longer waits for every card, and the toggle came while the answer was still loading.
-- **The test suites** start every desktop test with all three lanes on (the journeys check a card from
-  each); the phone's start with a new install's, Safe and Curious. One set of page objects serves both
+- **The test suites** start every test with a new install's lanes: all three, Wild too. One set of page objects serves both
   layouts: `SearchPage` and `ResultsPage` both root at `DiscoverPage`.
 - **Gone**: `SearchPage`, `ResultsPage`, the `results` route, `SearchLauncher`, `RunningSearch`, the card's
   "Searching…" note, and the stacked-page diagnostic test. Favourites' "More →" goes back to the one page and

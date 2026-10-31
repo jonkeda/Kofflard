@@ -4,7 +4,6 @@ using Bruinet.Maui.Interfaces;
 using Bruinet.Maui.Testing;
 using Bruinet.Bdd;
 using Bruinet.Uat;
-using Kofflard.Core.Models;
 using Kofflard.Infrastructure;
 using Kofflard.Uat.Phrases;
 using Kofflard.UITests;
@@ -52,15 +51,12 @@ public class KofflardUatFixture : KofflardAppFixture, IUatScenarioLifecycle
 
 /// <summary>
 /// Kofflard in the phone's narrow layout (.my/design/single-page-phone.md), for the scenarios tagged
-/// <c>@phone</c>, starting with a new install's lanes, Safe and Curious.
+/// <c>@phone</c>.
 /// </summary>
 public sealed class KofflardPhoneUatFixture : KofflardUatFixture
 {
     /// <inheritdoc />
     protected override KofflardLayout Layout => KofflardLayout.Phone;
-
-    /// <inheritdoc />
-    protected override LaneSet StartLanes => LaneSet.Default;
 }
 
 /// <summary>Binds the phone scenarios to the one <see cref="KofflardPhoneUatFixture"/>.</summary>

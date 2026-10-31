@@ -67,12 +67,6 @@ public class KofflardAppFixture : MauiTestFixtureBase
             ? layout
             : KofflardLayout.Desktop;
 
-    /// <summary>
-    /// The lanes each test starts with. Every lane in the desktop suite, whose journeys check a card from each;
-    /// a new install's, Safe and Curious, in the phone's (<see cref="PhoneAppFixture"/>).
-    /// </summary>
-    protected virtual Kofflard.Core.Models.LaneSet StartLanes => Kofflard.Core.Models.LaneSet.All;
-
     /// <summary>The fake AI the app is connected to, unless the run is live.</summary>
     public FakeAi Ai => Arranged.Ai;
 
@@ -257,7 +251,7 @@ public class KofflardAppFixture : MauiTestFixtureBase
         {
             var test = new Kofflard.Core.Ai.AiConnection(Arranged.Settings.AiProvider, Arranged.Settings.AiBaseUrl, Arranged.Settings.AiModel);
             new SqliteSettingsStore(new KofflardDatabase(Arranged.Settings.DatabasePath))
-                .SaveAsync(Kofflard.Core.Services.AppSettings.Default with { Connection = test, Lanes = StartLanes })
+                .SaveAsync(Kofflard.Core.Services.AppSettings.Default with { Connection = test })
                 .GetAwaiter().GetResult();
         }
     }

@@ -67,7 +67,7 @@ They do two jobs at once:
 | **A lane turned on that has no cards yet** | It asks for that lane alone, 4 picks, and they stream into their section; the other cards stay. |
 
 - They are remembered across restarts, as the `lanes` setting.
-- A new install starts with Safe and Curious on, Wild off: serendipity comes when the user asks for it (design §2).
+- A new install starts with every lane on, Wild too (changed 2026-10-31; first Safe and Curious only).
 - The heading counts what shows: "Like Nick Drake · 8 of 12".
 - Screen readers: "Wild, shown" or "Wild, hidden"; a tap says the new state.
 
@@ -149,7 +149,7 @@ The parts keep their ids, so most page objects keep working:
 5. **Recent** shows when the field is focused and empty (and before the first search), in the list's place; no chips above the field.
 
 6. **A lane turned on with no cards yet** asks for that lane alone, 4 picks, at once.
-7. **A new install** has Safe and Curious on, Wild off.
+7. **A new install** has every lane on, Wild too (changed 2026-10-31: it first had Safe and Curious only).
 
 ## As built
 

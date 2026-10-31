@@ -29,8 +29,8 @@ public readonly record struct LaneSet(bool Safe, bool Curious, bool Wild)
     /// <summary>Every lane: what the desktop design asks for and shows.</summary>
     public static LaneSet All { get; } = new(true, true, true);
 
-    /// <summary>A new install: Safe and Curious, so far picks come only when asked for (design §2).</summary>
-    public static LaneSet Default { get; } = new(true, true, false);
+    /// <summary>A new install: every lane, Wild too; a user turns off what they don't want (2026-10-31).</summary>
+    public static LaneSet Default { get; } = All;
 
     /// <summary>The lanes that are on, in lane order.</summary>
     public IReadOnlyList<Lane> Lanes => [.. Enum.GetValues<Lane>().Where(Contains)];

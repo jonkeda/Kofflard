@@ -333,6 +333,7 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Discover_ASearch_LoadsInPlace_AskingForTheLanesThatAreOn()
     {
+        await _settings.SaveAsync(_settings.Current with { Lanes = new LaneSet(true, true, false) });
         Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Bridget St John", Lane.Curious)));
         var discover = Discover();
         await discover.LoadAsync();
@@ -351,7 +352,6 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Discover_ATogglesOff_HidesItsSection_WithNoRequest_AndIsRemembered()
     {
-        await _settings.SaveAsync(_settings.Current with { Lanes = LaneSet.All });
         Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Ali Farka Touré", Lane.Wild)));
         var discover = Discover();
         await discover.LoadAsync();
@@ -375,6 +375,7 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Discover_ALaneTurnedOn_WithNoCards_AsksForThatLaneAlone()
     {
+        await _settings.SaveAsync(_settings.Current with { Lanes = new LaneSet(true, true, false) });
         Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Bridget St John", Lane.Curious)));
         var discover = Discover();
         await discover.LoadAsync();
@@ -392,6 +393,7 @@ public sealed class ViewModelTests
     [Fact]
     public async Task Discover_ALaneTurnedOn_WhileTheSearchRuns_IsAskedForWhenItEnds()
     {
+        await _settings.SaveAsync(_settings.Current with { Lanes = new LaneSet(true, true, false) });
         var gate = new TaskCompletionSource();
         var first = Ok(("Vashti Bunyan", Lane.Safe), ("Bridget St John", Lane.Curious));
         _engine.DiscoverAsync(default!, default, default!, default!, default).ReturnsForAnyArgs(_ => Gated(first, gate.Task));
