@@ -48,6 +48,7 @@ public sealed class ResultsViewModel : ParentViewModel
     private string _connectionLine = string.Empty;
     private bool _isStreaming;
     private string? _streamError;
+    private SuggestionViewModel? _selectedCard;
 
     /// <summary>Creates the view model.</summary>
     public ResultsViewModel(
@@ -150,6 +151,25 @@ public sealed class ResultsViewModel : ParentViewModel
                 OnPropertyChanged();
                 ChooseCandidateCommand.Execute(value);
             }
+        }
+    }
+
+    /// <summary>
+    /// Clicking or tapping a card selects it, which opens it in the Open with service; the selection is then
+    /// cleared, as Bruinet's Todo sample does (.my/rca/card-click.md).
+    /// </summary>
+    public SuggestionViewModel? SelectedCard
+    {
+        get => _selectedCard;
+        set
+        {
+            if (!SetProperty(ref _selectedCard, value) || value is null)
+            {
+                return;
+            }
+
+            _ = value.OpenCommand.ExecuteAsync(null);
+            SetProperty(ref _selectedCard, null);
         }
     }
 

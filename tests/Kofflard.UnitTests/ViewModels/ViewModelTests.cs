@@ -155,6 +155,22 @@ public sealed class ViewModelTests
     }
 
     [Fact]
+    public async Task Results_SelectingACard_OpensIt_AndClearsTheSelection()
+    {
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
+        var results = Results();
+        await results.LoadAsync("Nick Drake", cached: false);
+        var card = Assert.Single(results.Cards);
+
+        results.SelectedCard = card;
+        await Until(() => card.HasOpenedText);
+
+        Assert.Equal(MusicService.YouTube, Assert.Single(_launcher.Links).Service);
+        Assert.Equal("Opened in YouTube ✓", card.OpenedText);
+        Assert.Null(results.SelectedCard);
+    }
+
+    [Fact]
     public async Task Results_ExcludeWhatWasShownBefore()
     {
         Answers(Ok(("Vashti Bunyan", Lane.Safe)));

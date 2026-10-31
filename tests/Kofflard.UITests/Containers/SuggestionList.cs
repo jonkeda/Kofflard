@@ -87,9 +87,8 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
     [BddThen("{item} should open in {value} first")]
     public SuggestionList AssertOpensFirstIn(string musician, string service)
     {
-        var card = Card(musician);
-        card.Surface.Click();
-        card.Opened.AssertText($"Opened in {service} ✓", timeoutMs: TestConstants.PageTimeoutMs);
+        Select(musician);
+        Card(musician).Opened.AssertText($"Opened in {service} ✓", timeoutMs: TestConstants.PageTimeoutMs);
         return Self;
     }
 
@@ -113,9 +112,16 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
     [BddWhen("I open {item}")]
     public SuggestionList Open(string musician)
     {
-        Card(musician).Surface.Click();
+        Select(musician);
         return Self;
     }
+
+    /// <summary>
+    /// Selects <paramref name="musician"/>'s list item, which is what a click or tap on the card does, as in
+    /// Bruinet's Todo sample (.my/rca/card-click.md).
+    /// </summary>
+    public SuggestionList Select(string musician)
+        => SelectItem(Card(musician).Index, TestConstants.PageTimeoutMs);
 
     /// <summary>
     /// Opens <paramref name="musician"/> in <paramref name="service"/>: a tap for the Open with service, else a
@@ -134,8 +140,7 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
 
         // Not one of the other two, so it is the Open with service: hide them again and tap.
         card.Surface.LongPress();
-        card.Surface.Click();
-        return Self;
+        return Select(musician);
     }
 
     /// <summary>Long-presses <paramref name="musician"/>'s card, so it offers the other two services.</summary>

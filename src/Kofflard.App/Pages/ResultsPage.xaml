@@ -86,10 +86,12 @@
                 </Grid>
             </toolkit:StateContainer.StateViews>
 
+            <!-- A click on a card selects it, which opens it (.my/rca/card-click.md). -->
             <CollectionView AutomationId="Results_Items"
                             ItemsSource="{Binding Lanes}"
                             IsGrouped="True"
-                            SelectionMode="None">
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedCard}">
                 <CollectionView.GroupHeaderTemplate>
                     <DataTemplate x:DataType="vm:LaneGroupViewModel">
                         <!-- The lane's name in its colour: amber Safe, teal Curious, violet Wild. -->

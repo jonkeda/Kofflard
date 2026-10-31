@@ -18,7 +18,8 @@
         <CollectionView Grid.Row="1"
                         AutomationId="Saved_Items"
                         ItemsSource="{Binding Items}"
-                        SelectionMode="None">
+                        SelectionMode="Single"
+                        SelectedItem="{Binding SelectedCard}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:SuggestionViewModel">
                     <VerticalStackLayout AutomationId="Suggestion">

@@ -3,14 +3,17 @@
     One card, on the results and the favourites page (.my/design/results-list-changes.md). It takes its
     BindingContext from the list item. Every card repeats the same ids; item scoping keeps them apart.
 
-    Two layers in one cell. Below, Suggestion_Card: the tap surface, which opens the Open with service,
-    and on a long press (a right-click on Windows) shows the other two. Above, the content: the text lets
-    taps fall through to the surface, and the star, More and the Open in links are buttons on top. They
-    are siblings of the surface, not its children, so their taps never reach its gestures, on any platform.
+    A click or tap on the card is the list's: it selects the card, and the page opens it in the Open with
+    service (.my/rca/card-click.md). A TouchBehavior's tap never ran on Windows, and a list item's own click
+    works on every platform.
+
+    Two layers in one cell. Below, Suggestion_Card: the surface for the long press (a right-click on Windows,
+    TouchBehavior on a phone, added in code), which shows the other two services. Above, the content: the
+    text lets clicks fall through, and the star, More and the Open in links are buttons on top, which take
+    their own clicks.
 -->
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:Kofflard.Core.ViewModels;assembly=Kofflard.Core"
              x:Class="Kofflard.App.Views.SuggestionCardView"
              x:DataType="vm:SuggestionViewModel">
@@ -39,10 +42,6 @@
                          BackgroundColor="Transparent"
                          SemanticProperties.Description="{Binding OpenDescription}"
                          SemanticProperties.Hint="Long press for other services">
-                <ContentView.Behaviors>
-                    <toolkit:TouchBehavior Command="{Binding OpenCommand}"
-                                           LongPressCommand="{Binding ShowOtherServicesCommand}" />
-                </ContentView.Behaviors>
                 <FlyoutBase.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Open in…" Command="{Binding ShowOtherServicesCommand}" />

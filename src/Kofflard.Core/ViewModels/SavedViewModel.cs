@@ -8,8 +8,29 @@ namespace Kofflard.Core.ViewModels;
 /// <summary>The favourites, with the same card as the results.</summary>
 public sealed class SavedViewModel(ISavedStore saved, ISettingsStore settings, SuggestionCards cards, INavigator navigator) : ParentViewModel
 {
+    private SuggestionViewModel? _selectedCard;
+
     /// <summary>The saved musicians, newest first.</summary>
     public ObservableCollection<SuggestionViewModel> Items { get; } = [];
+
+    /// <summary>
+    /// Clicking or tapping a card selects it, which opens it in the Open with service; the selection is then
+    /// cleared, as Bruinet's Todo sample does (.my/rca/card-click.md).
+    /// </summary>
+    public SuggestionViewModel? SelectedCard
+    {
+        get => _selectedCard;
+        set
+        {
+            if (!SetProperty(ref _selectedCard, value) || value is null)
+            {
+                return;
+            }
+
+            _ = value.OpenCommand.ExecuteAsync(null);
+            SetProperty(ref _selectedCard, null);
+        }
+    }
 
     /// <summary>Whether nothing is saved.</summary>
     public bool IsEmpty => Items.Count == 0;

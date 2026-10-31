@@ -5,9 +5,10 @@ using Kofflard.Core.ViewModels;
 namespace Kofflard.App.Automation;
 
 /// <summary>
-/// The card's tap and long press for Bruinet's gesture bridge. A finger reaches them through the card's
-/// TouchBehavior, which the bridge cannot drive (MAUI has no long-press recognizer), so the sink runs the
-/// same commands the behavior binds.
+/// The card's long press for Bruinet's gesture bridge. A finger reaches it through the card's TouchBehavior
+/// (a right-click on Windows), which the bridge cannot drive (MAUI has no long-press recognizer), so the
+/// sink runs the same command. A tap is not here: it is the list's, and Bruinet selects the card's list item,
+/// as a click does (.my/rca/card-click.md).
 /// </summary>
 public sealed class CardGestureSink : IBruinetGestureSink
 {
@@ -15,10 +16,10 @@ public sealed class CardGestureSink : IBruinetGestureSink
     public static CardGestureSink Instance { get; } = new();
 
     /// <summary>The verbs to declare on the card's tap surface.</summary>
-    public const string Declared = nameof(BruinetVerb.Tap) + "," + nameof(BruinetVerb.LongPress);
+    public const string Declared = nameof(BruinetVerb.LongPress);
 
     /// <inheritdoc />
-    public IReadOnlyCollection<BruinetVerb> Verbs { get; } = [BruinetVerb.Tap, BruinetVerb.LongPress];
+    public IReadOnlyCollection<BruinetVerb> Verbs { get; } = [BruinetVerb.LongPress];
 
     /// <inheritdoc />
     public int Invoke(VisualElement element, BruinetVerb verb, int arg1, int arg2)
@@ -30,10 +31,6 @@ public sealed class CardGestureSink : IBruinetGestureSink
 
         switch (verb)
         {
-            case BruinetVerb.Tap:
-                card.OpenCommand.Execute(null);
-                return HResults.S_OK;
-
             case BruinetVerb.LongPress:
                 card.ShowOtherServicesCommand.Execute(null);
                 return HResults.S_OK;
