@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-    The results (design §3.1). Results_State is a CommunityToolkit StateContainer, as Todo's list: its
+    The results (design §3.1, .my/design/results-list-changes.md). "Like Genesis" is the title bar's;
+    the suggestions fold by lane, each lane's header a button. Results_State is a CommunityToolkit StateContainer, as Todo's list: its
     default content is the suggestions; Loading, Empty, Error and Candidates each carry their own
     AutomationId, which is how Bruinet's StateContainer control tells which one is showing.
 -->
@@ -17,14 +18,7 @@
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="16,8" RowSpacing="8">
 
-        <VerticalStackLayout Spacing="2">
-            <Label AutomationId="Results_Heading" Text="{Binding Heading}" FontSize="22" FontAttributes="Bold" />
-            <Label AutomationId="Results_Summary" Text="{Binding Summary}" TextColor="{StaticResource Gray500}" />
-            <Grid ColumnDefinitions="*,Auto">
-                <Label AutomationId="Results_Adventure" Text="{Binding AdventureText}" FontSize="12" />
-                <Label Grid.Column="1" AutomationId="Results_Lanes" Text="{Binding LaneSummary}" FontSize="12" />
-            </Grid>
-        </VerticalStackLayout>
+        <Label AutomationId="Results_Summary" Text="{Binding Summary}" TextColor="{StaticResource Gray500}" />
 
         <Grid Grid.Row="1"
               AutomationId="Results_State"
@@ -53,6 +47,11 @@
                                      VerticalOptions="Center">
                     <Label AutomationId="Results_ErrorLabel"
                            Text="{Binding ErrorMessage}"
+                           HorizontalTextAlignment="Center" />
+                    <Label AutomationId="Results_Connection"
+                           Text="{Binding ConnectionLine}"
+                           FontSize="12"
+                           TextColor="{StaticResource Gray500}"
                            HorizontalTextAlignment="Center" />
                     <Button AutomationId="Results_Retry"
                             Text="Try again"
@@ -88,17 +87,27 @@
             </toolkit:StateContainer.StateViews>
 
             <CollectionView AutomationId="Results_Items"
-                            ItemsSource="{Binding Items}"
+                            ItemsSource="{Binding Lanes}"
+                            IsGrouped="True"
                             SelectionMode="None">
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate x:DataType="vm:LaneGroupViewModel">
+                        <Grid AutomationId="LaneHeader">
+                            <Button AutomationId="LaneHeader_Toggle"
+                                    Text="{Binding HeaderText}"
+                                    Command="{Binding ToggleCommand}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource Primary}"
+                                    FontAttributes="Bold"
+                                    FontSize="16"
+                                    Padding="4,8"
+                                    HorizontalOptions="Start" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:SuggestionViewModel">
                         <VerticalStackLayout AutomationId="Suggestion">
-                            <Label AutomationId="Suggestion_Lane"
-                                   Text="{Binding LaneName}"
-                                   FontSize="12"
-                                   FontAttributes="Bold"
-                                   TextColor="{StaticResource Primary}"
-                                   Margin="4,8,0,0" />
                             <views:SuggestionCardView />
                         </VerticalStackLayout>
                     </DataTemplate>

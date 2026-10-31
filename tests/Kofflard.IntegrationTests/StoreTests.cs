@@ -24,10 +24,27 @@ public sealed class StoreTests : IDisposable
         var store = new SqliteSettingsStore(_database);
         Assert.Equal(AppSettings.Default, await store.LoadAsync());
 
-        var changed = new AppSettings(new AiConnection("azure", "https://res.openai.azure.com", "gpt-4.1-mini"), MusicService.Spotify, true, 4);
+        var changed = new AppSettings(new AiConnection("azure", "https://res.openai.azure.com", "gpt-4.1-mini"), MusicService.Spotify, true, 4)
+        {
+            OpenLanes = new HashSet<Lane> { Lane.Leap, Lane.Close },
+        };
         await store.SaveAsync(changed);
 
         Assert.Equal(changed, await new SqliteSettingsStore(_database).LoadAsync());
+    }
+
+    [Fact]
+    public async Task Settings_ABadOpenLanesValue_ReadsAsTheLanesItNames()
+    {
+        var store = new SqliteSettingsStore(_database);
+        await store.SaveAsync(AppSettings.Default);
+        await using (var connection = await _database.OpenAsync())
+        await using (var command = connection.Command("UPDATE settings SET value = 'Stretch, Sideways,7,' WHERE key = 'open_lanes';"))
+        {
+            await command.ExecuteNonQueryAsync();
+        }
+
+        Assert.Equal([Lane.Stretch], (await store.LoadAsync()).OpenLanes);
     }
 
     [Fact]

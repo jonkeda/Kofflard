@@ -10,8 +10,8 @@ namespace Kofflard.Core.ViewModels;
 /// One card: a suggestion on the results page, or a saved musician (design §3.1).
 /// </summary>
 /// <remarks>
-/// The main button opens the service chosen in Open with; the two small ones open the other two
-/// (design §8.3). Explore searches again from this musician ("chain").
+/// A tap opens the service chosen in Open with; a long press offers the other two (design §8.3,
+/// .my/design/results-list-changes.md). Explore searches again from this musician ("chain").
 /// </remarks>
 public sealed class SuggestionViewModel : ParentViewModel
 {
@@ -26,6 +26,7 @@ public sealed class SuggestionViewModel : ParentViewModel
     private bool _isSaved;
     private string _openedText = string.Empty;
     private int _opens;
+    private bool _showsOtherServices;
 
     /// <summary>Creates a card.</summary>
     /// <param name="suggestion">What the card shows.</param>
@@ -58,6 +59,7 @@ public sealed class SuggestionViewModel : ParentViewModel
         OpenCommand = new TargetAsyncCommand(this, () => OpenAsync(_services[0]));
         OpenSecondCommand = new TargetAsyncCommand(this, () => OpenAsync(_services[1]));
         OpenThirdCommand = new TargetAsyncCommand(this, () => OpenAsync(_services[2]));
+        ShowOtherServicesCommand = new RelayCommand(() => ShowsOtherServices = !ShowsOtherServices);
         SaveCommand = new TargetAsyncCommand(this, ToggleSavedAsync);
         ExploreCommand = new TargetAsyncCommand(this, () => _explore(this));
     }
@@ -89,8 +91,8 @@ public sealed class SuggestionViewModel : ParentViewModel
     /// <summary>Whether <see cref="KnownForText"/> is shown.</summary>
     public bool HasKnownFor => Suggestion.KnownFor is not null;
 
-    /// <summary>"▶ YouTube": the main button.</summary>
-    public string OpenText => $"▶ {MusicLinks.DisplayName(_services[0])}";
+    /// <summary>"Open Camel in YouTube": what a tap on the card does, for screen readers.</summary>
+    public string OpenDescription => $"Open {Name} in {MusicLinks.DisplayName(_services[0])}";
 
     /// <summary>The second service's name.</summary>
     public string SecondText => MusicLinks.DisplayName(_services[1]);
@@ -134,28 +136,42 @@ public sealed class SuggestionViewModel : ParentViewModel
         {
             if (SetProperty(ref _isSaved, value))
             {
-                OnPropertyChanged(nameof(SaveText));
+                OnPropertyChanged(nameof(StarText));
+                OnPropertyChanged(nameof(StarDescription));
             }
         }
     }
 
-    /// <summary>"☆ Save" or "★ Saved".</summary>
-    public string SaveText => _isSaved ? "★ Saved" : "☆ Save";
+    /// <summary>"★" in favourites, else "☆".</summary>
+    public string StarText => _isSaved ? "★" : "☆";
+
+    /// <summary>"Add Camel to favourites" or "Remove Camel from favourites", for screen readers.</summary>
+    public string StarDescription => _isSaved ? $"Remove {Name} from favourites" : $"Add {Name} to favourites";
+
+    /// <summary>Whether the long press's "Open in" row is shown.</summary>
+    public bool ShowsOtherServices
+    {
+        get => _showsOtherServices;
+        private set => SetProperty(ref _showsOtherServices, value);
+    }
 
     /// <summary>The link the main button opens.</summary>
     public MusicLink Link(MusicService service)
         => MusicLinks.For(service, Name, Suggestion.KnownFor, _verification.SpotifyArtistId);
 
-    /// <summary>Opens the musician in the Open with service.</summary>
+    /// <summary>Opens the musician in the Open with service: a tap on the card.</summary>
     public IAsyncRelayCommand OpenCommand { get; }
 
-    /// <summary>Opens the musician in the second service.</summary>
+    /// <summary>Opens the musician in the second service, from the long press's row.</summary>
     public IAsyncRelayCommand OpenSecondCommand { get; }
 
-    /// <summary>Opens the musician in the third service.</summary>
+    /// <summary>Opens the musician in the third service, from the long press's row.</summary>
     public IAsyncRelayCommand OpenThirdCommand { get; }
 
-    /// <summary>Saves or unsaves the musician.</summary>
+    /// <summary>Shows or hides "Open in" with the other two services: a long press, or a right-click on Windows.</summary>
+    public IRelayCommand ShowOtherServicesCommand { get; }
+
+    /// <summary>Adds the musician to favourites, or removes them.</summary>
     public IAsyncRelayCommand SaveCommand { get; }
 
     /// <summary>Searches from this musician.</summary>
@@ -183,6 +199,7 @@ public sealed class SuggestionViewModel : ParentViewModel
     /// <summary>Opens the musician in <paramref name="service"/>, and remembers it was opened.</summary>
     public async Task<LaunchOutcome> OpenAsync(MusicService service)
     {
+        ShowsOtherServices = false;
         var outcome = await _launcher.OpenAsync(Link(service));
         await _history.MarkOpenedAsync(Name, _time.GetUtcNow());
 

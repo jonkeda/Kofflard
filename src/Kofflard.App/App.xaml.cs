@@ -7,6 +7,12 @@ public partial class App : Application
     /// </summary>
     public const string WindowTitle = "Kofflard";
 
+    /// <summary>The window's width on Windows: a phone's, so the app looks as it does on one.</summary>
+    public const double PhoneWidth = 420;
+
+    /// <summary>The window's height on Windows.</summary>
+    public const double PhoneHeight = 860;
+
     private readonly AppShell _shell;
 
     public App(AppShell shell)
@@ -16,8 +22,9 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Creates the window, titled explicitly so a driver attaching by title finds it, and sized when the launch
-    /// asks (<c>KOFFLARD_WINDOW=1280x800</c>), so a recorded video has the same frame every take.
+    /// Creates the window, titled explicitly so a driver attaching by title finds it. On Windows it starts
+    /// phone-sized, unless the launch asks for a size (<c>KOFFLARD_WINDOW=1280x800</c>), so a recorded video
+    /// has the same frame every take.
     /// </summary>
     protected override Window CreateWindow(IActivationState? activationState)
     {
@@ -30,6 +37,13 @@ public partial class App : Application
             window.Width = w;
             window.Height = h;
         }
+#if WINDOWS
+        else
+        {
+            window.Width = PhoneWidth;
+            window.Height = PhoneHeight;
+        }
+#endif
 
         return window;
     }

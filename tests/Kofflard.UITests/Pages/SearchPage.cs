@@ -5,7 +5,7 @@ namespace Kofflard.UITests.Pages;
 /// <summary>
 /// Page object for the search page, the Shell root.
 /// </summary>
-/// <remarks>Saved and Settings are toolbar items, so they are declared on <see cref="AppRoot"/>.</remarks>
+/// <remarks>Favourites (★) and Settings (⚙) are toolbar items, so they are declared on <see cref="AppRoot"/>.</remarks>
 public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(context)
 {
     private readonly AppRoot _appRoot = new(context);
@@ -21,22 +21,38 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
     [UatName("Name Error")]
     public Label<SearchPage> NameError => new(this, "Search_NameError");
 
-    /// <summary>The adventurousness, 1-5.</summary>
-    public Stepper<SearchPage> Adventure => new(this, "Search_Adventure");
+    /// <summary>The five adventure choices, Safe to Wild.</summary>
+    public static readonly IReadOnlyList<string> Adventures = ["Safe", "Curious", "Open", "Bold", "Wild"];
 
-    /// <summary>"Safe" to "Wild".</summary>
-    [UatName("Adventure Name")]
-    public Label<SearchPage> AdventureName => new(this, "Search_AdventureName");
+    /// <summary>One adventure choice: "Curious".</summary>
+    public RadioButton<SearchPage> Adventure(string name) => new(this, $"Adventure_{name}");
+
+    /// <summary>The chosen adventure: "Curious".</summary>
+    public string? ChosenAdventure() => Adventures.SingleOrDefault(name => Adventure(name).IsChecked() == true);
+
+    /// <summary>Chooses how adventurous: "Bold".</summary>
+    [BddWhen("I choose {adventure} adventure")]
+    public SearchPage ChooseAdventure(string adventure)
+    {
+        Adventure(adventure).Click();
+        return this;
+    }
+
+    /// <summary>Asserts the chosen adventure.</summary>
+    [BddThen("{adventure} adventure should be chosen")]
+    public SearchPage AssertAdventure(string adventure)
+    {
+        Assert.Equal(adventure, ChosenAdventure());
+        return this;
+    }
 
     /// <summary>Searches.</summary>
     /// <remarks>Not marked as navigating: with no name typed it stays here and says so.</remarks>
     [UatName("Go")]
     public Button<SearchPage> GoButton => new(this, "Search_Go");
 
-    /// <summary>"AI: Azure OpenAI / Foundry · kofflard-test".</summary>
-    public Label<SearchPage> Connection => new(this, "Search_Connection");
-
-    /// <summary>Opens the saved musicians.</summary>
+    /// <summary>Opens the favourites: the star.</summary>
+    [UatName("Favourites")]
     [UatNavigatesTo(typeof(SavedPage))]
     public ToolbarButton<AppRoot> SavedButton => new(_appRoot, Locator.ByAccessibilityId("Search_Saved"));
 
@@ -60,7 +76,7 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
         return SettingsPage.Arrived(Context);
     }
 
-    /// <summary>Opens the saved musicians.</summary>
+    /// <summary>Opens the favourites.</summary>
     public SavedPage OpenSaved()
     {
         SavedButton.Click();

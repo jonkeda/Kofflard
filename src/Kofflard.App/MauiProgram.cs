@@ -32,6 +32,23 @@ public static class MauiProgram
         Microsoft.Maui.Handlers.PickerHandler.Mapper.ModifyMapping(
             nameof(IPicker.IsOpen),
             (handler, picker, map) => { });
+
+        // A grouped list on Windows pins the current lane's header and clips the cards under it. UI Automation
+        // then reports them off-screen, and scrolling one into view puts it right back under the header, so
+        // automation cannot read it (.my/rca/windows-vs-headless.md). The lane headers scroll with their cards.
+        Microsoft.Maui.Controls.Handlers.Items.CollectionViewHandler.Mapper.AppendToMapping("NoStickyGroupHeaders", (handler, view) =>
+        {
+            if (handler.PlatformView is Microsoft.UI.Xaml.Controls.ListViewBase list)
+            {
+                list.Loaded += (_, _) =>
+                {
+                    if (list.ItemsPanelRoot is Microsoft.UI.Xaml.Controls.ItemsStackPanel panel)
+                    {
+                        panel.AreStickyGroupHeadersEnabled = false;
+                    }
+                };
+            }
+        });
 #endif
 
         // Off unless this build has the bridge and the test run asks for it.

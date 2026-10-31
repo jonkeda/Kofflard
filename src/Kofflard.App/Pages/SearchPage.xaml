@@ -12,9 +12,10 @@
              AutomationId="SearchPage"
              Title="Kofflard">
 
+    <!-- Icons on the Primary title bar; the text is each item's accessible name (.my/design/search-page-changes.md). -->
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Saved" AutomationId="Search_Saved" Command="{Binding SavedCommand}" />
-        <ToolbarItem Text="Settings" AutomationId="Search_Settings" Command="{Binding SettingsCommand}" />
+        <ToolbarItem Text="Favourites" IconImageSource="star.png" AutomationId="Search_Saved" Command="{Binding SavedCommand}" />
+        <ToolbarItem Text="Settings" IconImageSource="settings.png" AutomationId="Search_Settings" Command="{Binding SettingsCommand}" />
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
@@ -32,30 +33,43 @@
                    TextColor="Red"
                    IsVisible="{Binding HasNameError}" />
 
-            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
-                <Label Text="How adventurous?" VerticalOptions="Center" />
-                <Label Grid.Column="1"
-                       AutomationId="Search_AdventureName"
-                       Text="{Binding AdventureName}"
-                       FontAttributes="Bold"
-                       VerticalOptions="Center" />
-                <Stepper Grid.Column="2"
-                         AutomationId="Search_Adventure"
-                         Minimum="1"
-                         Maximum="5"
-                         Increment="1"
-                         Value="{Binding AdventureStep}"
-                         SemanticProperties.Description="Adventurousness, from safe to wild" />
+            <Label Text="How adventurous?" />
+            <Grid AutomationId="Search_Adventure"
+                  ColumnDefinitions="*,*,*,*,*"
+                  ColumnSpacing="6"
+                  RadioButtonGroup.GroupName="Adventure"
+                  BindableLayout.ItemsSource="{Binding AdventureOptions}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AdventureOptionViewModel">
+                        <RadioButton AutomationId="{Binding Name, StringFormat='Adventure_{0}'}"
+                                     Grid.Column="{Binding Column}"
+                                     Value="{Binding Adventure.Level}"
+                                     IsChecked="{Binding IsChosen}"
+                                     ControlTemplate="{StaticResource AdventureChoice}"
+                                     SemanticProperties.Description="{Binding Name}">
+                            <RadioButton.Content>
+                                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                                    <Image Source="{Binding Icon}" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" />
+                                    <Label Text="{Binding Name}" FontSize="11" HorizontalOptions="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsChosen}" Value="True">
+                                                <Setter Property="TextColor" Value="White" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsChosen}" Value="False">
+                                                <Setter Property="TextColor" Value="{StaticResource Tertiary}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </VerticalStackLayout>
+                            </RadioButton.Content>
+                        </RadioButton>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
             </Grid>
 
             <Button AutomationId="Search_Go"
                     Text="Find musicians"
                     Command="{Binding SearchCommand}" />
-
-            <Label AutomationId="Search_Connection"
-                   Text="{Binding ConnectionLine}"
-                   FontSize="12"
-                   TextColor="{StaticResource Gray500}" />
 
             <Label Text="Recent" FontAttributes="Bold" IsVisible="{Binding HasRecent}" />
         </VerticalStackLayout>

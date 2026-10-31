@@ -22,7 +22,7 @@ When I enter "Nick Drake" into Name
 And I tap Go
 Then I should be on the Results page
 And Heading should equal "Like Nick Drake"
-And Lanes should equal "Close 6 · Stretch 4 · Leap 2"
+And the lanes should be "Close 6 · Stretch 4 · Leap 2"
 And Suggestions should suggest "Vashti Bunyan"
 And "Vashti Bunyan" should be a "Close" suggestion
 And "Bill Fay" should be a "Stretch" suggestion
@@ -67,4 +67,5 @@ And I tap Go
 Then I should be on the Results page
 And Results should show the Error state
 And Error Message should equal "This key was not accepted by Azure OpenAI / Foundry."
+And Connection should contain "AI: Azure OpenAI / Foundry"
 ```

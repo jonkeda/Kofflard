@@ -18,6 +18,9 @@ public readonly record struct Adventure
     /// <summary>The level a new install starts on.</summary>
     public static Adventure Default { get; } = new(2);
 
+    /// <summary>Every level, Safe first.</summary>
+    public static IReadOnlyList<Adventure> All { get; } = [.. Enumerable.Range(Min, Max).Select(level => new Adventure(level))];
+
     /// <summary>Creates a level, clamped to 1-5.</summary>
     public Adventure(int level) => Level = Math.Clamp(level, Min, Max);
 
@@ -33,6 +36,12 @@ public readonly record struct Adventure
         4 => "Bold",
         _ => "Wild",
     };
+
+    /// <summary>The level's icon, from staying in harbour to leaving the planet: "adventure_safe.png".</summary>
+    public string Icon => $"adventure_{Name.ToLowerInvariant()}.png";
+
+    /// <summary>The icon in white, for the chosen level: "adventure_safe_on.png".</summary>
+    public string ChosenIcon => $"adventure_{Name.ToLowerInvariant()}_on.png";
 
     /// <inheritdoc />
     public override string ToString() => $"{Level} ({Name})";

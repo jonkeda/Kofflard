@@ -1,7 +1,7 @@
 # Feature: DISC.03 Open a musician in YouTube, YouTube Music or Spotify
 
-A card's main button opens the service chosen in Open with (YouTube unless changed); the two small
-buttons open the other two. On Windows the browser opens; on Android and iOS the service's app when it
+A tap on a card opens the service chosen in Open with (YouTube unless changed); a long press (a
+right-click on Windows) offers the other two. On Windows the browser opens; on Android and iOS the service's app when it
 is installed (design §8). Under test, the app writes the link instead of opening it.
 
 ## Metadata
@@ -15,7 +15,7 @@ is installed (design §8). Under test, the app writes the link instead of openin
 | Tags | maui, links |
 
 @DISC.03.1 @smoke @maui @windows
-## Scenario: DISC.03.1 The main button opens YouTube, with what the musician is known for
+## Scenario: DISC.03.1 A tap opens YouTube, with what the musician is known for
 
 ```gherkin
 Given I am on the Search page
@@ -28,7 +28,7 @@ Then the app should have opened "https://www.youtube.com/results?search_query=Va
 ```
 
 @DISC.03.2 @maui @windows
-## Scenario: DISC.03.2 Spotify opens from its own button, as a search
+## Scenario: DISC.03.2 Spotify opens from a long press, as a search
 
 ```gherkin
 Given I am on the Search page
@@ -40,7 +40,7 @@ Then the app should have opened "https://open.spotify.com/search/Bert%20Jansch"
 ```
 
 @DISC.03.3 @maui @windows
-## Scenario: DISC.03.3 YouTube Music opens from its own button
+## Scenario: DISC.03.3 YouTube Music opens from a long press
 
 ```gherkin
 Given I am on the Search page

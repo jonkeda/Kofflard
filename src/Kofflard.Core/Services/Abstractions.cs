@@ -18,6 +18,21 @@ public sealed record AppSettings(
 {
     /// <summary>A new install's settings.</summary>
     public static AppSettings Default { get; } = new(null, MusicService.YouTube, false, Models.Adventure.Default.Level);
+
+    /// <summary>The result lanes left open; a new install has every lane closed. Remembered, not set.</summary>
+    public IReadOnlySet<Lane> OpenLanes { get; init; } = new HashSet<Lane>();
+
+    /// <summary>Equal when every setting is, the open lanes as a set.</summary>
+    public bool Equals(AppSettings? other)
+        => other is not null
+           && Connection == other.Connection
+           && OpenWith == other.OpenWith
+           && CheckNames == other.CheckNames
+           && Adventure == other.Adventure
+           && OpenLanes.SetEquals(other.OpenLanes);
+
+    /// <inheritdoc />
+    public override int GetHashCode() => HashCode.Combine(Connection, OpenWith, CheckNames, Adventure, OpenLanes.Count);
 }
 
 /// <summary>Where the settings are kept: the app's own database.</summary>

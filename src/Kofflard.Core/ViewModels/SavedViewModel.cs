@@ -5,7 +5,7 @@ using Kofflard.Core.Services;
 
 namespace Kofflard.Core.ViewModels;
 
-/// <summary>The saved musicians, with the same buttons as a result card.</summary>
+/// <summary>The favourites, with the same card as the results.</summary>
 public sealed class SavedViewModel(ISavedStore saved, ISettingsStore settings, SuggestionCards cards, INavigator navigator) : ParentViewModel
 {
     /// <summary>The saved musicians, newest first.</summary>

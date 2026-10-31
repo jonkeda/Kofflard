@@ -101,4 +101,41 @@
         <Setter Property="BackgroundColor" Value="{StaticResource Gray100}" />
     </Style>
 
+    <!-- The title bar in the main button's colour, on every page (.my/design/results-list-changes.md #10). -->
+    <Style TargetType="Shell" ApplyToDerivedTypes="True">
+        <Setter Property="Shell.BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="Shell.ForegroundColor" Value="White" />
+        <Setter Property="Shell.TitleColor" Value="White" />
+    </Style>
+
+    <!--
+        One adventure choice: a RadioButton drawn as an icon button, Primary when chosen and Secondary
+        otherwise (.my/design/search-page-changes.md). The content (icon and name) follows IsChosen itself.
+    -->
+    <ControlTemplate x:Key="AdventureChoice">
+        <Border StrokeThickness="0"
+                StrokeShape="RoundRectangle 8"
+                Padding="2,8"
+                MinimumHeightRequest="48"
+                BackgroundColor="{StaticResource Secondary}">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CheckedStates">
+                        <VisualState x:Name="Checked">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Unchecked">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="{StaticResource Secondary}" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </VisualStateManager.VisualStateGroups>
+            <ContentPresenter />
+        </Border>
+    </ControlTemplate>
+
 </ResourceDictionary>

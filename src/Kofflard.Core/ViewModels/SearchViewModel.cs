@@ -24,7 +24,6 @@ public sealed class SearchViewModel : ParentViewModel
     private string _name = string.Empty;
     private int _adventureLevel = Adventure.Default.Level;
     private string? _nameError;
-    private string _connectionLine = string.Empty;
     private bool _loaded;
 
     /// <summary>Creates the view model.</summary>
@@ -39,6 +38,8 @@ public sealed class SearchViewModel : ParentViewModel
         OpenRecentCommand = new TargetAsyncCommand<RecentSearch>(this, OpenRecentAsync);
         SavedCommand = new TargetAsyncCommand(this, () => _navigator.GoToAsync(KofflardRoutes.Saved));
         SettingsCommand = new TargetAsyncCommand(this, () => _navigator.GoToAsync(KofflardRoutes.Settings));
+        AdventureOptions = [.. Adventure.All.Select(adventure => new AdventureOptionViewModel(adventure, chosen => AdventureLevel = chosen.Level))];
+        ShowChosenAdventure();
     }
 
     /// <summary>The name as typed. Typing clears a shown error.</summary>
@@ -64,7 +65,7 @@ public sealed class SearchViewModel : ParentViewModel
             if (SetProperty(ref _adventureLevel, level))
             {
                 OnPropertyChanged(nameof(AdventureName));
-                OnPropertyChanged(nameof(AdventureStep));
+                ShowChosenAdventure();
                 if (_loaded)
                 {
                     _ = SaveAdventureAsync(level);
@@ -73,12 +74,8 @@ public sealed class SearchViewModel : ParentViewModel
         }
     }
 
-    /// <summary><see cref="AdventureLevel"/> as the Stepper binds it.</summary>
-    public double AdventureStep
-    {
-        get => _adventureLevel;
-        set => AdventureLevel = (int)Math.Round(value);
-    }
+    /// <summary>The five levels as icon choices, Safe first; exactly one is chosen.</summary>
+    public IReadOnlyList<AdventureOptionViewModel> AdventureOptions { get; }
 
     /// <summary>Tapping a recent search selects it, which opens it; the selection is then cleared.</summary>
     public RecentSearch? SelectedRecent
@@ -113,13 +110,6 @@ public sealed class SearchViewModel : ParentViewModel
     /// <summary>Whether <see cref="NameError"/> is shown.</summary>
     public bool HasNameError => _nameError is not null;
 
-    /// <summary>"AI: Azure OpenAI / Foundry · gpt-4.1-mini", or "No AI connected".</summary>
-    public string ConnectionLine
-    {
-        get => _connectionLine;
-        private set => SetProperty(ref _connectionLine, value);
-    }
-
     /// <summary>The recent searches, newest first.</summary>
     public ObservableCollection<RecentSearch> Recent { get; } = [];
 
@@ -132,7 +122,7 @@ public sealed class SearchViewModel : ParentViewModel
     /// <summary>Opens a recent search again; a result from the last day is shown from the cache.</summary>
     public IAsyncRelayCommand<RecentSearch> OpenRecentCommand { get; }
 
-    /// <summary>Opens the saved musicians.</summary>
+    /// <summary>Opens the favourites.</summary>
     public IAsyncRelayCommand SavedCommand { get; }
 
     /// <summary>Opens the settings.</summary>
@@ -146,12 +136,11 @@ public sealed class SearchViewModel : ParentViewModel
         var settings = await _settings.LoadAsync();
         _adventureLevel = new Adventure(settings.Adventure).Level;
         OnPropertyChanged(nameof(AdventureLevel));
-        OnPropertyChanged(nameof(AdventureStep));
         OnPropertyChanged(nameof(AdventureName));
+        ShowChosenAdventure();
         _loaded = true;
 
         var connected = await _connections.GetWithSecretAsync();
-        ConnectionLine = connected is { } current ? $"AI: {current.Connection.Describe()}" : "No AI connected";
 
         Recent.Clear();
         foreach (var search in await _discovery.RecentAsync())
@@ -183,6 +172,14 @@ public sealed class SearchViewModel : ParentViewModel
         => search is null
             ? Task.CompletedTask
             : _navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(search.Artist, new Adventure(search.Adventure), cached: true));
+
+    private void ShowChosenAdventure()
+    {
+        foreach (var option in AdventureOptions)
+        {
+            option.Show(option.Adventure.Level == _adventureLevel);
+        }
+    }
 
     private async Task SaveAdventureAsync(int level)
     {

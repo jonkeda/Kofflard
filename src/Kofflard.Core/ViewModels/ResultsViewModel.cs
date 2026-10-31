@@ -33,6 +33,7 @@ public sealed class ResultsViewModel : ParentViewModel
     private readonly ISavedStore _saved;
     private readonly IArtistVerifier _verifier;
     private readonly SuggestionCards _cards;
+    private readonly AiConnections _connections;
     private readonly INavigator _navigator;
 
     private CancellationTokenSource? _work;
@@ -40,10 +41,10 @@ public sealed class ResultsViewModel : ParentViewModel
     private Adventure _adventure = Adventure.Default;
     private string _stateKey = LoadingState;
     private string _summary = string.Empty;
-    private string _laneSummary = string.Empty;
     private string _candidatesTitle = string.Empty;
     private string _errorMessage = string.Empty;
     private bool _canFixConnection;
+    private string _connectionLine = string.Empty;
 
     /// <summary>Creates the view model.</summary>
     public ResultsViewModel(
@@ -52,6 +53,7 @@ public sealed class ResultsViewModel : ParentViewModel
         ISavedStore saved,
         IArtistVerifier verifier,
         SuggestionCards cards,
+        AiConnections connections,
         INavigator navigator)
     {
         _discovery = discovery;
@@ -59,6 +61,7 @@ public sealed class ResultsViewModel : ParentViewModel
         _saved = saved;
         _verifier = verifier;
         _cards = cards;
+        _connections = connections;
         _navigator = navigator;
 
         RetryCommand = new TargetAsyncCommand(this, () => SearchAsync(useCache: false));
@@ -75,16 +78,6 @@ public sealed class ResultsViewModel : ParentViewModel
     {
         get => _summary;
         private set => SetProperty(ref _summary, value);
-    }
-
-    /// <summary>"Adventure: Curious".</summary>
-    public string AdventureText => $"Adventure: {_adventure.Name}";
-
-    /// <summary>"Close 6 · Stretch 4 · Leap 2".</summary>
-    public string LaneSummary
-    {
-        get => _laneSummary;
-        private set => SetProperty(ref _laneSummary, value);
     }
 
     /// <summary>Loading, Content, Candidates, Empty or Error.</summary>
@@ -124,8 +117,11 @@ public sealed class ResultsViewModel : ParentViewModel
         }
     }
 
-    /// <summary>The cards, in lane order.</summary>
-    public ObservableCollection<SuggestionViewModel> Items { get; } = [];
+    /// <summary>The lanes that have suggestions, in order; each folds open and closed.</summary>
+    public ObservableCollection<LaneGroupViewModel> Lanes { get; } = [];
+
+    /// <summary>Every card, in lane order, whether its lane is open or not.</summary>
+    public IEnumerable<SuggestionViewModel> Cards => Lanes.SelectMany(lane => lane.Cards);
 
     /// <summary>Who the user may have meant.</summary>
     public ObservableCollection<Musician> Candidates { get; } = [];
@@ -142,6 +138,13 @@ public sealed class ResultsViewModel : ParentViewModel
     {
         get => _errorMessage;
         private set => SetProperty(ref _errorMessage, value);
+    }
+
+    /// <summary>"AI: Azure OpenAI / Foundry · gpt-4.1-mini" under an error: the first thing to know when an answer fails.</summary>
+    public string ConnectionLine
+    {
+        get => _connectionLine;
+        private set => SetProperty(ref _connectionLine, value);
     }
 
     /// <summary>Whether the error is about the connection, so "Fix connection" is offered.</summary>
@@ -163,6 +166,9 @@ public sealed class ResultsViewModel : ParentViewModel
     /// <summary>Opens Connect.</summary>
     public IAsyncRelayCommand FixConnectionCommand { get; }
 
+    /// <summary>The save of the open lanes still running, if any; tests wait on it.</summary>
+    public Task Remembering { get; private set; } = Task.CompletedTask;
+
     /// <summary>The verification still running, if any; tests wait on it.</summary>
     public Task Verifying { get; private set; } = Task.CompletedTask;
 
@@ -172,7 +178,6 @@ public sealed class ResultsViewModel : ParentViewModel
         _artist = artist;
         _adventure = adventure;
         OnPropertyChanged(nameof(Heading));
-        OnPropertyChanged(nameof(AdventureText));
         return SearchAsync(cached);
     }
 
@@ -186,9 +191,8 @@ public sealed class ResultsViewModel : ParentViewModel
         var token = _work.Token;
 
         State = LoadingState;
-        Items.Clear();
+        Lanes.Clear();
         Candidates.Clear();
-        LaneSummary = string.Empty;
         Summary = string.Empty;
 
         DiscoveryResult result;
@@ -202,7 +206,7 @@ public sealed class ResultsViewModel : ParentViewModel
         }
         catch (AiException failure)
         {
-            ShowError(failure.Message, failure.Failure is AiFailure.NotConnected or AiFailure.InvalidKey or AiFailure.ModelNotFound or AiFailure.NoCredit);
+            await ShowErrorAsync(failure.Message, failure.Failure is AiFailure.NotConnected or AiFailure.InvalidKey or AiFailure.ModelNotFound or AiFailure.NoCredit);
             return;
         }
 
@@ -227,19 +231,20 @@ public sealed class ResultsViewModel : ParentViewModel
 
         var settings = await _settings.LoadAsync();
         var saved = await _saved.NamesAsync();
-        foreach (var suggestion in result.Suggestions)
+        foreach (var lane in Enum.GetValues<Lane>().Where(lane => result.Count(lane) > 0))
         {
-            Items.Add(_cards.Create(suggestion, settings.OpenWith, saved.Contains(Names.Normalise(suggestion.Name)), ExploreAsync));
+            var cards = result.Suggestions
+                .Where(suggestion => suggestion.Lane == lane)
+                .Select(suggestion => _cards.Create(suggestion, settings.OpenWith, saved.Contains(Names.Normalise(suggestion.Name)), ExploreAsync))
+                .ToList();
+            Lanes.Add(new LaneGroupViewModel(lane, cards, settings.OpenLanes.Contains(lane), RememberOpenLanes));
         }
 
-        LaneSummary = string.Join(" · ", Enum.GetValues<Lane>()
-            .Where(lane => result.Count(lane) > 0)
-            .Select(lane => $"{lane} {result.Count(lane)}"));
         State = ContentState;
 
         if (settings.CheckNames)
         {
-            Verifying = VerifyAsync([.. Items], token);
+            Verifying = VerifyAsync([.. Cards], token);
         }
     }
 
@@ -258,11 +263,32 @@ public sealed class ResultsViewModel : ParentViewModel
         State = CandidatesState;
     }
 
-    private void ShowError(string message, bool connection)
+    private async Task ShowErrorAsync(string message, bool connection)
     {
         ErrorMessage = message;
         CanFixConnection = connection;
+        ConnectionLine = await _connections.GetAsync() is { } current ? $"AI: {current.Describe()}" : "No AI connected";
         State = ErrorState;
+    }
+
+    // The lanes open now are the lanes the next results open with, on any search, after a restart too.
+    // One save at a time, in order, so quick toggles end with the last one.
+    private void RememberOpenLanes(LaneGroupViewModel toggled)
+        => Remembering = RememberOpenLanesAsync(Remembering);
+
+    private async Task RememberOpenLanesAsync(Task previous)
+    {
+        await previous;
+        var open = Lanes.Where(lane => lane.IsExpanded).Select(lane => lane.Lane).ToHashSet();
+        var settings = await _settings.LoadAsync();
+
+        // A lane with no suggestions this time keeps what it was.
+        foreach (var lane in settings.OpenLanes.Where(lane => Lanes.All(shown => shown.Lane != lane)))
+        {
+            open.Add(lane);
+        }
+
+        await _settings.SaveAsync(settings with { OpenLanes = open });
     }
 
     // One name at a time, in lane order: MusicBrainz allows about one request a second (design §8.4).

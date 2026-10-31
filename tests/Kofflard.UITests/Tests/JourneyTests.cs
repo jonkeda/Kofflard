@@ -4,8 +4,8 @@ using Kofflard.UITests.Containers;
 namespace Kofflard.UITests.Tests;
 
 /// <summary>
-/// The main journeys through the real app (design §10): search, lanes, opening links, settings, saving,
-/// exploring, and asking which musician was meant.
+/// The main journeys through the real app (design §10): search, lanes that fold, opening links with a tap
+/// or a long press, settings, favourites, exploring, and asking which musician was meant.
 /// </summary>
 [Collection(KofflardCollection.Name)]
 [Trait("Category", "UITest")]
@@ -26,12 +26,30 @@ public sealed class JourneyTests
         var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
 
         results.Heading.AssertText("Like Nick Drake");
-        results.Lanes.AssertText("Close 6 · Stretch 4 · Leap 2");
+        results.AssertLanes("Close 6 · Stretch 4 · Leap 2");
         results.Suggestions
             .AssertLane("Vashti Bunyan", "Close")
             .AssertLane("Bill Fay", "Stretch")
             .AssertLane("Ali Farka Touré", "Leap");
         results.Suggestions.Card("Ali Farka Touré").Why.AssertTextStartsWith("Bridge: ");
+        return Task.CompletedTask;
+    }
+
+    [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
+    [Trait("Journey", "RES.01.1")]
+    public Task Lanes_StartClosed_AndAnOpenedLane_StaysOpen_OnTheNextSearch()
+    {
+        _fixture.Ai.Answer("Bill Fay", FakeAi.Canned("bill-fay"));
+        var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
+
+        results.LaneHeaders.AssertClosed("Close").AssertClosed("Stretch").AssertClosed("Leap");
+        Assert.Empty(results.Suggestions.Names());
+
+        results.LaneHeaders.Open("Stretch");
+        results.Suggestions.Shown("Bill Fay");
+
+        var next = results.Back().SearchFor("Bill Fay").WaitForSuggestions();
+        next.LaneHeaders.AssertOpen("Stretch").AssertClosed("Close");
         return Task.CompletedTask;
     }
 
@@ -49,24 +67,42 @@ public sealed class JourneyTests
 
     [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
     [Trait("Journey", "DISC.03.1")]
-    public Task Open_UsesYouTubeByDefault_AndTheOtherServicesFromTheirButtons()
+    public Task Open_ATapUsesYouTubeByDefault_AndALongPressOffersTheOthers()
     {
         var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
 
-        results.Suggestions.Card("Vashti Bunyan").OpenButton.AssertText("▶ YouTube");
         results.Suggestions.Open("Vashti Bunyan");
         Assert.Equal(
             "music YouTube https://www.youtube.com/results?search_query=Vashti%20Bunyan%20Just%20Another%20Diamond%20Day",
             _fixture.WaitForOpenedLink("music YouTube"));
 
-        results.Suggestions.OpenIn("Vashti Bunyan", "Spotify");
+        results.Suggestions.ShowOtherServices("Vashti Bunyan");
+        var card = results.Suggestions.Card("Vashti Bunyan");
+        card.SecondButton.AssertText("YouTube Music");
+        card.ThirdButton.AssertText("Spotify");
+        card.ThirdButton.Click();
         Assert.Equal("music Spotify https://open.spotify.com/search/Vashti%20Bunyan", _fixture.WaitForOpenedLink("music Spotify"));
+        card.SecondButton.AssertExists(false, timeoutMs: TestConstants.PageTimeoutMs);
+        return Task.CompletedTask;
+    }
+
+    [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
+    [Trait("Journey", "RES.01.2")]
+    public Task TheStarAndMore_OnACard_OpenNothing()
+    {
+        _fixture.Ai.Answer("Vashti Bunyan", FakeAi.Canned("bill-fay"));
+        var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
+
+        results.Suggestions.Save("Vashti Bunyan");
+        results.Suggestions.Explore("Vashti Bunyan");
+
+        Assert.Empty(_fixture.OpenedLinks);
         return Task.CompletedTask;
     }
 
     [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
     [Trait("Journey", "SET.01.1")]
-    public Task OpenWith_Spotify_MakesSpotifyTheMainButton()
+    public Task OpenWith_Spotify_MakesSpotifyWhatATapOpens()
     {
         var settings = _fixture.Search.OpenSettings();
         settings.OpenWith.AssertSelectedText("YouTube");
@@ -74,7 +110,7 @@ public sealed class JourneyTests
         settings.ChooseOpenWith("Spotify");
 
         var results = settings.Back().SearchFor("Nick Drake").WaitForSuggestions();
-        results.Suggestions.Card("Bert Jansch").OpenButton.AssertText("▶ Spotify");
+        results.Suggestions.AssertOpensFirstIn("Bert Jansch", "Spotify");
         return Task.CompletedTask;
     }
 
@@ -98,7 +134,7 @@ public sealed class JourneyTests
 
     [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
     [Trait("Journey", "DISC.05.1")]
-    public Task Saving_KeepsTheMusician_OnTheSavedPage()
+    public Task TheStar_KeepsTheMusician_InFavourites()
     {
         var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
         results.Suggestions.Save("Bill Fay");
@@ -132,6 +168,7 @@ public sealed class JourneyTests
         var results = _fixture.Search.SearchFor("Nick Drake");
         results.State.AssertShowing(ResultsState.Error, timeoutMs: TestConstants.PageTimeoutMs);
         results.ErrorMessage.AssertText("This key was not accepted by Azure OpenAI / Foundry.");
+        results.Connection.AssertTextStartsWith("AI: Azure OpenAI / Foundry");
         return Task.CompletedTask;
     }
 }

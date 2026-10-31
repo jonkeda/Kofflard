@@ -57,6 +57,8 @@
   <ItemGroup Condition="'$(TargetFramework)' != 'net10.0'">
     <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0F766E" />
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#0F766E" BaseSize="128,128" />
+    <!-- Toolbar icons (white, for the Primary title bar) and the adventure choices (Tertiary, and white when chosen). -->
+    <MauiImage Include="Resources\Images\*.svg" BaseSize="24,24" />
   </ItemGroup>
 
 </Project>

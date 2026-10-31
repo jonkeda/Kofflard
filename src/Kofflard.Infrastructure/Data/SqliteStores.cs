@@ -20,6 +20,7 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
     private const string OpenWithKey = "open_with";
     private const string CheckNamesKey = "check_names";
     private const string AdventureKey = "adventure";
+    private const string OpenLanesKey = "open_lanes";
 
     /// <inheritdoc />
     public async Task<AppSettings> LoadAsync()
@@ -48,7 +49,10 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
             values.TryGetValue(CheckNamesKey, out var check) ? check == "true" : defaults.CheckNames,
             values.TryGetValue(AdventureKey, out var level) && int.TryParse(level, CultureInfo.InvariantCulture, out var parsed)
                 ? new Adventure(parsed).Level
-                : defaults.Adventure);
+                : defaults.Adventure)
+        {
+            OpenLanes = ReadLanes(values.GetValueOrDefault(OpenLanesKey)),
+        };
     }
 
     /// <inheritdoc />
@@ -59,6 +63,7 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
             [OpenWithKey] = settings.OpenWith.ToString(),
             [CheckNamesKey] = settings.CheckNames ? "true" : "false",
             [AdventureKey] = settings.Adventure.ToString(CultureInfo.InvariantCulture),
+            [OpenLanesKey] = string.Join(",", Enum.GetValues<Lane>().Where(settings.OpenLanes.Contains)),
         };
 
         if (settings.Connection is { } ai)
@@ -83,6 +88,13 @@ public sealed class SqliteSettingsStore(KofflardDatabase database, AiConnection?
 
         await transaction.CommitAsync();
     }
+
+    // "Close,Leap"; a name that is not a lane is skipped, so a bad value reads as fewer open lanes.
+    private static HashSet<Lane> ReadLanes(string? value)
+        => [.. (value ?? string.Empty)
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(name => Enum.TryParse<Lane>(name, ignoreCase: true, out var lane) && Enum.IsDefined(lane) ? lane : (Lane?)null)
+            .OfType<Lane>()];
 }
 
 /// <summary>Searches, what was shown, and the result cache (design §9).</summary>
