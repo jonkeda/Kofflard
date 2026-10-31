@@ -267,11 +267,19 @@ public sealed class LaneHeaderList : CollectionObjectBase<ResultsPage, LaneHeade
 
     /// <summary>Each lane and its total, in order.</summary>
     /// <remarks>
-    /// Each lane is looked up by name, not read from the headers realised now: below a lane's cards the next
-    /// header can be off screen, and on Windows and Android it is then not in the tree.
+    /// On a phone each lane is looked up by name, not read from the headers realised now: below a lane's cards
+    /// the next header can be off screen, and on Windows and Android it is then not in the tree. The desktop's
+    /// columns are no virtualised list: every header of a lane that is on is there, side by side, so they are
+    /// read as they are, and a lane turned off is not searched for.
     /// </remarks>
     public IReadOnlyList<(string Name, int Total)> Totals()
     {
+        if (!Layouts.IsPhone(Context))
+        {
+            var shown = Items.Select(header => (header.Name, header.Total)).ToList();
+            return [.. ResultsPage.Lanes.SelectMany(lane => shown.Where(header => header.Name == lane))];
+        }
+
         var budget = TestConstants.ListSearchMs(Context.Platform);
         return [.. ResultsPage.Lanes
             .Select(lane => FindItem(header => header.Name == lane, budget))

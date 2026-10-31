@@ -1,0 +1,16 @@
+{
+  "status": "ok",
+  "artist": { "name": "Doe Maar", "summary": "Dutch pop and ska band, the biggest of the early eighties" },
+  "suggestions": [
+    { "name": "Het Goede Doel", "lane": "close", "why": "Smart Dutch-language pop from the same golden years.", "bridge": null, "tags": ["nederpop", "1980s", "NL"], "knownFor": "Vriendschap" },
+    { "name": "Toontje Lager", "lane": "close", "why": "Catchy Dutch new wave with a wink.", "bridge": null, "tags": ["new wave", "1980s", "NL"], "knownFor": "Stiekem gedanst" },
+    { "name": "Frank Boeijen Groep", "lane": "close", "why": "Dutch-language rock with a dark, romantic edge.", "bridge": null, "tags": ["nederrock", "1980s", "NL"], "knownFor": "Kronenburg Park" },
+    { "name": "Golden Earring", "lane": "close", "why": "The Dutch rock band that went furthest abroad.", "bridge": null, "tags": ["rock", "1970s", "NL"], "knownFor": "Radar Love" },
+    { "name": "Drukwerk", "lane": "stretch", "why": "Early-eighties nederpop, lighter and more playful.", "bridge": null, "tags": ["nederpop", "1980s", "NL"], "knownFor": "Je loog tegen mij" },
+    { "name": "Klein Orkest", "lane": "stretch", "why": "Gentle songs with sharp, political words.", "bridge": null, "tags": ["nederpop", "1980s", "NL"], "knownFor": "Over de muur" },
+    { "name": "The Scene", "lane": "stretch", "why": "Rough, poetic Dutch rock from a decade later.", "bridge": null, "tags": ["nederrock", "1990s", "NL"], "knownFor": "Iedereen is van de wereld" },
+    { "name": "The Specials", "lane": "leap", "why": "British two-tone ska, tight and political.", "bridge": "The offbeat ska guitar of Doe Maar's early songs came from the two-tone wave The Specials started.", "tags": ["ska", "1970s", "UK"], "knownFor": "Ghost Town" },
+    { "name": "The Police", "lane": "leap", "why": "Reggae rhythms played as tight new-wave rock.", "bridge": "Doe Maar mixed reggae into pop the way The Police did, and were called the Dutch answer to them.", "tags": ["new wave", "1980s", "UK"], "knownFor": "Roxanne" }
+  ],
+  "candidates": []
+}

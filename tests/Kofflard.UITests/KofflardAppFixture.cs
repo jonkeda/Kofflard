@@ -58,7 +58,14 @@ public class KofflardAppFixture : MauiTestFixtureBase
     /// The design the app shows. The desktop one (Aurora D) for this suite, on every head, a phone's
     /// included; <see cref="PhoneAppFixture"/> shows the phone's (.my/design/single-page-phone.md).
     /// </summary>
-    protected virtual KofflardLayout Layout => KofflardLayout.Desktop;
+    /// <remarks>
+    /// <c>KOFFLARD_LAYOUT=phone</c> in the test run's environment shows the phone's layout here too: how the
+    /// phone's video is recorded from the same scenarios (VideoScripts/kofflard-phone.video.md).
+    /// </remarks>
+    protected virtual KofflardLayout Layout
+        => Enum.TryParse<KofflardLayout>(Environment.GetEnvironmentVariable(LaunchSettings.LayoutVariable), ignoreCase: true, out var layout)
+            ? layout
+            : KofflardLayout.Desktop;
 
     /// <summary>
     /// The lanes each test starts with. Every lane in the desktop suite, whose journeys check a card from each;
@@ -228,11 +235,18 @@ public class KofflardAppFixture : MauiTestFixtureBase
     // What was shown is excluded from later searches (system-level novelty), and the fake AI always
     // suggests the same musicians: each test starts with none shown. The app's file is on this machine
     // on Windows and headless; on Android the app's own data is cleared at install.
+    // Favourites too: a test that saves some finds only its own.
     private void ForgetHistory()
     {
         if (Platform is MauiPlatform.Windows or MauiPlatform.Headless)
         {
-            new SqliteHistoryStore(new KofflardDatabase(Arranged.Settings.DatabasePath)).ClearAsync().GetAwaiter().GetResult();
+            var database = new KofflardDatabase(Arranged.Settings.DatabasePath);
+            new SqliteHistoryStore(database).ClearAsync().GetAwaiter().GetResult();
+            var saved = new SqliteSavedStore(database);
+            foreach (var musician in saved.AllAsync().GetAwaiter().GetResult())
+            {
+                saved.RemoveAsync(musician.Name).GetAwaiter().GetResult();
+            }
         }
     }
 
@@ -297,8 +311,8 @@ public class KofflardAppFixture : MauiTestFixtureBase
 
         if (platform == MauiPlatform.Windows)
         {
-            // The same frame in every take of a recorded video.
-            values[LaunchSettings.WindowVariable] = "1280x800";
+            // The same frame in every take of a recorded video: a desktop's, or a phone's.
+            values[LaunchSettings.WindowVariable] = settings.Layout == KofflardLayout.Phone ? "430x880" : "1280x800";
         }
 
         return values;

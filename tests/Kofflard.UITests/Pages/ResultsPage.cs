@@ -19,6 +19,15 @@ public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>
     /// <summary>"Like Nick Drake".</summary>
     public Label<ResultsPage> Heading => new(this, "Discover_Heading");
 
+    /// <summary>Opens the favourites: the star in the title bar.</summary>
+    [UatName("Favourites")]
+    [UatNavigatesTo(typeof(SavedPage))]
+    public ToolbarButton<AppRoot> SavedButton => new(_appRoot, Locator.ByAccessibilityId("Search_Saved"));
+
+    /// <summary>Searches for <paramref name="musician"/> again from the same page: a new search, a new trail.</summary>
+    [BddWhen("I search for {musician}")]
+    public ResultsPage SearchFor(string musician) => new SearchPage(Context).SearchFor(musician);
+
     /// <summary>"8 of 12": the cards shown of those found.</summary>
     [UatName("Count")]
     public Label<ResultsPage> Count => new(this, "Discover_Count");

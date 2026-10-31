@@ -1,0 +1,18 @@
+{
+  "status": "ok",
+  "artist": { "name": "De Dijk", "summary": "Amsterdam rock and soul band, Dutch-language, since 1981" },
+  "suggestions": [
+    { "name": "Doe Maar", "lane": "close", "why": "Dutch-language pop with a ska beat that filled the same halls in the eighties.", "bridge": null, "tags": ["nederpop", "1980s", "NL"], "knownFor": "Is dit alles" },
+    { "name": "BLØF", "lane": "close", "why": "Big Dutch-language rock songs about love and the sea.", "bridge": null, "tags": ["nederpop", "2000s", "NL"], "knownFor": "Liefs uit Londen" },
+    { "name": "Acda en de Munnik", "lane": "close", "why": "Two voices, plain Dutch words, songs about ordinary life.", "bridge": null, "tags": ["singer-songwriter", "1990s", "NL"], "knownFor": "Het regent zonnestralen" },
+    { "name": "Van Dik Hout", "lane": "close", "why": "Warm Dutch-language rock with a singalong chorus.", "bridge": null, "tags": ["nederrock", "1990s", "NL"], "knownFor": "Stil in mij" },
+    { "name": "Normaal", "lane": "close", "why": "Loud, proud rock sung in the dialect of the Achterhoek.", "bridge": null, "tags": ["rock", "1970s", "NL"], "knownFor": "Oerend hard" },
+    { "name": "Herman Brood & His Wild Romance", "lane": "close", "why": "Raw Dutch rock and roll from the same years De Dijk began.", "bridge": null, "tags": ["rock", "1970s", "NL"], "knownFor": "Saturday Night" },
+    { "name": "Boudewijn de Groot", "lane": "stretch", "why": "The songwriter Dutch-language pop grew from, older and quieter.", "bridge": null, "tags": ["singer-songwriter", "1960s", "NL"], "knownFor": "Avond" },
+    { "name": "Raymond van het Groenewoud", "lane": "stretch", "why": "A Flemish rocker with the same wry, tender lyrics.", "bridge": null, "tags": ["rock", "1970s", "Belgium"], "knownFor": "Meisjes" },
+    { "name": "Ramses Shaffy", "lane": "stretch", "why": "Amsterdam chanson, sung as loud and as heartfelt.", "bridge": null, "tags": ["chanson", "1970s", "NL"], "knownFor": "Laat me" },
+    { "name": "Ede Staal", "lane": "stretch", "why": "Quiet songs in Groningen dialect, about home and land.", "bridge": null, "tags": ["singer-songwriter", "1980s", "NL"], "knownFor": "Het Hogeland" },
+    { "name": "Solomon Burke", "lane": "leap", "why": "Deep American soul, sung from the gut.", "bridge": "He recorded the album Hold On Tight with De Dijk in 2010, singing their songs in English.", "tags": ["soul", "1960s", "US"], "knownFor": "Cry to Me" }
+  ],
+  "candidates": []
+}

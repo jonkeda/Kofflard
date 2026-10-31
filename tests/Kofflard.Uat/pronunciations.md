@@ -10,3 +10,7 @@ pronunciation before a line is spoken, so no script carries tags for it; caption
 | Bunyan | Bun yun | |
 | Owusu | Oh woo soo | |
 | OpenRouter | Open Router | |
+| De Dijk | Duh Dike | |
+| Doe Maar | Doo Mar | |
+| Boudewijn | Bow duh wine | |
+| Groot | Grote | |

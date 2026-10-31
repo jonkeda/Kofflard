@@ -1,0 +1,19 @@
+{
+  "status": "ok",
+  "artist": { "name": "Eminem", "summary": "Detroit rapper, the fastest-selling hip hop of the 2000s" },
+  "suggestions": [
+    { "name": "Royce da 5'9\"", "lane": "close", "why": "Dense, technical Detroit rap; half of Bad Meets Evil with Eminem.", "bridge": null, "tags": ["hip hop", "2000s", "US"], "knownFor": "Boom" },
+    { "name": "Dr. Dre", "lane": "close", "why": "The producer behind Eminem's sound, with his own hard West Coast records.", "bridge": null, "tags": ["hip hop", "1990s", "US"], "knownFor": "Still D.R.E." },
+    { "name": "50 Cent", "lane": "close", "why": "Hard-hitting hooks from the same label and the same years.", "bridge": null, "tags": ["hip hop", "2000s", "US"], "knownFor": "In da Club" },
+    { "name": "Kendrick Lamar", "lane": "close", "why": "Story-telling rap with the same anger and wordplay.", "bridge": null, "tags": ["hip hop", "2010s", "US"], "knownFor": "HUMBLE." },
+    { "name": "Joyner Lucas", "lane": "close", "why": "Fast, personal verses that build to a shout.", "bridge": null, "tags": ["hip hop", "2010s", "US"], "knownFor": "I'm Not Racist" },
+    { "name": "Danny Brown", "lane": "stretch", "why": "Another Detroit voice, wilder and stranger.", "bridge": null, "tags": ["hip hop", "2010s", "US"], "knownFor": "XXX" },
+    { "name": "Tech N9ne", "lane": "stretch", "why": "Rapid-fire independent rap from Kansas City.", "bridge": null, "tags": ["hip hop", "2000s", "US"], "knownFor": "Caribou Lou" },
+    { "name": "Atmosphere", "lane": "stretch", "why": "Confessional Minneapolis rap, quieter but as honest.", "bridge": null, "tags": ["hip hop", "2000s", "US"], "knownFor": "Sunshine" },
+    { "name": "Brother Ali", "lane": "stretch", "why": "Soulful, outspoken rap from the same Minneapolis label.", "bridge": null, "tags": ["hip hop", "2000s", "US"], "knownFor": "Uncle Sam Goddamn" },
+    { "name": "Dido", "lane": "leap", "why": "Soft, wistful British pop.", "bridge": "Eminem built Stan on a sample of her song Thank You, and she sings its hook.", "tags": ["pop", "2000s", "UK"], "knownFor": "Thank You" },
+    { "name": "Aerosmith", "lane": "leap", "why": "Big seventies American hard rock.", "bridge": "Eminem's Sing for the Moment is built on their Dream On, guitar solo and all.", "tags": ["rock", "1970s", "US"], "knownFor": "Dream On" },
+    { "name": "Elton John", "lane": "leap", "why": "Piano-led pop songs, sung big.", "bridge": "He sang Stan with Eminem at the 2001 Grammys, piano and all.", "tags": ["pop", "1970s", "UK"], "knownFor": "Your Song" }
+  ],
+  "candidates": []
+}
