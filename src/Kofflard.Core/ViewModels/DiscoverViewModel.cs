@@ -19,6 +19,7 @@ public sealed class DiscoverViewModel : ParentViewModel, ISearchFlow
     private readonly Explorer _explorer;
 
     private ResultsViewModel? _results;
+    private bool _hasResults;
     private LaneSet _lanes = LaneSet.Default;
     private bool _isEditing;
 
@@ -38,28 +39,34 @@ public sealed class DiscoverViewModel : ParentViewModel, ISearchFlow
     /// <summary>The name, its error, and Recent.</summary>
     public SearchViewModel Search { get; }
 
-    /// <summary>The search shown, or null before the first one.</summary>
+    /// <summary>
+    /// The results, null before the first search. One for the page, loaded again for each search: the list
+    /// stays bound to it, so its state view never changes under it.
+    /// </summary>
     public ResultsViewModel? Results
     {
         get => _results;
+        private set => SetProperty(ref _results, value);
+    }
+
+    /// <summary>Whether a search is shown; false before the first one and after going back to Recent.</summary>
+    public bool HasResults
+    {
+        get => _hasResults;
         private set
         {
-            if (SetProperty(ref _results, value))
+            if (SetProperty(ref _hasResults, value))
             {
-                OnPropertyChanged(nameof(HasResults));
                 OnPropertyChanged(nameof(ShowsRecent));
             }
         }
     }
 
-    /// <summary>Whether a search is shown.</summary>
-    public bool HasResults => _results is not null;
-
     /// <summary>
     /// Whether Recent shows in the list's place: before the first search, and while the name field is focused
     /// and empty.
     /// </summary>
-    public bool ShowsRecent => _results is null || (_isEditing && Search.Name.Length == 0);
+    public bool ShowsRecent => !_hasResults || (_isEditing && Search.Name.Length == 0);
 
     /// <summary>Whether the name field has the focus; the page sets it.</summary>
     public bool IsEditing
@@ -109,7 +116,7 @@ public sealed class DiscoverViewModel : ParentViewModel, ISearchFlow
     /// <summary>A card's search: the search shown, if it has cards, goes on the trail.</summary>
     public Task ExploreAsync(string artist)
     {
-        if (_results is { HasContent: true } shown)
+        if (_hasResults && _results is { HasContent: true } shown)
         {
             _trail.Push(shown.Artist);
             OnTrailChanged();
@@ -131,10 +138,10 @@ public sealed class DiscoverViewModel : ParentViewModel, ISearchFlow
             return true;
         }
 
-        if (_results is { } results)
+        if (_hasResults)
         {
-            results.Stop();
-            Results = null;
+            _results?.Stop();
+            HasResults = false;
             return true;
         }
 
@@ -157,7 +164,7 @@ public sealed class DiscoverViewModel : ParentViewModel, ISearchFlow
         RefreshToggles();
         await _settings.SaveAsync((await _settings.LoadAsync()) with { Lanes = _lanes });
 
-        if (_results is { } results)
+        if (_hasResults && _results is { } results)
         {
             results.Shown = _lanes;
             results.Mix = LaneMix.For(_lanes);
@@ -173,12 +180,13 @@ public sealed class DiscoverViewModel : ParentViewModel, ISearchFlow
     {
         _lanes = (await _settings.LoadAsync()).Lanes;
         RefreshToggles();
-        _results?.Stop();
-        var results = _makeResults();
+        var results = _results ?? _makeResults();
+        results.Stop();
         results.Flow = _explorer;
         results.Shown = _lanes;
         results.Mix = LaneMix.For(_lanes);
         Results = results;
+        HasResults = true;
         Search.Name = artist;
         await results.LoadAsync(artist, cached);
     }

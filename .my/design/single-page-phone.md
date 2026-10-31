@@ -161,7 +161,8 @@ What differs from the plan above, or was left out:
 - **The list** is `Views/ResultsView.xaml`, shared with the desktop results page, so both draw the same cards with the same ids. Recent is a separate layer over it, not the list's `EmptyView`.
 - **Ids**: `Discover_Heading`, `Discover_Count` and `Discover_Recent` were added; a Recent chip is `Recent_{artist}` with `RecentRow_Remove_{artist}`.
 - **iOS keyboard**: not changed. MAUI scrolls the focused field into view; whether the dock then sits right needs a device.
-- **Tests**: unit tests for the mix, the prompt, the toggles and the trail; UI tests `PhoneTests` (`Layout=phone`: the toggles, the trail, and a screenshot for a look). No UAT scenarios yet: the UAT runner has one fixture, the desktop one.
+- **One results view model** for the page, loaded again for each search: replacing it swapped the list's binding under its state view, and on Windows a second search then never showed.
+- **Tests**: unit tests for the mix, the prompt, the toggles and the trail. UAT scenarios PHONE.01.1–4, tagged `@phone`, run on the phone's design in their own fixture (`KofflardPhoneUatFixture`); the results page object knows which design it is on (`Layouts`). The UI test `PhoneTests` keeps only a screenshot for a look.
 
 ## Not in this change
 - The desktop and tablet design.

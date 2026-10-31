@@ -42,8 +42,7 @@
                 Text="{Binding TrailText, StringFormat='‹ {0}'}"
                 Style="{StaticResource SoftButton}"
                 Command="{Binding BackCommand}"
-                IsVisible="{Binding HasTrail}"
-                SemanticProperties.Description="{Binding TrailText, StringFormat='Back to {0}'}" />
+                IsVisible="{Binding HasTrail}" />
 
         <!-- "Like Vashti Bunyan · 8 of 12". -->
         <VerticalStackLayout Grid.Row="1"

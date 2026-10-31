@@ -3,22 +3,91 @@ using Kofflard.UITests.Containers;
 
 namespace Kofflard.UITests.Pages;
 
-/// <summary>Page object for the results: the cards in lanes, Safe, Curious and Wild, or who the user may have meant.</summary>
+/// <summary>
+/// Page object for the results: the cards in lanes, Safe, Curious and Wild, or who the user may have meant.
+/// On the desktop design it is the results page; on a phone, the one page with a search shown, which adds
+/// the lane toggles, the count and the trail (<see cref="Layouts"/>, .my/design/single-page-phone.md).
+/// </summary>
 public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>(context)
 {
     private readonly AppRoot _appRoot = new(context);
 
     /// <inheritdoc />
-    public override string Name => "ResultsPage";
+    public override string Name => Layouts.IsPhone(Context) ? "DiscoverPage" : "ResultsPage";
 
     /// <summary>"Like Nick Drake": the title bar's text, the page has no heading of its own.</summary>
     public Label<AppRoot> Heading => new(_appRoot, "title");
 
-    /// <summary>
-    /// "Like Nick Drake" as this design shows it: the title bar's on the desktop design; the phone's one page
-    /// has a label (<see cref="PhoneResults"/>).
-    /// </summary>
-    public virtual Label<ResultsPage> PageHeading => new(this, "title");
+    /// <summary>"Like Nick Drake" as this design shows it: the title bar's on the desktop design, a label on the phone's.</summary>
+    public Label<ResultsPage> PageHeading => Layouts.IsPhone(Context) ? new(this, "Discover_Heading") : new(this, "title");
+
+    /// <summary>"8 of 12": the cards shown of those found. The phone's design only.</summary>
+    [UatName("Count")]
+    public Label<ResultsPage> Count => new(this, "Discover_Count");
+
+    /// <summary>"‹ Nick Drake": back to the search this one came from. The phone's design only.</summary>
+    [UatName("Trail")]
+    public TextButton<ResultsPage> Trail => new(this, "Discover_Back");
+
+    /// <summary>The Safe, Curious or Wild toggle. The phone's design only.</summary>
+    public Button<ResultsPage> LaneToggle(string lane) => new(this, $"Lane_{lane}");
+
+    /// <summary>Turns a lane on or off.</summary>
+    [BddWhen("I toggle {lane}")]
+    public ResultsPage Toggle(string lane)
+    {
+        LaneToggle(lane).Click();
+        return this;
+    }
+
+    /// <summary>Asserts the lanes shown and their totals, once they are so: a lane turned on arrives as the AI writes.</summary>
+    [BddThen("the lanes should become {lanes}")]
+    public ResultsPage AssertLanesBecome(string lanes)
+    {
+        var deadline = DateTime.UtcNow.AddMilliseconds(TestConstants.PageTimeoutMs);
+        while (LaneHeaders.Summary() != lanes && DateTime.UtcNow < deadline)
+        {
+            Thread.Sleep(100);
+        }
+
+        Assert.Equal(lanes, LaneHeaders.Summary());
+        return this;
+    }
+
+    /// <summary>A card's "More →" on the phone: its search replaces the list, and the trail grows.</summary>
+    [BddWhen("I follow {musician}")]
+    public ResultsPage Follow(string musician)
+    {
+        Suggestions.LookAt(musician);
+        Suggestions.Card(musician).ExploreButton.Click();
+        PageHeading.AssertText($"Like {musician}", timeoutMs: TestConstants.PageTimeoutMs);
+        WaitForSuggestions();
+        return this;
+    }
+
+    /// <summary>Goes back one search with the phone's trail.</summary>
+    [BddWhen("I go back along the trail")]
+    public ResultsPage BackAlongTrail()
+    {
+        var from = PageHeading.GetText();
+        Trail.Click();
+        var deadline = DateTime.UtcNow.AddMilliseconds(TestConstants.PageTimeoutMs);
+        while (PageHeading.GetText() == from && DateTime.UtcNow < deadline)
+        {
+            Thread.Sleep(100);
+        }
+
+        WaitForSuggestions();
+        return this;
+    }
+
+    /// <summary>Asserts the trail is gone: the first search of the trail is shown.</summary>
+    [BddThen("there should be no trail")]
+    public ResultsPage AssertNoTrail()
+    {
+        Trail.AssertExists(false, "The trail should be gone at the first search.", TestConstants.PageTimeoutMs);
+        return this;
+    }
 
     /// <summary>The searched musician in one line.</summary>
     public Label<ResultsPage> Summary => new(this, "Results_Summary");

@@ -20,15 +20,11 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
                ItemStrategy.ByAutomationId("Suggestion"),
                (collection, itemRoot, index) => new SuggestionCard(collection, itemRoot, index))
     {
-        _onPhone = parentScope is PhoneResults;
     }
-
-    // Whether the list is on the phone's one page rather than the desktop's results page.
-    private readonly bool _onPhone;
 
     // A fresh page object each time, so it finds the page shown now: after "More →" the page this list was
     // made on may be covered by the next one (.my/rca/stacked-pages.md).
-    private ResultsPage Results => _onPhone ? new PhoneResults(Context) : new ResultsPage(Context);
+    private ResultsPage Results => new(Context);
 
     /// <summary>The names of the cards, in the order shown.</summary>
     public IReadOnlyList<string> Names() => [.. Items.Select(card => TryReadName(card) ?? string.Empty)];

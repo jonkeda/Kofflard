@@ -46,6 +46,11 @@ public class KofflardAppFixture : MauiTestFixtureBase
     /// <summary>Launches the app and waits for its first page.</summary>
     public KofflardAppFixture()
     {
+        if (Layout == KofflardLayout.Phone)
+        {
+            Layouts.MarkPhone(Context);
+        }
+
         Arrived();
     }
 

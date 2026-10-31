@@ -12,22 +12,12 @@ public sealed class PhoneAppFixture : KofflardAppFixture
     /// <inheritdoc />
     protected override KofflardLayout Layout => KofflardLayout.Phone;
 
-    /// <summary>
-    /// Puts back what earlier tests changed outside the app, and walks the trail back to its start, so a
-    /// test's searches make the only trail.
-    /// </summary>
+    /// <summary>Puts back what earlier tests changed outside the app, and walks the trail back to its start.</summary>
     /// <remarks>The page keeps the last search an earlier test made; a test searches before it looks.</remarks>
     public PhonePage StartPhoneTest()
     {
         Reset();
-        var page = PhonePage.Arrived(Context);
-        for (var step = 0; step < 20 && page.BackButton.IsExists(); step++)
-        {
-            page.BackButton.Click();
-            page.BackButton.WaitExists(false, TestConstants.PageTimeoutMs / 10);
-        }
-
-        return page;
+        return PhonePage.Arrived(Context).WalkTrailBack();
     }
 
     /// <inheritdoc />
