@@ -10,7 +10,7 @@ namespace Kofflard.Core.ViewModels;
 
 /// <summary>
 /// The results: the suggestions in their lanes, Safe, Curious and Wild, or who the user may have meant
-/// (design §3.1, .my/design/adventure-as-outcomes.md). Cards come in one by one as the AI writes them
+/// (.my/design/kofflard-design.md §3.1–3.2). Cards come in one by one as the AI writes them
 /// (.my/design/streaming-answers.md). On the desktop design it is the results page; on a phone, the list of
 /// the one page, filtered by the lane toggles (.my/design/single-page-phone.md).
 /// </summary>

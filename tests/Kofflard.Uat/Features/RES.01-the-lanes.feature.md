@@ -1,7 +1,7 @@
 # Feature: RES.01 The lanes
 
 The results come in three lanes, Safe, Curious and Wild, each under a header with the lane's total, Safe
-first (.my/design/adventure-as-outcomes.md).
+first (.my/design/kofflard-design.md §3.2).
 
 ## Metadata
 

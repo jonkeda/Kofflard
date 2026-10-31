@@ -4,7 +4,7 @@ namespace Kofflard.Core.Rules;
 
 /// <summary>
 /// How many suggestions a search asks for in each lane. The desktop design asks for 4 Safe, 4 Curious and 4
-/// Wild (.my/design/adventure-as-outcomes.md); a phone splits 12 between the lanes that are on, and asks
+/// Wild (.my/design/kofflard-design.md §3.2); a phone splits 12 between the lanes that are on, and asks
 /// for 4 of one lane turned on later (.my/design/single-page-phone.md).
 /// </summary>
 /// <param name="Safe">Safe picks.</param>

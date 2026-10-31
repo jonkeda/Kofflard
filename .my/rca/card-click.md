@@ -4,7 +4,7 @@ Date: 2026-10-31. Status: root cause found by experiment; fixed in Kofflard and 
 
 ## Summary
 
-On Windows, a click on a suggestion card should open the musician in the Open with service (YouTube by default) and show "Opened in YouTube ✓" ([results-list-changes.md](../design/results-list-changes.md) #6). It did nothing.
+On Windows, a click on a suggestion card should open the musician in the Open with service (YouTube by default) and show "Opened in YouTube ✓" (results-list-changes (folded into kofflard-design.md) #6). It did nothing.
 
 **Root cause:** the card's tap was a CommunityToolkit `TouchBehavior` (`Command="{Binding OpenCommand}"`) on a transparent tap surface. On Windows its command never ran on a mouse click, even with the click landing on the surface itself.
 

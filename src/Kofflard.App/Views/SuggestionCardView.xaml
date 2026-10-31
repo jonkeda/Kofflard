@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-    One card, on the results and the favourites page (.my/design/results-list-changes.md). It takes its
+    One card, on the results and the favourites page (.my/design/kofflard-design.md §3.1). It takes its
     BindingContext from the list item. Every card repeats the same ids; item scoping keeps them apart.
 
     A click or tap on the card is the list's: it selects the card, and the page opens it in the Open with

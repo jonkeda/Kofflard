@@ -2,7 +2,7 @@
 <!--
     The results list and its states, shared by the desktop design's results page and the phone's one page
     (.my/design/single-page-phone.md), so both draw the same cards with the same ids. The suggestions are
-    grouped by lane, Safe, Curious and Wild (.my/design/adventure-as-outcomes.md).
+    grouped by lane, Safe, Curious and Wild (.my/design/kofflard-design.md §3.2).
     Results_State is a CommunityToolkit StateContainer, as Todo's list: its default content is the
     suggestions; Loading, Empty, Error and Candidates each carry their own AutomationId, which is how
     Bruinet's StateContainer control tells which one is showing.

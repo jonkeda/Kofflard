@@ -8,7 +8,7 @@ using Kofflard.Core.Rules;
 namespace Kofflard.Core.ViewModels;
 
 /// <summary>
-/// One lane on the results page, a group headed "Safe (4)" (.my/design/adventure-as-outcomes.md). Cards are
+/// One lane on the results page, a group headed "Safe (4)" (.my/design/kofflard-design.md §3.2). Cards are
 /// added as the AI writes them (.my/design/streaming-answers.md), and the header counts up.
 /// </summary>
 public sealed class LaneGroupViewModel : ObservableCollection<SuggestionViewModel>

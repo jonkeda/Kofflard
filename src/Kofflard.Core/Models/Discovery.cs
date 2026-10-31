@@ -1,7 +1,7 @@
 namespace Kofflard.Core.Models;
 
 /// <summary>
-/// How adventurous a suggestion is, from safe to wild (design §3.2, .my/design/adventure-as-outcomes.md).
+/// How adventurous a suggestion is, from safe to wild (.my/design/kofflard-design.md §3.2).
 /// The order matters: the results show every lane up to the one the user slid to.
 /// </summary>
 /// <remarks>The prompt still calls them close, stretch and leap; those words never reach the screen.</remarks>

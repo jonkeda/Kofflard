@@ -4,7 +4,7 @@ Date: 2026-10-31. Status: root causes found and confirmed by experiment. Worked 
 
 ## Summary
 
-The results list changed from a flat list of cards to lanes that fold: a grouped `CollectionView`, a header per lane ([results-list-changes.md](../design/results-list-changes.md)).
+The results list changed from a flat list of cards to lanes that fold: a grouped `CollectionView`, a header per lane (results-list-changes (folded into kofflard-design.md)).
 
 **Results:**
 - On the MauiHeadless head every UI test and UAT scenario passed (12/12, 16/16).

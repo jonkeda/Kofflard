@@ -11,7 +11,7 @@ namespace Kofflard.Core.ViewModels;
 /// </summary>
 /// <remarks>
 /// A tap opens the service chosen in Open with; a long press offers the other two (design §8.3,
-/// .my/design/results-list-changes.md). Explore searches again from this musician ("chain").
+/// .my/design/kofflard-design.md §3.1). Explore searches again from this musician ("chain").
 /// </remarks>
 public sealed class SuggestionViewModel : ParentViewModel
 {

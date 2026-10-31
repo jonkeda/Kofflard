@@ -9,7 +9,7 @@ makes **one page and one view model for both**, with **two layouts**: the phone'
 for a narrow window, and this two-pane one for a wide window.
 
 It replaces the desktop's two pages (Aurora D's search page that pushes a results page, and
-[desktop-aurora-changes.md](desktop-aurora-changes.md) #1, "no results stay on the search page"), which a
+the earlier desktop change "no results stay on the search page"), which a
 one-pager makes moot: nothing is pushed, so an empty answer simply shows where the cards would.
 
 ## The mock
@@ -50,8 +50,8 @@ The mock was drawn before some decisions. The decisions stand ([Decided](#decide
 
 | In the mock | Decided before | Here |
 | --- | --- | --- |
-| Close, Stretch, Leap | Safe, Curious, Wild ([adventure-as-outcomes.md](adventure-as-outcomes.md)) | Safe, Curious, Wild |
-| ✓ after a verified name | the ✓ marks go ([desktop-aurora-changes.md](desktop-aurora-changes.md) #3) | no ✓ |
+| Close, Stretch, Leap | Safe, Curious, Wild ([kofflard-design.md §3.2](kofflard-design.md)) | Safe, Curious, Wild |
+| ✓ after a verified name | the ✓ marks go | no ✓ |
 | No ✕ on the Recent chips | ✕ removes a recent search | keep ✕ |
 | No lane toggles | the phone's toggles set what is asked and shown | the lane headers are the toggles (below) |
 | A photo with initials | Aurora left photos out: there are none yet | the initials in the lane's colour, as drawn, in the wide layout only |

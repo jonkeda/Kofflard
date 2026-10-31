@@ -12,10 +12,11 @@ Status: phases 0–1 built, with parts of phase 2 (OpenRouter sign-in, opt-in Mu
 
 - **One wire format.** Every provider, Anthropic and Azure included, goes through the OpenAI SDK at its OpenAI-compatible endpoint (Azure: `…/openai/v1/`, with the key also sent as `api-key`). There is no native Anthropic adapter yet. The catalogue is code (`Kofflard.Core/Ai/AiProviders.cs`), not `Providers.json`.
 - **Settings in SQLite.** Settings are kept in the app's SQLite file, not `Preferences`, so tests can set them up the same way on every head. The secret is still kept only in `SecureStorage`.
-- **Disambiguation is a state of the Results page**, not a page of its own.
+- **One page.** Search and results are one page, laid out for a narrow window (a phone) or a wide one (the desktop): §3.1. Disambiguation, errors and "nobody found" are states of its results, not pages of their own.
 - **Parsing and validation live in Core** (`DiscoveryAnswer`, `SuggestionValidator`), next to the prompt.
 - **Exploring has its own button.** "More like this →" on each card starts a new search from that musician, rather than a tap on the card body.
-- **Not built yet:** OAuth for Hugging Face and Azure (Entra ID); these use a key for now. Also not built: streaming, the eval console, Dutch localisation, and cost per search.
+- **Streaming.** Cards appear as the AI writes them ([streaming-answers.md](streaming-answers.md)).
+- **Not built yet:** OAuth for Hugging Face and Azure (Entra ID); these use a key for now. Also not built: the eval console, Dutch localisation, and cost per search.
 - **iOS** builds only on a Mac: `net10.0-ios` is added only when building on macOS.
 
 ---
@@ -60,49 +61,44 @@ The thesis studies video-on-demand, not music, but its findings carry over direc
 
 ### 3.1 Screens
 
+Search and results are **one page**, in two layouts, chosen by the window's width
+([one-page-desktop.md](one-page-desktop.md), [single-page-phone.md](single-page-phone.md)). The look is
+Aurora: a night sky in dark mode, a dawn sky in light mode ([aurora.md](aurora.md)).
+
 ```
-┌─────────────────────────────┐   ┌─────────────────────────────┐
-│ Kofflard                    │   │ ← Like "Nick Drake"         │
-│                             │   │  Adventure ●●○○○            │
-│ [ Who do you like?     🔍 ] │   │                             │
-│                             │   │ CLOSE                       │
-│ How adventurous?            │   │ ┌─────────────────────────┐ │
-│  Safe ●●○○○ Wild            │   │ │ Vashti Bunyan         ✓ │ │
-│                             │   │ │ Fragile late-60s UK folk│ │
-│ Recent                      │   │ │ [Spotify] [YouTube] [+] │ │
-│  Nick Drake                 │   │ └─────────────────────────┘ │
-│  Khruangbin                 │   │ STRETCH                     │
-│                             │   │  …                          │
-│ ☆ Saved (4)        ⚙ AI: …  │   │ LEAP                        │
-└─────────────────────────────┘   │ ┌─────────────────────────┐ │
-        Search page               │ │ Ali Farka Touré       ✓ │ │
-                                  │ │ Bridge: the same hushed │ │
-                                  │ │ fingerpicking, from Mali│ │
-                                  │ │ [Spotify] [YouTube] [+] │ │
-                                  │ └─────────────────────────┘ │
-                                  │ [ More like this… ]         │
-                                  └─────────────────────────────┘
-                                          Results page
+Narrow (under 900): a phone          Wide (900 and up): the desktop, a tablet in landscape
+┌──────────────────────────┐         ┌──────────────┬──────────────────────────────────────────┐
+│ Kofflard            ★  ⚙ │         │ Kofflard     │                                  ★  ⚙    │
+│ ‹ Nick Drake             │         │  ╭────────╮  │ Like Vashti Bunyan        ○  ○  ○        │
+│ Like Vashti Bunyan       │         │ ( Who do   ) │ 12 of 12                   ╲ │ ╱  map    │
+│ 12 of 12                 │         │ ( you like?) │                    ○ ─── (VB) ─── ○      │
+│ SAFE (6)                 │         │  ╰────────╯  │ ● Safe (6)   ● Curious (4)  ● Wild (2)   │
+│ [card] [card] …          │         │ [Find music] │ [card]       [card]         [card]       │
+│ CURIOUS (4) …            │         │ RECENT       │ [card]       [card]         [card]       │
+│ [ More like this… ]      │         │ (Nick ✕)     │ …                                        │
+├──────────────────────────┤         │              │        [ More like this… ]               │
+│ [Safe][Curious][Wild]    │         └──────────────┴──────────────────────────────────────────┘
+│ ((Who do you like?))  ➤  │
+└──────────────────────────┘
 ```
 
-1. **Connect AI** appears on first run, and again from ⚙ whenever no AI is connected. See §6.
-2. **Search** has:
-   - the name entry
-   - the adventurousness control (5 steps, default 2)
-   - recent searches
-   - Saved
-   - the connected provider and model (⚙)
-3. **Results** shows suggestions in three lanes. Each card has:
-   - the name
-   - a one-line *why* (or the bridge, for leaps)
-   - 1–3 tags (genre, era, country)
-   - a ✓ once the artist is verified (§8.4; only when **Check musician names** is on)
-   - one main **open** button for the default service (§8.3), and two small buttons for the other two (YouTube, YouTube Music, Spotify)
-   - **+** to save
+1. **Connect AI** appears on first run, and again whenever no AI is connected. See §6.
+2. **The one page** has:
+   - the name and ➤ (a phone, in the dock at the bottom) or Find musicians (the desktop, in the search pane);
+   - **Recent**: the latest searches as chips, each with ✕ to forget it; on a phone they show before the first search and while the name field is focused and empty;
+   - the **Safe, Curious and Wild toggles**: the dock's three buttons on a phone, the column headers on the desktop (§3.2);
+   - the results: the heading ("Like Nick Drake"), the count ("10 of 12"), the cards in their lanes, and **More like this…**;
+   - the **trail** ("‹ Nick Drake"): a card's "More →" searches that musician on the same page, and the trail goes back, from the cache;
+   - on the desktop, the **artist map**: the searched musician in the middle, the shown picks around it; a dot searches its musician.
+3. **A card** has:
+   - ☆ to keep it in Favourites (★ once kept);
+   - the name and **More →**;
+   - a one-line *why* (for a wild pick, the bridge), 1–3 tags, and what it is known for;
+   - on the desktop, the initials on the lane's colour, until there are photos.
 
-   Tapping the card body starts a new search from that musician ("chain"), so exploring is natural.
-4. **Disambiguation** appears when a name is ambiguous or unknown (for example "Genesis", or a typo). It shows 2–4 candidates with a short description.
-5. **Saved** lists the user's saved musicians, with the same open buttons.
+   A tap or click on the card opens it in the **Open with** service (§8.3), and says "Opened in YouTube" for a moment; a long press (a right-click on Windows) offers the other two. There is no ✓: an artist MusicBrainz could not confirm says so instead (§8.4, when **Check musician names** is on).
+4. **Did you mean** shows in the results when a name is ambiguous or unknown (for example "Genesis", or a typo): 2–4 candidates with a short description. Errors and "nobody found" show there too.
+5. **Favourites** lists the kept musicians, with the same cards. "More →" there goes back to the one page and searches.
 6. **Settings** (§3.3).
 
 ### 3.3 Settings
@@ -111,17 +107,36 @@ The thesis studies video-on-demand, not music, but its findings carry over direc
 | --- | --- | --- | --- |
 | **AI provider** | the catalogue (§6.1), **Azure first** | Azure OpenAI / Foundry | Plus change and disconnect. The connection test runs on save. |
 | **Model / deployment** | per provider | the provider's default from the catalogue | For Azure: the deployment name |
-| **Open with** | YouTube, YouTube Music, Spotify | YouTube | Sets the card's main button (§8.3) |
-| **Check musician names** | on / off | **off** | MusicBrainz verification (§8.4). It is slow (about 1 name per second), so it is opt-in. When off, there is no ✓ and Spotify links are search links. |
-| **Adventurousness** | 1–5 | 2 | Also on the Search page; both edit the same value |
+| **Open with** | YouTube, YouTube Music, Spotify | YouTube | Sets what a tap on a card opens (§8.3) |
+| **Check musician names** | on / off | **off** | MusicBrainz verification (§8.4). It is slow (about 1 name per second), so it is opt-in. When off, Spotify links are search links. |
 | **Clear history** | action | — | Empties recent, shown and cache (§9) |
 
-All of these except the secret are stored in `Preferences`. The secret is stored in `SecureStorage`. `SettingsViewModel` reads and writes them through an `ISettings` port, so view models and tests never touch `Preferences` directly.
+The lanes that are on are a setting too, changed only with the toggles (§3.2). All settings but the secret are kept in the app's SQLite file; the secret only in `SecureStorage`.
 
 ### 3.2 The three lanes
 
 | Lane | Relevance | Novelty | Unexpectedness | Purpose |
 | --- | --- | --- | --- | --- |
+| **Safe** | high | medium | low | Safe and satisfying: "fans also like", but less obvious |
+| **Curious** | high | high | medium | Lesser-known artists, other eras, deep cuts of the same sound |
+| **Wild** | medium–high (via a bridge) | high | high | Another genre, country or decade, joined to the original by an explicit bridge |
+
+The prompt still calls them close, stretch and leap; those words never reach the screen. There is no
+adventure slider: how adventurous is the lanes the user keeps on.
+
+**The toggles** set both what a search asks for and which lanes show:
+
+| | |
+| --- | --- |
+| **The ask** | 12 picks split between the lanes that are on: one lane 12, two lanes 6 + 6, all three 4 + 4 + 4 (`LaneMix`). "More like this…" asks the same way. |
+| **The list** | Only the lanes that are on show; turning one off hides it at once, with no request. |
+| **A lane turned on with no cards** | It asks for that lane alone, 4 picks, which stream into it; the other cards stay. Turned on while a search still runs, it is asked for when that search ends. |
+
+- A new install has every lane on, Wild too. The choice is remembered.
+- The last lane on can't be turned off.
+- A Wild pick always says why, with a concrete bridge; a short or vague one is dropped (§7.2).
+
+--- | --- | --- | --- | --- |
 | **Close** | high | medium | low | Safe and satisfying: "fans also like", but less obvious |
 | **Stretch** | high | high | medium | Lesser-known artists, other eras, deep cuts of the same sound |
 | **Leap** | medium–high (via a bridge) | high | high | Another genre, country or decade, joined to the original by an explicit bridge |

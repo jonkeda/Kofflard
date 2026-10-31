@@ -2,7 +2,7 @@
 
 Date: 2026-10-31. Status: built, on Windows; Android and iOS not yet looked at.
 
-Kofflard looked like an office form: a teal title bar, grey page, white boxes. Aurora gives it a night sky in dark mode and a dawn sky in light mode, with glowing rings around the search, a dot slider for the adventure, and cards tinted by lane. The mock-ups are on the design canvas (claude.ai/artifact/2JsCoSm3nwxwTWBNaVRBRJ, boards "D · Aurora"). It restyles design §3 in [kofflard-design.md](kofflard-design.md) and the look of [search-page-changes.md](search-page-changes.md) and [results-list-changes.md](results-list-changes.md); no behaviour, page structure or AutomationId changes.
+Kofflard looked like an office form: a teal title bar, grey page, white boxes. Aurora gives it a night sky in dark mode and a dawn sky in light mode, with glowing rings around the search, a dot slider for the adventure, and cards tinted by lane. The mock-ups are on the design canvas (claude.ai/artifact/2JsCoSm3nwxwTWBNaVRBRJ, boards "D · Aurora"). It restyles design §3 in [kofflard-design.md](kofflard-design.md) and the look of the search page and the results list (kofflard-design.md §3.1); no behaviour, page structure or AutomationId changes.
 
 ## How it is drawn
 

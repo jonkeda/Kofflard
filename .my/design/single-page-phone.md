@@ -4,11 +4,11 @@ Date: 2026-10-31. Status: built 2026-10-31 (see [As built](#as-built)); checked 
 
 Today a search is two pages: the search page (the orb, Find musicians, Recent) pushes a results page, and tapping a card pushes another results page on top. On a phone this means the name field is at the top, out of thumb reach, and every chained search adds a page to the stack. This change folds search and results into one page **on phones (Android and iOS)**: the list fills the screen and the search sits at the bottom, as in a chat or a maps app. Favourites, Settings and Connect stay separate pages.
 
-Kofflard has two designs: this one for **phones**, and **desktop and tablet** (Windows, iPad, Android tablets), which is Aurora D: the search page and the results page from [aurora.md](aurora.md), changed by [desktop-aurora-changes.md](desktop-aurora-changes.md). This change does not touch that design. Its ✓-free cards and ✕ on Recent chips apply here too, as the templates are shared.
+Kofflard has two designs: this one for **phones**, and **desktop and tablet** (Windows, iPad, Android tablets), which is Aurora D: the search page and the results page from [aurora.md](aurora.md), changed by desktop-aurora-changes (folded into kofflard-design.md). This change does not touch that design. Its ✓-free cards and ✕ on Recent chips apply here too, as the templates are shared.
 
 It changes design §3.1 (screens) in [kofflard-design.md](kofflard-design.md) for phones. It takes the Aurora look. Aurora removed the adventure slider; the phone gets [three lane toggles](#safe-curious-wild-one-filter-for-the-ask-and-the-list) instead, one filter for what is asked and what is shown. The AI request, the cards and the data stay as they are.
 
-The mock-ups are on the design canvas (claude.ai/artifact/2JsCoSm3nwxwTWBNaVRBRJ, row "E · Phone — one page"): the results in dark and light, with the Safe, Curious and Wild toggles working, and the first open with Recent. Their source is in [canvas/project](canvas/project).
+The mock-ups are on the design canvas (claude.ai/artifact/2JsCoSm3nwxwTWBNaVRBRJ, row "E · Phone — one page"): the results in dark and light, with the Safe, Curious and Wild toggles working, and the first open with Recent. Their source is in the canvas itself.
 
 ## Before and after
 
@@ -156,7 +156,7 @@ The parts keep their ids, so most page objects keep working:
 What differs from the plan above, or was left out:
 
 - **The layout** is chosen in `AppShell`: by `DeviceInfo.Idiom`, or by the launch setting `KOFFLARD_LAYOUT=phone|desktop`. The UI suite's own fixture asks for the desktop design on every head, a phone's included; `PhoneAppFixture` asks for the phone's, so headless runs both.
-- **The seam** is `ISearchFlow` as planned, with no `NavigatingSearchFlow`: on the desktop design `Flow` is null and the search waits for its first card (`SearchLauncher`, [desktop-aurora-changes.md](desktop-aurora-changes.md)).
+- **The seam** is `ISearchFlow` as planned, with no `NavigatingSearchFlow`: on the desktop design `Flow` is null and the search waits for its first card (`SearchLauncher`, desktop-aurora-changes (folded into kofflard-design.md)).
 - **The trail** grows only from a card's "More →"; a search from the dock or Recent starts a new trail.
 - **The list** is `Views/ResultsView.xaml`, shared with the desktop results page, so both draw the same cards with the same ids. Recent is a separate layer over it, not the list's `EmptyView`.
 - **Ids**: `Discover_Heading`, `Discover_Count` and `Discover_Recent` were added; a Recent chip is `Recent_{artist}` with `RecentRow_Remove_{artist}`.
