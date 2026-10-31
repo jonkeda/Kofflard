@@ -26,6 +26,7 @@ public static class DiscoveryPrompt
           - "close": clearly fits the given musician's taste; well chosen, but not the most obvious "fans also like" pick.
           - "stretch": still fits the taste, but less known: another era, a deep cut, an underrated contemporary.
           - "leap": another genre, country or decade, joined to the given musician by a bridge.
+        - Write the suggestions in lane order: every "close" one first, then "stretch", then "leap".
         - A "leap" must have a "bridge": one concrete, true link back to the given musician - a shared producer,
           an influence either way, a sample, a scene, an instrument or technique. Generic links such as
           "similar vibe" are not bridges. Other lanes have "bridge": null.

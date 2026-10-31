@@ -16,7 +16,7 @@
              AutomationId="ResultsPage"
              Title="{Binding Heading}">
 
-    <Grid RowDefinitions="Auto,*,Auto" Padding="16,8" RowSpacing="8">
+    <Grid RowDefinitions="Auto,*,Auto,Auto" Padding="16,8" RowSpacing="8">
 
         <Label AutomationId="Results_Summary" Text="{Binding Summary}" Style="{StaticResource Muted}" FontSize="15" />
 
@@ -122,12 +122,31 @@
             </CollectionView>
         </Grid>
 
-        <Button Grid.Row="2"
+        <!--
+            While the AI is still writing: the cards so far show above, and this says more are coming
+            (.my/design/streaming-answers.md). If the answer breaks off, what went wrong shows here instead.
+        -->
+        <VerticalStackLayout Grid.Row="2" Spacing="4">
+            <HorizontalStackLayout AutomationId="Results_Streaming"
+                                   Spacing="8"
+                                   HorizontalOptions="Center"
+                                   IsVisible="{Binding IsStreaming}">
+                <ActivityIndicator IsRunning="{Binding IsStreaming}" HeightRequest="20" WidthRequest="20" />
+                <Label Text="More on the way…" Style="{StaticResource Muted}" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+            <Label AutomationId="Results_StreamError"
+                   Text="{Binding StreamError}"
+                   Style="{StaticResource Error}"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding HasStreamError}" />
+        </VerticalStackLayout>
+
+        <Button Grid.Row="3"
                 AutomationId="Results_More"
                 Text="More like this…"
                 HeightRequest="52"
                 CornerRadius="26"
                 Command="{Binding MoreCommand}"
-                IsVisible="{Binding HasContent}" />
+                IsVisible="{Binding CanAskMore}" />
     </Grid>
 </ContentPage>

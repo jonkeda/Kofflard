@@ -90,3 +90,22 @@ public sealed record DiscoveryResult(
     /// <summary>The count per lane, in lane order.</summary>
     public int Count(Lane lane) => Suggestions.Count(suggestion => suggestion.Lane == lane);
 }
+
+/// <summary>
+/// One step of a search as the answer comes in (.my/design/streaming-answers.md): the musician searched for,
+/// a pick to show, and at the end the whole validated result.
+/// </summary>
+public abstract record DiscoveryUpdate
+{
+    /// <summary>The musician searched for, as the model knows them.</summary>
+    public sealed record ArtistFound(Musician Artist) : DiscoveryUpdate;
+
+    /// <summary>A pick that passed the rules and fits its lane's share: show it now.</summary>
+    public sealed record PickFound(Suggestion Suggestion) : DiscoveryUpdate;
+
+    /// <summary>
+    /// The whole answer, validated. It holds every pick shown before, and may add a few that top up a short
+    /// lane; for an ambiguous or unknown name it holds the candidates.
+    /// </summary>
+    public sealed record Done(DiscoveryResult Result) : DiscoveryUpdate;
+}

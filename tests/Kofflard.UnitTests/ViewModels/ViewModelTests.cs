@@ -106,10 +106,52 @@ public sealed class ViewModelTests
         await results.MoreCommand.ExecuteAsync(null);
 
         Assert.Equal("Ali Farka Touré", Assert.Single(results.Cards).Name);
-        await _engine.Received().DiscoverAsync(
+        _engine.Received().DiscoverAsync(
             Azure, "key", "Nick Drake",
             Arg.Is<IReadOnlyCollection<string>>(exclude => exclude.Contains("Vashti Bunyan")),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Results_CardsArrive_OneByOne_AndMoreWaitsForTheWholeAnswer()
+    {
+        var answer = Ok(("Vashti Bunyan", Lane.Safe), ("Bill Fay", Lane.Curious));
+        var gate = new TaskCompletionSource();
+        _engine.DiscoverAsync(default!, default, default!, default!, default).ReturnsForAnyArgs(_ => Gated(answer, gate.Task));
+        var results = Results();
+
+        var loading = results.LoadAsync("Nick Drake", cached: false);
+        await Until(() => results.Cards.Any());
+
+        Assert.Equal(ResultsViewModel.ContentState, results.State);
+        Assert.Equal("Vashti Bunyan", Assert.Single(results.Cards).Name);
+        Assert.Equal(["Safe (1)"], results.Lanes.Select(l => l.HeaderText));
+        Assert.True(results.IsStreaming);
+        Assert.False(results.CanAskMore);
+
+        gate.SetResult();
+        await loading;
+
+        Assert.Equal(["Vashti Bunyan", "Bill Fay"], results.Cards.Select(c => c.Name));
+        Assert.False(results.IsStreaming);
+        Assert.True(results.CanAskMore);
+    }
+
+    [Fact]
+    public async Task Results_WhenTheAnswerBreaksOff_KeepTheCards_AndSayWhy()
+    {
+        var shown = Ok(("Vashti Bunyan", Lane.Safe)).Suggestions[0];
+        _engine.DiscoverAsync(default!, default, default!, default!, default)
+            .ReturnsForAnyArgs(_ => Failing(new AiException(AiFailure.Unavailable, "Azure OpenAI / Foundry had a problem on its side. Try again."), shown));
+        var results = Results();
+
+        await results.LoadAsync("Nick Drake", cached: false);
+
+        Assert.Equal(ResultsViewModel.ContentState, results.State);
+        Assert.Equal("Vashti Bunyan", Assert.Single(results.Cards).Name);
+        Assert.True(results.HasStreamError);
+        Assert.Contains("problem on its side", results.StreamError, StringComparison.Ordinal);
+        Assert.False(results.IsStreaming);
     }
 
     [Fact]
@@ -121,7 +163,7 @@ public sealed class ViewModelTests
         Answers(Ok(("Linda Perhacs", Lane.Safe)));
         await Results().LoadAsync("Nick Drake", cached: false);
 
-        await _engine.Received().DiscoverAsync(
+        _engine.Received().DiscoverAsync(
             Azure, "key", "Nick Drake",
             Arg.Is<IReadOnlyCollection<string>>(exclude => exclude.Contains("Vashti Bunyan")),
             Arg.Any<CancellationToken>());
@@ -139,7 +181,7 @@ public sealed class ViewModelTests
         await again.LoadAsync("Nick Drake", cached: true);
 
         Assert.Equal("Vashti Bunyan", Assert.Single(again.Cards).Name);
-        await _engine.DidNotReceiveWithAnyArgs().DiscoverAsync(default!, default, default!, default!, default);
+        _engine.DidNotReceiveWithAnyArgs().DiscoverAsync(default!, default, default!, default!, default);
     }
 
     [Fact]
@@ -163,7 +205,7 @@ public sealed class ViewModelTests
     public async Task Results_WhenTheKeyIsRefused_ShowTheError_AndOfferToFixIt()
     {
         _engine.DiscoverAsync(default!, default, default!, default!, default)
-            .ReturnsForAnyArgs<Task<DiscoveryResult>>(_ => throw new AiException(AiFailure.InvalidKey, "This key was not accepted by Azure OpenAI / Foundry."));
+            .ReturnsForAnyArgs(_ => Failing(new AiException(AiFailure.InvalidKey, "This key was not accepted by Azure OpenAI / Foundry.")));
         var results = Results();
 
         await results.LoadAsync("Nick Drake", cached: false);
@@ -369,8 +411,64 @@ public sealed class ViewModelTests
     private ConnectViewModel Connect()
         => new(_connections, _engine, Substitute.For<IOpenRouterSignIn>(), _launcher, _navigator);
 
+    // As the engine answers: each lane's share as a pick first, then the whole result.
     private void Answers(DiscoveryResult result)
-        => _engine.DiscoverAsync(default!, default, default!, default!, default).ReturnsForAnyArgs(result);
+        => _engine.DiscoverAsync(default!, default, default!, default!, default).ReturnsForAnyArgs(_ => Streamed(result));
+
+    private static async IAsyncEnumerable<DiscoveryUpdate> Streamed(DiscoveryResult result)
+    {
+        await Task.Yield();
+        if (result.Artist is { } artist)
+        {
+            yield return new DiscoveryUpdate.ArtistFound(artist);
+        }
+
+        if (result.Status == DiscoveryStatus.Ok)
+        {
+            foreach (var lane in result.Suggestions.GroupBy(s => s.Lane))
+            {
+                foreach (var pick in lane.Take(LaneMix.For(lane.Key)))
+                {
+                    yield return new DiscoveryUpdate.PickFound(pick);
+                }
+            }
+        }
+
+        yield return new DiscoveryUpdate.Done(result);
+    }
+
+    private static async IAsyncEnumerable<DiscoveryUpdate> Failing(AiException failure, params Suggestion[] first)
+    {
+        await Task.Yield();
+        foreach (var pick in first)
+        {
+            yield return new DiscoveryUpdate.PickFound(pick);
+        }
+
+        throw failure;
+    }
+
+    private static async IAsyncEnumerable<DiscoveryUpdate> Gated(DiscoveryResult result, Task gate)
+    {
+        yield return new DiscoveryUpdate.PickFound(result.Suggestions[0]);
+        await gate;
+        foreach (var pick in result.Suggestions.Skip(1))
+        {
+            yield return new DiscoveryUpdate.PickFound(pick);
+        }
+
+        yield return new DiscoveryUpdate.Done(result);
+    }
+
+    private static async Task Until(Func<bool> condition)
+    {
+        for (var waited = 0; !condition() && waited < 5000; waited += 10)
+        {
+            await Task.Delay(10);
+        }
+
+        Assert.True(condition());
+    }
 
     private static DiscoveryResult Ok(params (string Name, Lane Lane)[] picks)
         => new(

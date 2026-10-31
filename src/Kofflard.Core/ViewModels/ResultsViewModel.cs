@@ -10,7 +10,8 @@ namespace Kofflard.Core.ViewModels;
 
 /// <summary>
 /// The results page: the suggestions in their lanes, Safe, Curious and Wild, or who the user may have meant
-/// (design §3.1, .my/design/adventure-as-outcomes.md).
+/// (design §3.1, .my/design/adventure-as-outcomes.md). Cards come in one by one as the AI writes them
+/// (.my/design/streaming-answers.md).
 /// </summary>
 public sealed class ResultsViewModel : ParentViewModel
 {
@@ -45,6 +46,8 @@ public sealed class ResultsViewModel : ParentViewModel
     private string _errorMessage = string.Empty;
     private bool _canFixConnection;
     private string _connectionLine = string.Empty;
+    private bool _isStreaming;
+    private string? _streamError;
 
     /// <summary>Creates the view model.</summary>
     public ResultsViewModel(
@@ -90,6 +93,7 @@ public sealed class ResultsViewModel : ParentViewModel
             {
                 OnPropertyChanged(nameof(StateKey));
                 OnPropertyChanged(nameof(HasContent));
+                OnPropertyChanged(nameof(CanAskMore));
             }
         }
     }
@@ -100,8 +104,40 @@ public sealed class ResultsViewModel : ParentViewModel
     /// </summary>
     public string? StateKey => _stateKey == ContentState ? null : _stateKey;
 
-    /// <summary>Whether suggestions are shown, so "More like this" is offered.</summary>
+    /// <summary>Whether suggestions are shown.</summary>
     public bool HasContent => _stateKey == ContentState;
+
+    /// <summary>Whether cards are shown while the AI is still writing more: "More on the way…".</summary>
+    public bool IsStreaming
+    {
+        get => _isStreaming;
+        private set
+        {
+            if (SetProperty(ref _isStreaming, value))
+            {
+                OnPropertyChanged(nameof(CanAskMore));
+            }
+        }
+    }
+
+    /// <summary>Whether "More like this" is offered: once the answer is complete, so two never run at once.</summary>
+    public bool CanAskMore => HasContent && !_isStreaming;
+
+    /// <summary>What went wrong after some cards were shown; they stay, and this shows under them.</summary>
+    public string? StreamError
+    {
+        get => _streamError;
+        private set
+        {
+            if (SetProperty(ref _streamError, value))
+            {
+                OnPropertyChanged(nameof(HasStreamError));
+            }
+        }
+    }
+
+    /// <summary>Whether <see cref="StreamError"/> is shown.</summary>
+    public bool HasStreamError => _streamError is not null;
 
     /// <summary>Tapping a candidate selects it, which searches it; the selection is then cleared.</summary>
     public Musician? SelectedCandidate
@@ -190,11 +226,34 @@ public sealed class ResultsViewModel : ParentViewModel
         Lanes.Clear();
         Candidates.Clear();
         Summary = string.Empty;
+        IsStreaming = false;
+        StreamError = null;
 
-        DiscoveryResult result;
+        var settings = await _settings.LoadAsync();
+        var saved = await _saved.NamesAsync();
+        void Show(Suggestion suggestion)
+            => AddCard(_cards.Create(suggestion, settings.OpenWith, saved.Contains(Names.Normalise(suggestion.Name)), ExploreAsync));
+
+        DiscoveryResult? result = null;
         try
         {
-            result = await _discovery.DiscoverAsync(_artist, useCache, token);
+            await foreach (var update in _discovery.DiscoverAsync(_artist, useCache, token))
+            {
+                switch (update)
+                {
+                    case DiscoveryUpdate.ArtistFound found:
+                        Summary = found.Artist.Summary ?? string.Empty;
+                        break;
+                    case DiscoveryUpdate.PickFound pick:
+                        Show(pick.Suggestion);
+                        IsStreaming = true;
+                        State = ContentState;
+                        break;
+                    case DiscoveryUpdate.Done done:
+                        result = done.Result;
+                        break;
+                }
+            }
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
@@ -202,11 +261,19 @@ public sealed class ResultsViewModel : ParentViewModel
         }
         catch (AiException failure)
         {
+            IsStreaming = false;
+            if (Lanes.Count > 0)
+            {
+                StreamError = failure.Message;
+                return;
+            }
+
             await ShowErrorAsync(failure.Message, failure.Failure is AiFailure.NotConnected or AiFailure.InvalidKey or AiFailure.ModelNotFound or AiFailure.NoCredit);
             return;
         }
 
-        if (token.IsCancellationRequested)
+        IsStreaming = false;
+        if (token.IsCancellationRequested || result is null)
         {
             return;
         }
@@ -215,25 +282,28 @@ public sealed class ResultsViewModel : ParentViewModel
 
         if (result.Status != DiscoveryStatus.Ok)
         {
+            Lanes.Clear();
             ShowCandidates(result);
             return;
         }
 
-        if (result.Suggestions.Count == 0)
+        // The whole answer holds every card shown, and may top up a short lane; a card shown stays.
+        var shown = Cards.Select(card => Names.Normalise(card.Name)).ToHashSet();
+        foreach (var suggestion in result.Suggestions.Where(suggestion => !shown.Contains(Names.Normalise(suggestion.Name))))
+        {
+            if (shown.Count >= LaneMix.Total)
+            {
+                break;
+            }
+
+            shown.Add(Names.Normalise(suggestion.Name));
+            Show(suggestion);
+        }
+
+        if (Lanes.Count == 0)
         {
             State = EmptyState;
             return;
-        }
-
-        var settings = await _settings.LoadAsync();
-        var saved = await _saved.NamesAsync();
-        foreach (var lane in Enum.GetValues<Lane>().Where(lane => result.Count(lane) > 0))
-        {
-            var cards = result.Suggestions
-                .Where(suggestion => suggestion.Lane == lane)
-                .Select(suggestion => _cards.Create(suggestion, settings.OpenWith, saved.Contains(Names.Normalise(suggestion.Name)), ExploreAsync))
-                .ToList();
-            Lanes.Add(new LaneGroupViewModel(lane, cards));
         }
 
         State = ContentState;
@@ -242,6 +312,20 @@ public sealed class ResultsViewModel : ParentViewModel
         {
             Verifying = VerifyAsync([.. Cards], token);
         }
+    }
+
+    // Into its lane, after the cards already there; a lane is added, in lane order, with its first card.
+    private void AddCard(SuggestionViewModel card)
+    {
+        var lane = card.Lane;
+        if (Lanes.FirstOrDefault(group => group.Lane == lane) is { } group)
+        {
+            group.Add(card);
+            return;
+        }
+
+        var index = Lanes.Count(other => other.Lane < lane);
+        Lanes.Insert(index, new LaneGroupViewModel(lane, [card]));
     }
 
     private void ShowCandidates(DiscoveryResult result)

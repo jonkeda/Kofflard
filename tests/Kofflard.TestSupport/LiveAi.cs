@@ -9,15 +9,16 @@ namespace Kofflard.TestSupport;
 /// shape) or the <c>KOFFLARD_LIVE_AI_*</c> variables, which override it.
 /// </summary>
 /// <remarks>
-/// Nothing in the gate calls it: the Live integration tests skip without it, and the UI suites use it only
-/// when <see cref="RequestedVariable"/> is set. The key is passed to the app in memory, never logged.
+/// Nothing calls it unless <see cref="RequestedVariable"/> is set: <c>ai.secrets.json</c> is the dev app's
+/// key, not the tests', so its being there is not a request. The key is passed to the app in memory, never
+/// logged.
 /// </remarks>
 public sealed record LiveAi(AiConnection Connection, string Key)
 {
     /// <summary>The secrets file's name, at the repository root.</summary>
     public const string FileName = "ai.secrets.json";
 
-    /// <summary>Set to <c>1</c> to run the UI and UAT suites against the live AI.</summary>
+    /// <summary>Set to <c>1</c> to run the Live integration tests, or the UI and UAT suites, against the live AI.</summary>
     public const string RequestedVariable = "KOFFLARD_LIVE_AI";
 
     /// <summary>The endpoint, overriding the file.</summary>
@@ -84,13 +85,20 @@ public sealed record LiveAi(AiConnection Connection, string Key)
     }
 }
 
-/// <summary>A fact that needs the live AI: skipped, saying why, when <see cref="LiveAi.TryLoad"/> finds none.</summary>
+/// <summary>
+/// A fact that needs the live AI: skipped, saying why, unless the run asks for it (<see cref="LiveAi.Requested"/>)
+/// and <see cref="LiveAi.TryLoad"/> finds one.
+/// </summary>
 public sealed class LiveAiFactAttribute : Xunit.FactAttribute
 {
-    /// <summary>Skips the test when no live AI is set up.</summary>
+    /// <summary>Skips the test unless the live AI was asked for and is set up.</summary>
     public LiveAiFactAttribute()
     {
-        if (LiveAi.TryLoad() is null)
+        if (!LiveAi.Requested)
+        {
+            Skip = $"Calls the real AI: set {LiveAi.RequestedVariable}=1 to run it.";
+        }
+        else if (LiveAi.TryLoad() is null)
         {
             Skip = $"No live AI: copy ai.secrets.example.json to {LiveAi.FileName} at the repository root.";
         }

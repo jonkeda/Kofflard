@@ -1,4 +1,7 @@
 using System.ClientModel;
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using Kofflard.Core.Ai;
 using Kofflard.Core.Models;
@@ -8,24 +11,27 @@ using Microsoft.Extensions.AI;
 namespace Kofflard.Infrastructure.Ai;
 
 /// <summary>
-/// Asks the connected AI for musicians: the prompt, structured output where the provider takes it, one
-/// retry on an unusable answer, then validation (design §7).
+/// Asks the connected AI for musicians: the prompt, structured output where the provider takes it, the
+/// answer streamed so cards show as they are written, one retry on an unusable answer, then validation
+/// (design §7, .my/design/streaming-answers.md).
 /// </summary>
 /// <remarks>
-/// Some models refuse a temperature, and some providers a JSON schema. A 400 that names either is
-/// retried once without it, so a model the catalogue does not know still works.
+/// Some models refuse a temperature, and some providers a JSON schema or streaming. A 400 that names one
+/// is retried without it, so a model the catalogue does not know still works.
 /// </remarks>
 public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngine
 {
     private static readonly JsonElement Schema = JsonDocument.Parse(DiscoveryPrompt.Schema).RootElement.Clone();
 
+    private static readonly ConcurrentDictionary<string, bool> Unstreamable = new();
+
     /// <inheritdoc />
-    public async Task<DiscoveryResult> DiscoverAsync(
+    public async IAsyncEnumerable<DiscoveryUpdate> DiscoverAsync(
         AiConnection connection,
         string? secret,
         string artist,
         IReadOnlyCollection<string> exclude,
-        CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var client = clients.Create(connection, secret);
         var messages = new List<ChatMessage>
@@ -45,7 +51,86 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
                 : ChatResponseFormat.Json,
         };
 
-        var text = await AskAsync(client, connection, messages, options, cancellationToken);
+        string? streamed = null;
+        if (!Unstreamable.ContainsKey(StreamKey(connection)))
+        {
+            var answer = new StreamedAnswer(artist, exclude);
+            var text = new StringBuilder();
+            for (var attempt = 0; attempt < 3; attempt++)
+            {
+                var updates = client.GetStreamingResponseAsync(messages, options, cancellationToken).GetAsyncEnumerator(cancellationToken);
+                Exception? failure = null;
+                try
+                {
+                    while (true)
+                    {
+                        var step = await NextAsync(updates, cancellationToken);
+                        if (step.Failure is not null || step.Ended)
+                        {
+                            failure = step.Failure;
+                            break;
+                        }
+
+                        text.Append(step.Text);
+                        foreach (var update in answer.Add(step.Text))
+                        {
+                            yield return update;
+                        }
+                    }
+                }
+                finally
+                {
+                    await updates.DisposeAsync();
+                }
+
+                if (failure is null)
+                {
+                    streamed = text.ToString();
+                    break;
+                }
+
+                // Refused before anything came: without streaming, or without what the model refused.
+                if (text.Length == 0 && failure is ClientResultException { Status: 400 } refused)
+                {
+                    var body = Body(refused);
+                    if (body.Contains("stream", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Unstreamable[StreamKey(connection)] = true;
+                        break;
+                    }
+
+                    if (Drop(options, body))
+                    {
+                        continue;
+                    }
+                }
+
+                // Broke off after cards were shown: they stay, and the answer is asked for once more, whole.
+                if (answer.HasShown)
+                {
+                    break;
+                }
+
+                throw Fail(failure, connection);
+            }
+        }
+
+        yield return new DiscoveryUpdate.Done(await ValidateAsync(client, connection, messages, options, artist, exclude, streamed, cancellationToken));
+    }
+
+    // The whole answer, validated; one retry, without streaming, when it can't be used. With no streamed
+    // answer (streaming refused, or broken off), it is asked for without streaming first.
+    private static async Task<DiscoveryResult> ValidateAsync(
+        IChatClient client,
+        AiConnection connection,
+        List<ChatMessage> messages,
+        ChatOptions options,
+        string artist,
+        IReadOnlyCollection<string> exclude,
+        string? streamed,
+        CancellationToken cancellationToken)
+    {
+        var text = streamed ?? await AskAsync(client, connection, messages, options, cancellationToken);
         try
         {
             return SuggestionValidator.Validate(DiscoveryAnswer.Parse(text), artist, exclude);
@@ -101,20 +186,43 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
             {
                 // Asked again without what the model refused.
             }
-            catch (ClientResultException failure)
+            catch (Exception failure) when (IsRequestFailure(failure, cancellationToken))
             {
-                throw Translate(failure, connection);
-            }
-            catch (HttpRequestException failure)
-            {
-                throw new AiException(AiFailure.Unreachable, $"{connection.Provider.Name} could not be reached. Check the connection and the endpoint.", failure);
-            }
-            catch (TaskCanceledException failure) when (!cancellationToken.IsCancellationRequested)
-            {
-                throw new AiException(AiFailure.Unavailable, $"{connection.Provider.Name} took too long to answer. Try again.", failure);
+                throw Fail(failure, connection);
             }
         }
     }
+
+    // One piece of the streamed answer, or why the stream stopped; a failure is returned, not thrown, so the
+    // caller can still yield what it had.
+    private static async Task<StreamStep> NextAsync(IAsyncEnumerator<ChatResponseUpdate> updates, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await updates.MoveNextAsync() ? new StreamStep(updates.Current.Text, false, null) : new StreamStep(null, true, null);
+        }
+        catch (Exception failure) when (IsRequestFailure(failure, cancellationToken))
+        {
+            return new StreamStep(null, false, failure);
+        }
+    }
+
+    private static bool IsRequestFailure(Exception failure, CancellationToken cancellationToken)
+        => failure is ClientResultException or HttpRequestException
+           || (failure is TaskCanceledException && !cancellationToken.IsCancellationRequested);
+
+    // What a failed request means to the user.
+    private static AiException Fail(Exception failure, AiConnection connection) => failure switch
+    {
+        ClientResultException refused => Translate(refused, connection),
+        HttpRequestException => new AiException(AiFailure.Unreachable, $"{connection.Provider.Name} could not be reached. Check the connection and the endpoint.", failure),
+        _ => new AiException(AiFailure.Unavailable, $"{connection.Provider.Name} took too long to answer. Try again.", failure),
+    };
+
+    // A connection whose provider refused to stream is asked without streaming until the app restarts.
+    private static string StreamKey(AiConnection connection) => $"{connection.ProviderId}|{connection.Endpoint}|{connection.Model}";
+
+    private sealed record StreamStep(string? Text, bool Ended, Exception? Failure);
 
     // Removes the option a 400 complains about; false when it complains about something else.
     private static bool Drop(ChatOptions options, string body)

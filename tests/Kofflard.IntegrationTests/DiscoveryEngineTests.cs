@@ -24,7 +24,7 @@ public sealed class DiscoveryEngineTests : IDisposable
     [Fact]
     public async Task Discover_ReturnsTheValidatedLanes()
     {
-        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", []);
+        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", []).ResultAsync();
 
         Assert.Equal(DiscoveryStatus.Ok, result.Status);
         Assert.Equal(6, result.Count(Lane.Safe));
@@ -36,21 +36,53 @@ public sealed class DiscoveryEngineTests : IDisposable
     [Fact]
     public async Task Discover_AsksForTheSchema_AndFourOfEachLane()
     {
-        await _engine.DiscoverAsync(Local, null, "Nick Drake", ["Bert Jansch"]);
+        await _engine.DiscoverAsync(Local, null, "Nick Drake", ["Bert Jansch"]).ResultAsync();
 
         using var request = JsonDocument.Parse(Assert.Single(_ai.Requests));
         var root = request.RootElement;
         Assert.Equal(FakeAi.Model, root.GetProperty("model").GetString());
         Assert.Equal("json_schema", root.GetProperty("response_format").GetProperty("type").GetString());
+        Assert.True(root.GetProperty("stream").GetBoolean());
         var user = root.GetProperty("messages")[1].GetProperty("content").GetString();
         Assert.Contains("4 close, 4 stretch and 4 leap", user, StringComparison.Ordinal);
         Assert.Contains("Bert Jansch", user, StringComparison.Ordinal);
     }
 
     [Fact]
+    public async Task Discover_StreamsPicks_BeforeTheResult_AndEveryOneIsInIt()
+    {
+        var updates = new List<DiscoveryUpdate>();
+        await foreach (var update in _engine.DiscoverAsync(Local, null, "Nick Drake", []))
+        {
+            updates.Add(update);
+        }
+
+        var done = Assert.IsType<DiscoveryUpdate.Done>(updates[^1]);
+        var picks = updates.OfType<DiscoveryUpdate.PickFound>().Select(p => p.Suggestion).ToList();
+        Assert.IsType<DiscoveryUpdate.ArtistFound>(updates[0]);
+        Assert.Equal(10, picks.Count);
+        Assert.All(picks, pick => Assert.Contains(done.Result.Suggestions, s => s.Name == pick.Name && s.Lane == pick.Lane));
+        Assert.All(Enum.GetValues<Lane>(), lane => Assert.True(picks.Count(p => p.Lane == lane) <= 4));
+    }
+
+    [Fact]
+    public async Task Discover_WhenTheProviderRefusesToStream_AsksWithoutIt()
+    {
+        _ai.RefuseStreaming();
+        var connection = new AiConnection("local", _ai.BaseUrl, "no-streaming-model");
+
+        var result = await _engine.DiscoverAsync(connection, null, "Nick Drake", []).ResultAsync();
+
+        Assert.Equal(12, result.Suggestions.Count);
+        Assert.Equal(2, _ai.Requests.Count);
+        using var second = JsonDocument.Parse(_ai.Requests[1]);
+        Assert.False(second.RootElement.TryGetProperty("stream", out var stream) && stream.GetBoolean());
+    }
+
+    [Fact]
     public async Task Discover_DropsExcludedNames_EvenWhenTheModelSuggestsThem()
     {
-        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", ["Vashti Bunyan"]);
+        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", ["Vashti Bunyan"]).ResultAsync();
 
         Assert.DoesNotContain(result.Suggestions, s => s.Name == "Vashti Bunyan");
     }
@@ -60,7 +92,7 @@ public sealed class DiscoveryEngineTests : IDisposable
     {
         _ai.InSequence("Sure! Here are some musicians you may like.", FakeAi.Default);
 
-        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", []);
+        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", []).ResultAsync();
 
         Assert.Equal(12, result.Suggestions.Count);
         Assert.Equal(2, _ai.Requests.Count);
@@ -72,7 +104,7 @@ public sealed class DiscoveryEngineTests : IDisposable
     {
         _ai.InSequence("not json", "still not json");
 
-        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(Local, null, "Nick Drake", []));
+        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(Local, null, "Nick Drake", []).ResultAsync());
 
         Assert.Equal(AiFailure.BadAnswer, failure.Failure);
     }
@@ -87,7 +119,7 @@ public sealed class DiscoveryEngineTests : IDisposable
     {
         _ai.FailWith(status);
 
-        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(Local, "key", "Nick Drake", []));
+        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(Local, "key", "Nick Drake", []).ResultAsync());
 
         Assert.Equal(expected, failure.Failure);
     }
@@ -97,7 +129,7 @@ public sealed class DiscoveryEngineTests : IDisposable
     {
         var nowhere = new AiConnection("local", "http://127.0.0.1:1", FakeAi.Model);
 
-        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(nowhere, null, "Nick Drake", []));
+        var failure = await Assert.ThrowsAsync<AiException>(() => _engine.DiscoverAsync(nowhere, null, "Nick Drake", []).ResultAsync());
 
         Assert.Equal(AiFailure.Unreachable, failure.Failure);
     }

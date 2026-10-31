@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Kofflard.Core.Ai;
 using Kofflard.Core.Models;
 using Kofflard.Core.Rules;
@@ -28,10 +29,10 @@ public sealed class DiscoveryService(
     /// </param>
     /// <param name="cancellationToken">Cancels the request.</param>
     /// <exception cref="AiException">No AI is connected, or the request failed.</exception>
-    public async Task<DiscoveryResult> DiscoverAsync(
+    public async IAsyncEnumerable<DiscoveryUpdate> DiscoverAsync(
         string artist,
         bool useCache,
-        CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var name = Names.Clean(artist);
         if (name.Length == 0)
@@ -50,19 +51,22 @@ public sealed class DiscoveryService(
 
         if (useCache && await history.CachedAsync(key, now - CacheFor) is { } cached)
         {
-            return cached;
+            yield return new DiscoveryUpdate.Done(cached);
+            yield break;
         }
 
         var exclude = await history.ShownAsync(DiscoveryPrompt.MaxExclusions);
-        var result = await engine.DiscoverAsync(connected.Connection, connected.Secret, name, exclude, cancellationToken);
-
-        if (result.Status == DiscoveryStatus.Ok && result.Suggestions.Count > 0)
+        await foreach (var update in engine.DiscoverAsync(connected.Connection, connected.Secret, name, exclude, cancellationToken))
         {
-            await history.MarkShownAsync(result.Suggestions.Select(suggestion => suggestion.Name), now);
-            await history.CacheAsync(key, result, now);
-        }
+            // What was shown is remembered, and cached, once the whole answer is in; never half an answer.
+            if (update is DiscoveryUpdate.Done { Result: { Status: DiscoveryStatus.Ok, Suggestions.Count: > 0 } result })
+            {
+                await history.MarkShownAsync(result.Suggestions.Select(suggestion => suggestion.Name), now);
+                await history.CacheAsync(key, result, now);
+            }
 
-        return result;
+            yield return update;
+        }
     }
 
     /// <summary>The latest searches, newest first.</summary>

@@ -62,22 +62,9 @@ public static class SuggestionValidator
             return new DiscoveryResult(status, searched, [], candidates);
         }
 
-        var blocked = new HashSet<string>(exclude.Select(Names.Normalise)) { Names.Normalise(artist) };
-        if (searched is not null)
-        {
-            blocked.Add(Names.Normalise(searched.Name));
-        }
-
-        var usable = new List<Suggestion>();
-        foreach (var pick in answer.Suggestions ?? [])
-        {
-            if (ToSuggestion(pick) is not { } suggestion || !blocked.Add(Names.Normalise(suggestion.Name)))
-            {
-                continue;
-            }
-
-            usable.Add(suggestion);
-        }
+        var filter = new PickFilter(artist, exclude);
+        filter.Searched(searched?.Name);
+        var usable = (answer.Suggestions ?? []).Select(filter.Accept).OfType<Suggestion>().ToList();
 
         return new DiscoveryResult(status, searched, Balance(usable), candidates);
     }
@@ -109,7 +96,7 @@ public static class SuggestionValidator
         return [.. chosen.OrderBy(suggestion => suggestion.Lane).Take(LaneMix.Total)];
     }
 
-    private static Suggestion? ToSuggestion(DiscoveryAnswer.Pick pick)
+    internal static Suggestion? ToSuggestion(DiscoveryAnswer.Pick pick)
     {
         if (string.IsNullOrWhiteSpace(pick.Name) || ParseLane(pick.Lane) is not { } lane)
         {
@@ -147,4 +134,37 @@ public static class SuggestionValidator
     };
 
     private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+}
+
+/// <summary>
+/// The rules for one pick (<see cref="SuggestionValidator"/>): a name and a known lane, a concrete bridge for a
+/// wild pick, not the searched musician, not excluded, not a duplicate. Used on a whole answer, or one pick
+/// at a time as it streams in, with the same outcome.
+/// </summary>
+public sealed class PickFilter
+{
+    private readonly HashSet<string> _blocked;
+
+    /// <summary>Creates the filter for a search on <paramref name="artist"/>.</summary>
+    /// <param name="artist">The name that was searched.</param>
+    /// <param name="exclude">Names already shown.</param>
+    public PickFilter(string artist, IReadOnlyCollection<string> exclude)
+    {
+        _blocked = new HashSet<string>(exclude.Select(Names.Normalise)) { Names.Normalise(artist) };
+    }
+
+    /// <summary>Blocks the musician as the model named them, too.</summary>
+    public void Searched(string? name)
+    {
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            _blocked.Add(Names.Normalise(name.Trim()));
+        }
+    }
+
+    /// <summary>The pick as a suggestion, or null when it breaks a rule or came before.</summary>
+    public Suggestion? Accept(DiscoveryAnswer.Pick pick)
+        => SuggestionValidator.ToSuggestion(pick) is { } suggestion && _blocked.Add(Names.Normalise(suggestion.Name))
+            ? suggestion
+            : null;
 }

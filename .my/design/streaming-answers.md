@@ -1,6 +1,6 @@
 # Change: cards appear as the AI writes them
 
-Date: 2026-10-31. Status: agreed (answers under Decided), not built.
+Date: 2026-10-31. Status: built and tested headless; not yet looked at on Windows, Android or iOS.
 
 After Find musicians the results page says "Asking the AI…" until the whole answer is in: 12 picks, each with a name, a reason, tags and an album, which takes a small model several seconds and a reasoning model much longer. This change streams the answer: the summary shows as soon as the AI has written it, and each card the moment its pick is complete. The full wait stays the same; the first thing to read comes much sooner.
 
@@ -21,7 +21,7 @@ Before                                   After
 8 s   all 12 cards at once               8 s   the last card; "More like this…"
 ```
 
-The times are guesses for a small model; measuring them is part of the work (see Tests).
+The times are guesses for a small model. Measured on 2026-10-31 with the dev app's deployment, `gpt-6-luna` on Azure (a reasoning model): the first card after 65 s, the whole answer after 77 s; a second run took 28 s in all. A reasoning model thinks before it writes anything, so streaming saves only the writing time; a non-reasoning model should gain much more.
 
 ## How it works
 
@@ -88,6 +88,13 @@ The times are guesses for a small model; measuring them is part of the work (see
 2. **The prompt asks for close picks first**, then stretch, then leap.
 3. **The MusicBrainz name check stays for now**, as it is: off by default, and when on it starts once the answer is complete. Removing it was considered and set aside, because it is also where a card's Spotify artist link comes from (see [Later](#later)).
 4. **A "More on the way…" line with a spinner** under the list while the AI is still answering; no placeholder cards.
+
+## As built
+
+Where the build differs from the plan above:
+- **No separate status update.** The engine reports `ArtistFound`, `PickFound` and `Done`. Lanes are created with their first card instead of when the status arrives; picks written before the status wait for it (`StreamedAnswer`).
+- **The slow-stream check is a unit test, not a UI scenario.** The fake AI sends its whole streamed answer at once, so the "first card while the AI is still answering" check runs on `ResultsViewModel` with a stream held halfway (`Results_CardsArrive_OneByOne_AndMoreWaitsForTheWholeAnswer`).
+- **The live timing is logged by the existing live test**, which now runs only with `KOFFLARD_LIVE_AI=1`: `ai.secrets.json` is the dev app's key and no longer makes tests call the real AI on its own.
 
 ## Not in this change
 - The prompt's content, the lanes and the mix stay as they are.
