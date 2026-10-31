@@ -48,9 +48,19 @@
                                      ControlTemplate="{StaticResource AdventureChoice}"
                                      SemanticProperties.Description="{Binding Name}">
                             <RadioButton.Content>
-                                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                                <!--
+                                    The content of a templated RadioButton does not get the option as its
+                                    binding context (on Windows its bindings came up empty: coloured boxes,
+                                    no icon, no name), so it takes it from the radio button explicitly.
+                                -->
+                                <VerticalStackLayout Spacing="2"
+                                                     HorizontalOptions="Center"
+                                                     BindingContext="{Binding Source={RelativeSource AncestorType={x:Type vm:AdventureOptionViewModel}}}">
                                     <Image Source="{Binding Icon}" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" />
-                                    <Label Text="{Binding Name}" FontSize="11" HorizontalOptions="Center">
+                                    <Label AutomationId="{Binding Name, StringFormat='Adventure_{0}_Name'}"
+                                           Text="{Binding Name}"
+                                           FontSize="11"
+                                           HorizontalOptions="Center">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label" Binding="{Binding IsChosen}" Value="True">
                                                 <Setter Property="TextColor" Value="White" />

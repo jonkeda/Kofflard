@@ -27,6 +27,9 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
     /// <summary>One adventure choice: "Curious".</summary>
     public RadioButton<SearchPage> Adventure(string name) => new(this, $"Adventure_{name}");
 
+    /// <summary>The name shown under an adventure choice's icon.</summary>
+    public Label<SearchPage> AdventureName(string name) => new(this, $"Adventure_{name}_Name");
+
     /// <summary>The chosen adventure: "Curious".</summary>
     public string? ChosenAdventure() => Adventures.SingleOrDefault(name => Adventure(name).IsChecked() == true);
 
