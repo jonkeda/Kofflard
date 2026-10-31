@@ -31,9 +31,6 @@ public sealed class ResultsViewModel : ParentViewModel
     /// <summary>The state after a failure.</summary>
     public const string ErrorState = "Error";
 
-    /// <summary>On a card while its "More →" waits for the first card.</summary>
-    public const string Searching = "Searching…";
-
     private readonly DiscoveryService _discovery;
     private readonly ISettingsStore _settings;
     private readonly ISavedStore _saved;
@@ -41,12 +38,13 @@ public sealed class ResultsViewModel : ParentViewModel
     private readonly SuggestionCards _cards;
     private readonly AiConnections _connections;
     private readonly INavigator _navigator;
-    private readonly SearchLauncher _launcher;
     private readonly Dictionary<Lane, List<SuggestionViewModel>> _byLane = [];
+    private readonly HashSet<Lane> _askAfter = [];
+    private int _searches;
+    private bool _searching;
 
     private CancellationTokenSource? _work;
     private CancellationTokenSource? _extra;
-    private CancellationTokenSource? _exploring;
     private LaneSet _shown = LaneSet.All;
     private string _artist = string.Empty;
     private string _stateKey = LoadingState;
@@ -67,8 +65,7 @@ public sealed class ResultsViewModel : ParentViewModel
         IArtistVerifier verifier,
         SuggestionCards cards,
         AiConnections connections,
-        INavigator navigator,
-        SearchLauncher launcher)
+        INavigator navigator)
     {
         _discovery = discovery;
         _settings = settings;
@@ -77,12 +74,12 @@ public sealed class ResultsViewModel : ParentViewModel
         _cards = cards;
         _connections = connections;
         _navigator = navigator;
-        _launcher = launcher;
 
         RetryCommand = new TargetAsyncCommand(this, () => SearchAsync(useCache: false));
         MoreCommand = new TargetAsyncCommand(this, () => SearchAsync(useCache: false));
         ChooseCandidateCommand = new TargetAsyncCommand<Musician>(this, ChooseAsync);
         FixConnectionCommand = new TargetAsyncCommand(this, () => _navigator.GoToAsync(KofflardRoutes.Connect));
+        LaneColumns = [.. Enum.GetValues<Lane>().Select(lane => new LaneColumnViewModel(lane))];
     }
 
     /// <summary>"Like Nick Drake".</summary>
@@ -94,11 +91,28 @@ public sealed class ResultsViewModel : ParentViewModel
     /// <summary>How many of each lane a search and "More like this" ask for: 4 + 4 + 4 unless a phone's toggles say otherwise.</summary>
     public LaneMix Mix { get; set; } = LaneMix.Even;
 
-    /// <summary>
-    /// Where a card's "More →" goes: on a phone the one page loads it in place. Null on the desktop design,
-    /// where it opens a results page on the first card.
-    /// </summary>
+    /// <summary>Where a card's "More →" goes: the one page, which loads it in place and grows the trail.</summary>
     public ISearchFlow? Flow { get; set; }
+
+    /// <summary>"ND": the searched musician, in the middle of the desktop's artist map.</summary>
+    public string ArtistInitials => ArtistMap.Initials(_artist);
+
+    /// <summary>
+    /// Safe, Curious and Wild, always, each with its cards: the desktop's three columns
+    /// (.my/design/one-page-desktop.md). Whether a column is on is the toggles'.
+    /// </summary>
+    public IReadOnlyList<LaneColumnViewModel> LaneColumns { get; }
+
+    /// <summary>The shown cards on the desktop's artist map: the first four of each lane that is on.</summary>
+    public IReadOnlyList<MapNodeViewModel> MapNodes
+    {
+        get
+        {
+            var cards = Lanes.SelectMany(lane => lane.Cards).ToList();
+            return [.. ArtistMap.Lay(cards.Select(card => (card.Name, card.Lane)))
+                .Select(node => new MapNodeViewModel(node, cards.First(card => card.Name == node.Name).ExploreCommand))];
+        }
+    }
 
     /// <summary>
     /// The lanes shown; the cards of the others are kept, hidden. Every lane on the desktop design; on a
@@ -122,7 +136,7 @@ public sealed class ResultsViewModel : ParentViewModel
             }
 
             OnPropertyChanged();
-            OnPropertyChanged(nameof(CountText));
+            OnCardsChanged();
         }
     }
 
@@ -285,6 +299,7 @@ public sealed class ResultsViewModel : ParentViewModel
     {
         _artist = artist;
         OnPropertyChanged(nameof(Heading));
+        OnPropertyChanged(nameof(ArtistInitials));
         return SearchAsync(cached);
     }
 
@@ -293,7 +308,6 @@ public sealed class ResultsViewModel : ParentViewModel
     {
         _work?.Cancel();
         _extra?.Cancel();
-        _exploring?.Cancel();
     }
 
     /// <summary>
@@ -301,8 +315,18 @@ public sealed class ResultsViewModel : ParentViewModel
     /// on with no cards in that lane yet; they stream into its section and the other cards stay
     /// (.my/design/single-page-phone.md). Nothing happens without results, or when the lane has cards.
     /// </summary>
+    /// <remarks>
+    /// While a search is still running it asked without the lane, so the lane is asked for once it has
+    /// finished, if it has cards then.
+    /// </remarks>
     public async Task AskForAsync(Lane lane)
     {
+        if (_searching)
+        {
+            _askAfter.Add(lane);
+            return;
+        }
+
         if (!HasContent || Has(lane))
         {
             return;
@@ -360,7 +384,39 @@ public sealed class ResultsViewModel : ParentViewModel
         }
     }
 
+    // One search at a time; a lane turned on while it runs is asked for once it is done, if it is the
+    // latest search and the lane is still on.
     private async Task SearchAsync(bool useCache)
+    {
+        var mine = ++_searches;
+        _searching = true;
+        _askAfter.Clear();
+        try
+        {
+            await RunSearchAsync(useCache);
+        }
+        finally
+        {
+            if (mine == _searches)
+            {
+                _searching = false;
+            }
+        }
+
+        if (mine != _searches || !HasContent)
+        {
+            return;
+        }
+
+        var asked = _askAfter.Where(_shown.Contains).ToList();
+        _askAfter.Clear();
+        foreach (var lane in asked)
+        {
+            await AskForAsync(lane);
+        }
+    }
+
+    private async Task RunSearchAsync(bool useCache)
     {
         _work?.Cancel();
         _extra?.Cancel();
@@ -369,8 +425,7 @@ public sealed class ResultsViewModel : ParentViewModel
 
         State = LoadingState;
         Lanes.Clear();
-        _byLane.Clear();
-        OnPropertyChanged(nameof(CountText));
+        ClearCards();
         Candidates.Clear();
         Summary = string.Empty;
         IsStreaming = false;
@@ -429,8 +484,7 @@ public sealed class ResultsViewModel : ParentViewModel
 
         if (result.Status != DiscoveryStatus.Ok)
         {
-            Lanes.Clear();
-            _byLane.Clear();
+            ClearCards();
             ShowCandidates(result);
             return;
         }
@@ -472,6 +526,7 @@ public sealed class ResultsViewModel : ParentViewModel
         }
 
         cards.Add(card);
+        LaneColumns[(int)lane].Cards.Add(card);
         if (_shown.Contains(lane))
         {
             if (Lanes.FirstOrDefault(group => group.Lane == lane) is { } group)
@@ -484,7 +539,7 @@ public sealed class ResultsViewModel : ParentViewModel
             }
         }
 
-        OnPropertyChanged(nameof(CountText));
+        OnCardsChanged();
     }
 
     private void ShowCandidates(DiscoveryResult result)
@@ -545,31 +600,29 @@ public sealed class ResultsViewModel : ParentViewModel
 
         _artist = candidate.Name;
         OnPropertyChanged(nameof(Heading));
+        OnPropertyChanged(nameof(ArtistInitials));
         return SearchAsync(useCache: false);
     }
 
-    // On a phone the page loads it in place. On the desktop design the card says "Searching…" until the
-    // first card opens the next results page, or says what came of it (.my/design/desktop-aurora-changes.md).
-    private async Task ExploreAsync(SuggestionViewModel card)
+    // The one page loads it in place, on the trail.
+    private Task ExploreAsync(SuggestionViewModel card)
+        => Flow?.ShowAsync(card.Name, cached: false) ?? Task.CompletedTask;
+
+    private void ClearCards()
     {
-        if (Flow is { } flow)
+        Lanes.Clear();
+        _byLane.Clear();
+        foreach (var column in LaneColumns)
         {
-            await flow.ShowAsync(card.Name, cached: false);
-            return;
+            column.Cards.Clear();
         }
 
-        _exploring?.Cancel();
-        _exploring = new CancellationTokenSource();
-        var token = _exploring.Token;
+        OnCardsChanged();
+    }
 
-        card.ExploreNote = Searching;
-        var search = await _launcher.StartAsync(card.Name, cached: false, token);
-        if (token.IsCancellationRequested)
-        {
-            card.ExploreNote = string.Empty;
-            return;
-        }
-
-        card.ExploreNote = search is null ? string.Empty : SearchLauncher.NothingFound(search);
+    private void OnCardsChanged()
+    {
+        OnPropertyChanged(nameof(CountText));
+        OnPropertyChanged(nameof(MapNodes));
     }
 }

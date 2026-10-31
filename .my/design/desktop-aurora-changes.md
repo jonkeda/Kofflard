@@ -1,6 +1,6 @@
 # Change: the desktop and tablet design, round 1
 
-Date: 2026-10-31. Status: built 2026-10-31 (see [As built](#as-built)); checked headless, and the waiting search and "More →" on Windows.
+Date: 2026-10-31. Status: built 2026-10-31 (see [As built](#as-built)), then replaced by [one-page-desktop.md](one-page-desktop.md): the desktop is one page now, so #1 (waiting on the search page) is gone; #3 (no ✓) and #4 (✕ on Recent) stay.
 
 Kofflard has two designs:
 - **Phone** (Android and iOS phones): one page, the search at the bottom ([single-page-phone.md](single-page-phone.md)).

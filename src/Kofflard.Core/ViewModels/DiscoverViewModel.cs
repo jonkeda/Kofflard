@@ -7,9 +7,10 @@ using Kofflard.Core.Services;
 namespace Kofflard.Core.ViewModels;
 
 /// <summary>
-/// The phone's one page (.my/design/single-page-phone.md): the results fill it, the search sits in the
-/// dock at the bottom, and a card's search replaces the list, with a trail back. The Safe, Curious and Wild
-/// toggles set both what a search asks for and which sections show.
+/// The one page, on a phone and on the desktop (.my/design/single-page-phone.md,
+/// .my/design/one-page-desktop.md): the search, the results, and a card's search replacing them with a trail
+/// back. The Safe, Curious and Wild toggles set both what a search asks for and which lanes show. The page
+/// lays it out for a narrow or a wide window; this doesn't know which.
 /// </summary>
 public sealed class DiscoverViewModel : ParentViewModel, ISearchFlow
 {
@@ -189,6 +190,7 @@ public sealed class DiscoverViewModel : ParentViewModel, ISearchFlow
         HasResults = true;
         Search.Name = artist;
         await results.LoadAsync(artist, cached);
+        await Search.LoadRecentAsync();
     }
 
     private void RefreshToggles()

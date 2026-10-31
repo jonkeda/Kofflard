@@ -6,7 +6,7 @@ using Kofflard.Core.Services;
 namespace Kofflard.Core.ViewModels;
 
 /// <summary>The favourites, with the same card as the results.</summary>
-public sealed class SavedViewModel(ISavedStore saved, ISettingsStore settings, SuggestionCards cards, INavigator navigator) : ParentViewModel
+public sealed class SavedViewModel(ISavedStore saved, ISettingsStore settings, SuggestionCards cards, INavigator navigator, ISearchFlow flow) : ParentViewModel
 {
     private SuggestionViewModel? _selectedCard;
 
@@ -48,6 +48,10 @@ public sealed class SavedViewModel(ISavedStore saved, ISettingsStore settings, S
         OnPropertyChanged(nameof(IsEmpty));
     }
 
-    private Task ExploreAsync(SuggestionViewModel card)
-        => navigator.GoToAsync(KofflardRoutes.Results, KofflardRoutes.ForSearch(card.Name));
+    // Back to the one page, which searches it.
+    private async Task ExploreAsync(SuggestionViewModel card)
+    {
+        await navigator.GoBackAsync();
+        await flow.ShowAsync(card.Name, cached: false);
+    }
 }

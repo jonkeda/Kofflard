@@ -60,6 +60,12 @@ public class KofflardAppFixture : MauiTestFixtureBase
     /// </summary>
     protected virtual KofflardLayout Layout => KofflardLayout.Desktop;
 
+    /// <summary>
+    /// The lanes each test starts with. Every lane in the desktop suite, whose journeys check a card from each;
+    /// a new install's, Safe and Curious, in the phone's (<see cref="PhoneAppFixture"/>).
+    /// </summary>
+    protected virtual Kofflard.Core.Models.LaneSet StartLanes => Kofflard.Core.Models.LaneSet.All;
+
     /// <summary>The fake AI the app is connected to, unless the run is live.</summary>
     public FakeAi Ai => Arranged.Ai;
 
@@ -78,11 +84,14 @@ public class KofflardAppFixture : MauiTestFixtureBase
     private Arrangement Arranged => _arrangement
         ?? throw new InvalidOperationException("The fixture was used before the app was arranged.");
 
-    /// <summary>Puts back what earlier tests may have changed outside the app, and returns to the search page.</summary>
+    /// <summary>
+    /// Puts back what earlier tests may have changed outside the app, returns to the one page, and walks its
+    /// trail back to the start.
+    /// </summary>
     public SearchPage StartTest()
     {
         Reset();
-        return ReturnToSearch();
+        return ReturnToSearch().WalkTrailBack();
     }
 
     /// <summary>Waits for the app's first page.</summary>
@@ -234,7 +243,7 @@ public class KofflardAppFixture : MauiTestFixtureBase
         {
             var test = new Kofflard.Core.Ai.AiConnection(Arranged.Settings.AiProvider, Arranged.Settings.AiBaseUrl, Arranged.Settings.AiModel);
             new SqliteSettingsStore(new KofflardDatabase(Arranged.Settings.DatabasePath))
-                .SaveAsync(Kofflard.Core.Services.AppSettings.Default with { Connection = test })
+                .SaveAsync(Kofflard.Core.Services.AppSettings.Default with { Connection = test, Lanes = StartLanes })
                 .GetAwaiter().GetResult();
         }
     }
@@ -313,7 +322,7 @@ public class KofflardAppFixture : MauiTestFixtureBase
             }
             else
             {
-                new ResultsPage(Context).BackButton.Click();
+                ShellBack(appRoot).Click();
             }
 
             search.WaitLoaded(true, TestConstants.PageTimeoutMs / 4);
@@ -321,6 +330,11 @@ public class KofflardAppFixture : MauiTestFixtureBase
 
         return SearchPage.Arrived(Context);
     }
+
+    // Shell's back arrow: WinUI's NavigationViewBackButton on Windows, "Navigate up" on Android.
+    private Button<AppRoot> ShellBack(AppRoot appRoot) => Context.Platform == MauiPlatform.Android
+        ? new(appRoot, Locator.ByAccessibilityId("Navigate up"))
+        : new(appRoot, "NavigationViewBackButton");
 
     private sealed record Arrangement(string Folder, FakeAi Ai, LaunchSettings Settings, string LaunchLog, LiveAi? Live);
 

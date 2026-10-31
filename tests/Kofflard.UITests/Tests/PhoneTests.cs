@@ -9,13 +9,12 @@ namespace Kofflard.UITests.Tests;
 [Trait("Layout", "phone")]
 public sealed class PhoneTests(PhoneAppFixture fixture)
 {
-    /// <summary>Saves the one page with results to <c>KOFFLARD_DIAG_SHOT</c>, to look at the design on a device.</summary>
+    /// <summary>Saves the narrow layout with results to <c>KOFFLARD_DIAG_SHOT</c>, to look at it on a device.</summary>
     [Fact(Timeout = TestConstants.DefaultTestTimeoutMs)]
     [Trait("Diagnostic", "phone-look")]
     public Task ThePage_WithResults_ForALook()
     {
-        var phone = fixture.StartPhoneTest();
-        phone.SearchFor("Nick Drake");
+        fixture.StartTest().SearchFor("Nick Drake").WaitForSuggestions();
         if (Environment.GetEnvironmentVariable("KOFFLARD_DIAG_SHOT") is { } shot)
         {
             fixture.Context.SaveScreenshot(shot);

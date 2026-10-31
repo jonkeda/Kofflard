@@ -132,10 +132,7 @@ public interface INavigator
     Task GoBackAsync();
 }
 
-/// <summary>
-/// Where a search is shown on a phone: the one page loads it in place (.my/design/single-page-phone.md). The
-/// desktop design has none; its searches open a results page.
-/// </summary>
+/// <summary>Where a search is shown: the one page loads it in place (.my/design/one-page-desktop.md).</summary>
 public interface ISearchFlow
 {
     /// <summary>Shows a search for <paramref name="artist"/>; <paramref name="cached"/> for a recent one.</summary>
@@ -155,11 +152,8 @@ public interface IDialogs
 /// <summary>The app's routes and their parameters.</summary>
 public static class KofflardRoutes
 {
-    /// <summary>The search page, the Shell root.</summary>
+    /// <summary>The one page, the Shell root.</summary>
     public const string Search = "search";
-
-    /// <summary>The results; takes <see cref="ArtistParameter"/> and optionally <see cref="CachedParameter"/>.</summary>
-    public const string Results = "results";
 
     /// <summary>Connecting an AI.</summary>
     public const string Connect = "connect";
@@ -169,31 +163,4 @@ public static class KofflardRoutes
 
     /// <summary>The saved musicians.</summary>
     public const string Saved = "saved";
-
-    /// <summary>The musician to search.</summary>
-    public const string ArtistParameter = "artist";
-
-    /// <summary>"true" when a cached result may be shown (a recent search opened again).</summary>
-    public const string CachedParameter = "cached";
-
-
-    /// <summary>The parameters of a search.</summary>
-    public static IReadOnlyDictionary<string, object> ForSearch(string artist, bool cached = false)
-        => new Dictionary<string, object>
-        {
-            [ArtistParameter] = artist,
-            [CachedParameter] = cached ? "true" : "false",
-        };
-
-    /// <summary>Reads a search's parameters; null when there is no artist.</summary>
-    public static (string Artist, bool Cached)? ReadSearch(IDictionary<string, object> query)
-    {
-        if (!query.TryGetValue(ArtistParameter, out var artist) || artist?.ToString() is not { Length: > 0 } name)
-        {
-            return null;
-        }
-
-        var cached = query.TryGetValue(CachedParameter, out var flag) && flag?.ToString() == "true";
-        return (name, cached);
-    }
 }

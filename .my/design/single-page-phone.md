@@ -1,6 +1,6 @@
 # Change: one page on a phone, search at the bottom
 
-Date: 2026-10-31. Status: built 2026-10-31 (see [As built](#as-built)); checked headless and on Windows, not yet on an Android or iOS device.
+Date: 2026-10-31. Status: built 2026-10-31 (see [As built](#as-built)); checked headless and on Windows, not yet on an Android or iOS device. Since [one-page-desktop.md](one-page-desktop.md) it is the narrow layout of the one page both designs share.
 
 Today a search is two pages: the search page (the orb, Find musicians, Recent) pushes a results page, and tapping a card pushes another results page on top. On a phone this means the name field is at the top, out of thumb reach, and every chained search adds a page to the stack. This change folds search and results into one page **on phones (Android and iOS)**: the list fills the screen and the search sits at the bottom, as in a chat or a maps app. Favourites, Settings and Connect stay separate pages.
 

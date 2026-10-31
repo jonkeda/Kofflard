@@ -20,10 +20,10 @@ sections show. A card's "More →" replaces the list, and a trail goes back (.my
 A new install has Safe and Curious on, so nothing wild is asked for.
 
 ```gherkin
-Given I am on the Phone page
-When I search for "Nick Drake" on the phone
+Given I am on the Search page
+When I search for "Nick Drake"
 Then I should be on the Results page
-And Page Heading should equal "Like Nick Drake"
+And Heading should equal "Like Nick Drake"
 And the lanes should become "Safe 6 · Curious 4"
 And Count should equal "10 of 10"
 ```
@@ -32,8 +32,8 @@ And Count should equal "10 of 10"
 ## Scenario: PHONE.01.2 Turning Wild on asks for the wild picks alone
 
 ```gherkin
-Given I am on the Phone page
-When I search for "Nick Drake" on the phone
+Given I am on the Search page
+When I search for "Nick Drake"
 And I toggle "Wild"
 Then the lanes should become "Safe 6 · Curious 4 · Wild 2"
 And Count should equal "12 of 12"
@@ -44,8 +44,8 @@ And "Ali Farka Touré" should be a "Wild" suggestion
 ## Scenario: PHONE.01.3 Turning Safe off hides its section
 
 ```gherkin
-Given I am on the Phone page
-When I search for "Nick Drake" on the phone
+Given I am on the Search page
+When I search for "Nick Drake"
 And I toggle "Safe"
 Then the lanes should become "Curious 4"
 And Count should equal "4 of 10"
@@ -56,14 +56,14 @@ And Count should equal "4 of 10"
 
 ```gherkin
 Given the AI answers "Bill Fay" with "bill-fay"
-And I am on the Phone page
-When I search for "Nick Drake" on the phone
+And I am on the Search page
+When I search for "Nick Drake"
 And I follow "Bill Fay"
-Then Page Heading should equal "Like Bill Fay"
+Then Heading should equal "Like Bill Fay"
 And Trail should equal "‹ Nick Drake"
 And Suggestions should suggest "Judee Sill"
 When I go back along the trail
-Then Page Heading should equal "Like Nick Drake"
+Then Heading should equal "Like Nick Drake"
 And there should be no trail
 And Suggestions should suggest "Vashti Bunyan"
 ```

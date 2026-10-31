@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    The one page in a wide window: Windows, a tablet in landscape (.my/design/one-page-desktop.md). The search
+    on the left; the heading, the artist map and the three lanes side by side on the right. The narrow layout
+    is PhoneLayout; both bind to DiscoverViewModel and keep the same ids where they show the same thing.
+-->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:Kofflard.Core.ViewModels;assembly=Kofflard.Core"
+             xmlns:models="clr-namespace:Kofflard.Core.Models;assembly=Kofflard.Core"
+             xmlns:services="clr-namespace:Kofflard.Core.Services;assembly=Kofflard.Core"
+             xmlns:views="clr-namespace:Kofflard.App.Views"
+             x:Class="Kofflard.App.Views.DesktopLayout"
+             x:DataType="vm:DiscoverViewModel"
+             AutomationId="Discover_Wide">
+
+    <ContentView.Resources>
+        <toolkit:InvertedBoolConverter x:Key="Not" />
+        <views:MapBoundsConverter x:Key="MapBounds" />
+        <!-- The lane header's click: an invisible button over the dot and the name. -->
+        <Style x:Key="LaneHeaderToggle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderWidth" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Text" Value="" />
+        </Style>
+    </ContentView.Resources>
+
+    <Grid ColumnDefinitions="300,1,*" Padding="24,8,24,16" ColumnSpacing="24">
+
+        <!-- The search: the orb, Find musicians, Recent. -->
+        <VerticalStackLayout Spacing="20">
+            <Grid WidthRequest="260" HeightRequest="260" HorizontalOptions="Center">
+                <Ellipse WidthRequest="256" HeightRequest="256" StrokeThickness="12" Opacity="0.12" InputTransparent="True"
+                         Stroke="{AppThemeBinding Light={StaticResource RingLightBrush}, Dark={StaticResource RingDarkBrush}}" />
+                <Ellipse WidthRequest="252" HeightRequest="252" StrokeThickness="6" Opacity="0.25" InputTransparent="True"
+                         Stroke="{AppThemeBinding Light={StaticResource RingLightBrush}, Dark={StaticResource RingDarkBrush}}" />
+                <Ellipse WidthRequest="248" HeightRequest="248" StrokeThickness="2.5" InputTransparent="True"
+                         Stroke="{AppThemeBinding Light={StaticResource RingLightBrush}, Dark={StaticResource RingDarkBrush}}" />
+                <Ellipse WidthRequest="232" HeightRequest="232" StrokeThickness="1" StrokeDashArray="1,5" Opacity="0.7" InputTransparent="True"
+                         Stroke="{AppThemeBinding Light={StaticResource Ring2Light}, Dark={StaticResource Ring2Dark}}" />
+                <Ellipse WidthRequest="210" HeightRequest="210" StrokeThickness="1" InputTransparent="True"
+                         Fill="{AppThemeBinding Light={StaticResource OrbLight}, Dark={StaticResource OrbDark}}"
+                         Stroke="{AppThemeBinding Light={StaticResource ChipEdgeLight}, Dark={StaticResource ChipEdgeDark}}" />
+                <VerticalStackLayout WidthRequest="180" Spacing="12" VerticalOptions="Center">
+                    <Label Text="Who do you like?" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource AskLight}, Dark={StaticResource AskDark}}" />
+                    <Border Style="{StaticResource Field}">
+                        <Entry AutomationId="Search_Name"
+                               Placeholder="A musician or band"
+                               Text="{Binding Search.Name}"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               ReturnType="Search"
+                               ReturnCommand="{Binding Search.SearchCommand}"
+                               SemanticProperties.Hint="Type the name of a musician you like" />
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label AutomationId="Search_NameError"
+                   Style="{StaticResource Error}"
+                   Text="{Binding Search.NameError}"
+                   HorizontalOptions="Center"
+                   IsVisible="{Binding Search.HasNameError}" />
+
+            <Button AutomationId="Search_Go"
+                    Text="Find musicians"
+                    FontSize="17"
+                    HeightRequest="52"
+                    CornerRadius="26"
+                    Command="{Binding Search.SearchCommand}" />
+
+            <Label Text="RECENT" Style="{StaticResource Faint}" CharacterSpacing="1.5" IsVisible="{Binding Search.HasRecent}" />
+            <FlexLayout AutomationId="Search_Recent" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Search.Recent}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="services:RecentSearch">
+                        <Border AutomationId="RecentRow"
+                                Margin="0,0,8,8"
+                                Padding="4,0"
+                                StrokeShape="RoundRectangle 20"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light={StaticResource ChipEdgeLight}, Dark={StaticResource ChipEdgeDark}}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource ChipLight}, Dark={StaticResource ChipDark}}">
+                            <HorizontalStackLayout>
+                                <Button AutomationId="{Binding Artist, StringFormat='Recent_{0}'}"
+                                        Text="{Binding Artist}"
+                                        Style="{StaticResource LinkButton}"
+                                        Padding="12,0,2,0"
+                                        Command="{Binding Search.OpenRecentCommand, Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}}}"
+                                        CommandParameter="{Binding .}" />
+                                <Button AutomationId="{Binding Artist, StringFormat='RecentRow_Remove_{0}'}"
+                                        Text="✕"
+                                        Style="{StaticResource LinkButton}"
+                                        FontSize="13"
+                                        Padding="10,0"
+                                        SemanticProperties.Description="{Binding Artist, StringFormat='Remove {0} from recent'}"
+                                        Command="{Binding Search.RemoveRecentCommand, Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}}}"
+                                        CommandParameter="{Binding .}" />
+                            </HorizontalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+        </VerticalStackLayout>
+
+        <BoxView Grid.Column="1" WidthRequest="1" Opacity="0.5"
+                 Color="{AppThemeBinding Light={StaticResource ChipEdgeLight}, Dark={StaticResource ChipEdgeDark}}" />
+
+        <!-- Before the first search. -->
+        <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" Spacing="8" IsVisible="{Binding HasResults, Converter={StaticResource Not}}">
+            <Label Text="Who do you like?" FontSize="30" HorizontalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource AskLight}, Dark={StaticResource AskDark}}" />
+            <Label Text="Name a musician or band on the left, and find who to listen to next." Style="{StaticResource Muted}" HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <!-- The results: the heading and the map, then the three lanes. -->
+        <Grid Grid.Column="2" RowDefinitions="Auto,*" RowSpacing="12" IsVisible="{Binding HasResults}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                    <Button AutomationId="Discover_Back"
+                            HorizontalOptions="Start"
+                            Text="{Binding TrailText, StringFormat='‹ {0}'}"
+                            Style="{StaticResource SoftButton}"
+                            Command="{Binding BackCommand}"
+                            IsVisible="{Binding HasTrail}" />
+                    <Label AutomationId="Discover_Heading" Text="{Binding Results.Heading}" Style="{StaticResource Heading}" FontSize="34" />
+                    <Label AutomationId="Results_Summary" Text="{Binding Results.Summary}" Style="{StaticResource Muted}" FontSize="15" />
+                    <Label AutomationId="Discover_Count" Text="{Binding Results.CountText}" Style="{StaticResource Faint}" />
+                </VerticalStackLayout>
+
+                <!-- The artist map: the searched musician in the middle, the shown picks around it. -->
+                <AbsoluteLayout Grid.Column="1" AutomationId="Discover_Map" WidthRequest="380" HeightRequest="160">
+                    <AbsoluteLayout BindableLayout.ItemsSource="{Binding Results.MapNodes}" AbsoluteLayout.LayoutBounds="0,0,380,160">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:MapNodeViewModel">
+                                <Line AbsoluteLayout.LayoutBounds="0,0,380,160" X1="190" Y1="80" X2="{Binding X}" Y2="{Binding Y}"
+                                      StrokeThickness="1.5" Opacity="0.6" InputTransparent="True"
+                                      Stroke="{AppThemeBinding Light={StaticResource SafeEdgeLight}, Dark={StaticResource SafeEdgeDark}}">
+                                    <Line.Triggers>
+                                        <DataTrigger TargetType="Line" Binding="{Binding LaneName}" Value="Curious">
+                                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource CuriousEdgeLight}, Dark={StaticResource CuriousEdgeDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Line" Binding="{Binding LaneName}" Value="Wild">
+                                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource WildEdgeLight}, Dark={StaticResource WildEdgeDark}}" />
+                                        </DataTrigger>
+                                    </Line.Triggers>
+                                </Line>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </AbsoluteLayout>
+                    <Border AbsoluteLayout.LayoutBounds="170,60,40,40" StrokeShape="RoundRectangle 20" StrokeThickness="2"
+                            Stroke="{AppThemeBinding Light={StaticResource Ring2Light}, Dark={StaticResource Ring2Dark}}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource InputLight}, Dark={StaticResource InputDark}}">
+                        <Label Text="{Binding Results.ArtistInitials}" FontAttributes="Bold" FontSize="13" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <AbsoluteLayout BindableLayout.ItemsSource="{Binding Results.MapNodes}" AbsoluteLayout.LayoutBounds="0,0,380,160">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:MapNodeViewModel">
+                                <AbsoluteLayout AbsoluteLayout.LayoutBounds="0,0,380,160">
+                                    <Border AutomationId="{Binding Name, StringFormat='MapNode_{0}'}"
+                                            AbsoluteLayout.LayoutBounds="{Binding DotBounds, Converter={StaticResource MapBounds}}"
+                                            StrokeShape="Ellipse"
+                                            StrokeThickness="2"
+                                            SemanticProperties.Description="{Binding Name, StringFormat='More like {0}'}"
+                                            Background="{AppThemeBinding Light={StaticResource SafeTintLight}, Dark={StaticResource SafeTintDark}}"
+                                            Stroke="{AppThemeBinding Light={StaticResource SafeLight}, Dark={StaticResource SafeDark}}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding ExploreCommand}" />
+                                        </Border.GestureRecognizers>
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding LaneName}" Value="Curious">
+                                                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource CuriousTintLight}, Dark={StaticResource CuriousTintDark}}" />
+                                                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource CuriousLight}, Dark={StaticResource CuriousDark}}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Border" Binding="{Binding LaneName}" Value="Wild">
+                                                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource WildTintLight}, Dark={StaticResource WildTintDark}}" />
+                                                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource WildLight}, Dark={StaticResource WildDark}}" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                    </Border>
+                                    <Label AbsoluteLayout.LayoutBounds="{Binding LabelBounds, Converter={StaticResource MapBounds}}"
+                                           Text="{Binding Name}" FontSize="10" HorizontalTextAlignment="Center" LineBreakMode="TailTruncation"
+                                           Style="{StaticResource Muted}" InputTransparent="True" />
+                                </AbsoluteLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </AbsoluteLayout>
+                </AbsoluteLayout>
+            </Grid>
+
+            <!-- The lanes, or what came instead: loading, nobody found, an error, "Did you mean". -->
+            <Grid Grid.Row="1"
+                  AutomationId="Results_State"
+                  toolkit:StateContainer.CurrentState="{Binding Results.StateKey}">
+                <toolkit:StateContainer.StateViews>
+                    <VerticalStackLayout toolkit:StateView.StateKey="Loading" AutomationId="Results_Loading" Spacing="8" VerticalOptions="Center">
+                        <ActivityIndicator IsRunning="True" />
+                        <Label Text="Asking the AI…" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout toolkit:StateView.StateKey="Empty" AutomationId="Results_Empty" VerticalOptions="Center">
+                        <Label AutomationId="Results_EmptyLabel" Text="The AI had no new musicians to suggest. Try again." HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout toolkit:StateView.StateKey="Error" AutomationId="Results_Error" Spacing="12" VerticalOptions="Center">
+                        <Label AutomationId="Results_ErrorLabel" Text="{Binding Results.ErrorMessage}" HorizontalTextAlignment="Center" />
+                        <Label AutomationId="Results_Connection" Text="{Binding Results.ConnectionLine}" Style="{StaticResource Faint}" HorizontalTextAlignment="Center" />
+                        <Button AutomationId="Results_Retry" Text="Try again" Command="{Binding Results.RetryCommand}" HorizontalOptions="Center" />
+                        <Button AutomationId="Results_FixConnection" Text="Fix the AI connection" Command="{Binding Results.FixConnectionCommand}"
+                                Style="{StaticResource SoftButton}" IsVisible="{Binding Results.CanFixConnection}" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                    <Grid toolkit:StateView.StateKey="Candidates" AutomationId="Results_Candidates" RowDefinitions="Auto,*" RowSpacing="8">
+                        <Label AutomationId="Results_CandidatesTitle" Text="{Binding Results.CandidatesTitle}" Style="{StaticResource Heading}" />
+                        <CollectionView Grid.Row="1"
+                                        AutomationId="Results_CandidateList"
+                                        ItemsSource="{Binding Results.Candidates}"
+                                        SelectionMode="Single"
+                                        SelectedItem="{Binding Results.SelectedCandidate}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:Musician">
+                                    <VerticalStackLayout AutomationId="CandidateRow" Padding="8">
+                                        <Label AutomationId="CandidateRow_Name" Text="{Binding Name}" Style="{StaticResource Heading}" FontSize="16" />
+                                        <Label AutomationId="CandidateRow_Summary" Text="{Binding Summary}" Style="{StaticResource Muted}" FontSize="12" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </Grid>
+                </toolkit:StateContainer.StateViews>
+
+                <ScrollView AutomationId="Results_Items">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="20">
+                        <!-- Safe: its header is its toggle (.my/design/one-page-desktop.md). -->
+                        <VerticalStackLayout Grid.Column="0" Spacing="10">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" HeightRequest="32">
+                                <Ellipse WidthRequest="10" HeightRequest="10" VerticalOptions="Center"
+                                         Fill="{AppThemeBinding Light={StaticResource SafeLight}, Dark={StaticResource SafeDark}}" />
+                                <Grid Grid.Column="1" AutomationId="LaneHeader" IsVisible="{Binding Toggles[0].IsOn}" InputTransparent="True">
+                                    <Label AutomationId="LaneHeader_Name"
+                                           Text="{Binding Results.LaneColumns[0].HeaderText}"
+                                           FontAttributes="Bold"
+                                           FontSize="14"
+                                           CharacterSpacing="1.5"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource SafeTextLight}, Dark={StaticResource SafeTextDark}}" />
+                                </Grid>
+                                <Label Grid.Column="1"
+                                       Text="Safe (off)"
+                                       FontSize="14"
+                                       CharacterSpacing="1.5"
+                                       Opacity="0.55"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding Toggles[0].IsOn, Converter={StaticResource Not}}"
+                                       InputTransparent="True"
+                                       TextColor="{AppThemeBinding Light={StaticResource SafeTextLight}, Dark={StaticResource SafeTextDark}}" />
+                                <Button Grid.ColumnSpan="2"
+                                        AutomationId="Lane_Safe"
+                                        Style="{StaticResource LaneHeaderToggle}"
+                                        Command="{Binding Toggles[0].ToggleCommand}"
+                                        SemanticProperties.Description="{Binding Toggles[0].Description}" />
+                            </Grid>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Results.LaneColumns[0].Cards}"
+                                                 IsVisible="{Binding Toggles[0].IsOn}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:SuggestionViewModel">
+                                        <VerticalStackLayout AutomationId="Suggestion">
+                                            <views:SuggestionCardView ShowsPhoto="True" OpensOnTap="True" />
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                            <Label Text="{Binding Results.LaneColumns[0].OffText}"
+                                   Style="{StaticResource Muted}"
+                                   IsVisible="{Binding Toggles[0].IsOn, Converter={StaticResource Not}}" />
+                        </VerticalStackLayout>
+                        <!-- Curious: its header is its toggle (.my/design/one-page-desktop.md). -->
+                        <VerticalStackLayout Grid.Column="1" Spacing="10">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" HeightRequest="32">
+                                <Ellipse WidthRequest="10" HeightRequest="10" VerticalOptions="Center"
+                                         Fill="{AppThemeBinding Light={StaticResource CuriousLight}, Dark={StaticResource CuriousDark}}" />
+                                <Grid Grid.Column="1" AutomationId="LaneHeader" IsVisible="{Binding Toggles[1].IsOn}" InputTransparent="True">
+                                    <Label AutomationId="LaneHeader_Name"
+                                           Text="{Binding Results.LaneColumns[1].HeaderText}"
+                                           FontAttributes="Bold"
+                                           FontSize="14"
+                                           CharacterSpacing="1.5"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource CuriousTextLight}, Dark={StaticResource CuriousTextDark}}" />
+                                </Grid>
+                                <Label Grid.Column="1"
+                                       Text="Curious (off)"
+                                       FontSize="14"
+                                       CharacterSpacing="1.5"
+                                       Opacity="0.55"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding Toggles[1].IsOn, Converter={StaticResource Not}}"
+                                       InputTransparent="True"
+                                       TextColor="{AppThemeBinding Light={StaticResource CuriousTextLight}, Dark={StaticResource CuriousTextDark}}" />
+                                <Button Grid.ColumnSpan="2"
+                                        AutomationId="Lane_Curious"
+                                        Style="{StaticResource LaneHeaderToggle}"
+                                        Command="{Binding Toggles[1].ToggleCommand}"
+                                        SemanticProperties.Description="{Binding Toggles[1].Description}" />
+                            </Grid>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Results.LaneColumns[1].Cards}"
+                                                 IsVisible="{Binding Toggles[1].IsOn}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:SuggestionViewModel">
+                                        <VerticalStackLayout AutomationId="Suggestion">
+                                            <views:SuggestionCardView ShowsPhoto="True" OpensOnTap="True" />
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                            <Label Text="{Binding Results.LaneColumns[1].OffText}"
+                                   Style="{StaticResource Muted}"
+                                   IsVisible="{Binding Toggles[1].IsOn, Converter={StaticResource Not}}" />
+                        </VerticalStackLayout>
+                        <!-- Wild: its header is its toggle (.my/design/one-page-desktop.md). -->
+                        <VerticalStackLayout Grid.Column="2" Spacing="10">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" HeightRequest="32">
+                                <Ellipse WidthRequest="10" HeightRequest="10" VerticalOptions="Center"
+                                         Fill="{AppThemeBinding Light={StaticResource WildLight}, Dark={StaticResource WildDark}}" />
+                                <Grid Grid.Column="1" AutomationId="LaneHeader" IsVisible="{Binding Toggles[2].IsOn}" InputTransparent="True">
+                                    <Label AutomationId="LaneHeader_Name"
+                                           Text="{Binding Results.LaneColumns[2].HeaderText}"
+                                           FontAttributes="Bold"
+                                           FontSize="14"
+                                           CharacterSpacing="1.5"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource WildTextLight}, Dark={StaticResource WildTextDark}}" />
+                                </Grid>
+                                <Label Grid.Column="1"
+                                       Text="Wild (off)"
+                                       FontSize="14"
+                                       CharacterSpacing="1.5"
+                                       Opacity="0.55"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding Toggles[2].IsOn, Converter={StaticResource Not}}"
+                                       InputTransparent="True"
+                                       TextColor="{AppThemeBinding Light={StaticResource WildTextLight}, Dark={StaticResource WildTextDark}}" />
+                                <Button Grid.ColumnSpan="2"
+                                        AutomationId="Lane_Wild"
+                                        Style="{StaticResource LaneHeaderToggle}"
+                                        Command="{Binding Toggles[2].ToggleCommand}"
+                                        SemanticProperties.Description="{Binding Toggles[2].Description}" />
+                            </Grid>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Results.LaneColumns[2].Cards}"
+                                                 IsVisible="{Binding Toggles[2].IsOn}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:SuggestionViewModel">
+                                        <VerticalStackLayout AutomationId="Suggestion">
+                                            <views:SuggestionCardView ShowsPhoto="True" OpensOnTap="True" />
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                            <Label Text="{Binding Results.LaneColumns[2].OffText}"
+                                   Style="{StaticResource Muted}"
+                                   IsVisible="{Binding Toggles[2].IsOn, Converter={StaticResource Not}}" />
+                        </VerticalStackLayout>
+                        </Grid>
+                        <HorizontalStackLayout AutomationId="Results_Streaming" Spacing="8" HorizontalOptions="Center" IsVisible="{Binding Results.IsStreaming}">
+                            <ActivityIndicator IsRunning="{Binding Results.IsStreaming}" HeightRequest="20" WidthRequest="20" />
+                            <Label Text="More on the way…" Style="{StaticResource Muted}" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Label AutomationId="Results_StreamError" Text="{Binding Results.StreamError}" Style="{StaticResource Error}"
+                               HorizontalTextAlignment="Center" IsVisible="{Binding Results.HasStreamError}" />
+                        <Button AutomationId="Results_More"
+                                Text="More like this…"
+                                HeightRequest="48"
+                                CornerRadius="24"
+                                WidthRequest="320"
+                                HorizontalOptions="Center"
+                                Command="{Binding Results.MoreCommand}"
+                                IsVisible="{Binding Results.CanAskMore}" />
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Grid>
+        </Grid>
+    </Grid>
+</ContentView>

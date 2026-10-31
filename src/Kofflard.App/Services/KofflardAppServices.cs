@@ -26,9 +26,7 @@ public static class KofflardAppServices
         services.AddSingleton<IDialogs, ShellDialogs>();
 
         services.AddSingleton<AppShell>();
-        services.AddSingleton<SearchPage>();
         services.AddSingleton<DiscoverPage>();
-        services.AddTransient<ResultsPage>();
         services.AddTransient<ConnectPage>();
         services.AddTransient<SettingsPage>();
         services.AddTransient<SavedPage>();

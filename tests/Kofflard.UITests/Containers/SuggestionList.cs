@@ -121,11 +121,20 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
     }
 
     /// <summary>
-    /// Selects <paramref name="musician"/>'s list item, which is what a click or tap on the card does, as in
-    /// Bruinet's Todo sample (.my/rca/card-click.md).
+    /// What a click or tap on <paramref name="musician"/>'s card does: on a phone it selects the card's list
+    /// item, as in Bruinet's Todo sample (.my/rca/card-click.md); the desktop's lane columns are no list, and
+    /// the card takes the tap itself.
     /// </summary>
     public SuggestionList Select(string musician)
-        => SelectItem(Card(musician).Index, TestConstants.PageTimeoutMs);
+    {
+        if (Layouts.IsPhone(Context))
+        {
+            return SelectItem(Card(musician).Index, TestConstants.PageTimeoutMs);
+        }
+
+        Card(musician).Surface.Click();
+        return Self;
+    }
 
     /// <summary>
     /// Opens <paramref name="musician"/> in <paramref name="service"/>: a tap for the Open with service, else a
@@ -153,6 +162,7 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
     {
         var card = Card(musician);
         card.Surface.LongPress();
+        card.SecondButton.ScrollIntoView();
         card.SecondButton.AssertVisible(true, timeoutMs: TestConstants.PageTimeoutMs);
         return Self;
     }

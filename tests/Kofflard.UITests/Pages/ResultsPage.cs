@@ -4,32 +4,30 @@ using Kofflard.UITests.Containers;
 namespace Kofflard.UITests.Pages;
 
 /// <summary>
-/// Page object for the results: the cards in lanes, Safe, Curious and Wild, or who the user may have meant.
-/// On the desktop design it is the results page; on a phone, the one page with a search shown, which adds
-/// the lane toggles, the count and the trail (<see cref="Layouts"/>, .my/design/single-page-phone.md).
+/// Page object for the results part of the one page: the cards in lanes, Safe, Curious and Wild, or who the
+/// user may have meant, with the lane toggles, the count and the trail (.my/design/one-page-desktop.md). On a
+/// phone the lanes are groups in one list; on the desktop, columns side by side. Both are read as one
+/// <see cref="Suggestions"/> collection.
 /// </summary>
 public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>(context)
 {
     private readonly AppRoot _appRoot = new(context);
 
     /// <inheritdoc />
-    public override string Name => Layouts.IsPhone(Context) ? "DiscoverPage" : "ResultsPage";
+    public override string Name => "DiscoverPage";
 
-    /// <summary>"Like Nick Drake": the title bar's text, the page has no heading of its own.</summary>
-    public Label<AppRoot> Heading => new(_appRoot, "title");
+    /// <summary>"Like Nick Drake".</summary>
+    public Label<ResultsPage> Heading => new(this, "Discover_Heading");
 
-    /// <summary>"Like Nick Drake" as this design shows it: the title bar's on the desktop design, a label on the phone's.</summary>
-    public Label<ResultsPage> PageHeading => Layouts.IsPhone(Context) ? new(this, "Discover_Heading") : new(this, "title");
-
-    /// <summary>"8 of 12": the cards shown of those found. The phone's design only.</summary>
+    /// <summary>"8 of 12": the cards shown of those found.</summary>
     [UatName("Count")]
     public Label<ResultsPage> Count => new(this, "Discover_Count");
 
-    /// <summary>"‹ Nick Drake": back to the search this one came from. The phone's design only.</summary>
+    /// <summary>"‹ Nick Drake": back to the search this one came from.</summary>
     [UatName("Trail")]
     public TextButton<ResultsPage> Trail => new(this, "Discover_Back");
 
-    /// <summary>The Safe, Curious or Wild toggle. The phone's design only.</summary>
+    /// <summary>The Safe, Curious or Wild toggle: in the phone's dock, the column header on the desktop.</summary>
     public Button<ResultsPage> LaneToggle(string lane) => new(this, $"Lane_{lane}");
 
     /// <summary>Turns a lane on or off.</summary>
@@ -54,25 +52,25 @@ public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>
         return this;
     }
 
-    /// <summary>A card's "More →" on the phone: its search replaces the list, and the trail grows.</summary>
+    /// <summary>A card's "More →": its search replaces the results, and the trail grows.</summary>
     [BddWhen("I follow {musician}")]
     public ResultsPage Follow(string musician)
     {
         Suggestions.LookAt(musician);
         Suggestions.Card(musician).ExploreButton.Click();
-        PageHeading.AssertText($"Like {musician}", timeoutMs: TestConstants.PageTimeoutMs);
+        Heading.AssertText($"Like {musician}", timeoutMs: TestConstants.PageTimeoutMs);
         WaitForSuggestions();
         return this;
     }
 
-    /// <summary>Goes back one search with the phone's trail.</summary>
+    /// <summary>Goes back one search with the trail.</summary>
     [BddWhen("I go back along the trail")]
     public ResultsPage BackAlongTrail()
     {
-        var from = PageHeading.GetText();
+        var from = Heading.GetText();
         Trail.Click();
         var deadline = DateTime.UtcNow.AddMilliseconds(TestConstants.PageTimeoutMs);
-        while (PageHeading.GetText() == from && DateTime.UtcNow < deadline)
+        while (Heading.GetText() == from && DateTime.UtcNow < deadline)
         {
             Thread.Sleep(100);
         }
@@ -124,15 +122,6 @@ public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>
     [UatName("More")]
     public Button<ResultsPage> MoreButton => new(this, "Results_More");
 
-    /// <summary>
-    /// Shell's back arrow: WinUI's <c>NavigationViewBackButton</c> on Windows, "Navigate up" on Android
-    /// (as Todo's detail page).
-    /// </summary>
-    [UatNavigatesTo(typeof(SearchPage))]
-    public Button<AppRoot> BackButton => Context.Platform == Bruinet.Maui.Enums.MauiPlatform.Android
-        ? new(_appRoot, Locator.ByAccessibilityId("Navigate up"))
-        : new(_appRoot, "NavigationViewBackButton");
-
     /// <summary>The lanes, in the order they show.</summary>
     public static readonly IReadOnlyList<string> Lanes = ["Safe", "Curious", "Wild"];
 
@@ -150,13 +139,6 @@ public class ResultsPage(IMauiTestContext context) : PageObjectBase<ResultsPage>
     {
         State.AssertShowing(ResultsState.Content, timeoutMs: TestConstants.PageTimeoutMs);
         return this;
-    }
-
-    /// <summary>Returns to the search page.</summary>
-    public SearchPage Back()
-    {
-        BackButton.Click();
-        return SearchPage.Arrived(Context);
     }
 
     /// <summary>The results page, once it is on screen.</summary>

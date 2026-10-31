@@ -24,7 +24,6 @@ public sealed class ViewModelTests
     private readonly IDiscoveryEngine _engine = Substitute.For<IDiscoveryEngine>();
     private readonly IArtistVerifier _verifier = Substitute.For<IArtistVerifier>();
     private readonly FakeTimeProvider _time = new(new DateTimeOffset(2026, 10, 31, 9, 0, 0, TimeSpan.Zero));
-    private readonly RunningSearch _running = new();
     private readonly AiConnections _connections;
     private readonly DiscoveryService _discovery;
 
@@ -44,79 +43,6 @@ public sealed class ViewModelTests
 
         Assert.Equal(SearchViewModel.NameRequired, search.NameError);
         Assert.Empty(_navigator.Visits);
-    }
-
-    [Fact]
-    public async Task Search_OpensTheResults_OnTheFirstCard_WithTheSearchRunning()
-    {
-        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
-        var search = Search();
-        await search.LoadAsync();
-        search.Name = "  Nick   Drake ";
-
-        await search.SearchCommand.ExecuteAsync(null);
-
-        var (route, parameters) = Assert.Single(_navigator.Visits);
-        Assert.Equal(KofflardRoutes.Results, route);
-        var running = Assert.IsType<ResultsViewModel>(_running.Take());
-        Assert.Equal("Nick Drake", running.Artist);
-        Assert.Equal("Vashti Bunyan", Assert.Single(running.Cards).Name);
-        Assert.False(search.IsWaiting);
-        Assert.False(search.HasMessage);
-    }
-
-    [Fact]
-    public async Task Search_WithNoResults_StaysOnTheSearchPage_AndSaysSo()
-    {
-        Answers(Ok());
-        var search = Search();
-        search.Name = "Xyzzy";
-
-        await search.SearchCommand.ExecuteAsync(null);
-
-        Assert.Empty(_navigator.Visits);
-        Assert.Equal("No musicians found like Xyzzy. Try another name.", search.Message);
-        Assert.False(search.IsWaiting);
-        Assert.Equal(SearchViewModel.GoText, search.GoButtonText);
-    }
-
-    [Fact]
-    public async Task Search_WhenTheKeyIsRefused_ShowsTheErrorOnTheSearchPage_WithFixConnection()
-    {
-        _engine.DiscoverAsync(default!, default, default!, default!, default)
-            .ReturnsForAnyArgs(_ => Failing(new AiException(AiFailure.InvalidKey, "This key was not accepted.")));
-        var search = Search();
-        search.Name = "Nick Drake";
-
-        await search.SearchCommand.ExecuteAsync(null);
-
-        Assert.Empty(_navigator.Visits);
-        Assert.Equal("This key was not accepted.", search.Message);
-        Assert.True(search.CanFixConnection);
-        await search.FixConnectionCommand.ExecuteAsync(null);
-        Assert.Equal(KofflardRoutes.Connect, Assert.Single(_navigator.Visits).Route);
-    }
-
-    [Fact]
-    public async Task Search_ForAnAmbiguousName_AsksOnTheSearchPage_AndSearchesThePick()
-    {
-        Answers(new DiscoveryResult(DiscoveryStatus.Ambiguous, null, [], [new("Genesis", "English prog rock band"), new("Genesis Owusu", "Australian rapper")]));
-        var search = Search();
-        search.Name = "Genesis";
-
-        await search.SearchCommand.ExecuteAsync(null);
-
-        Assert.Empty(_navigator.Visits);
-        Assert.Equal("Which Genesis do you mean?", search.CandidatesTitle);
-        Assert.Equal(["Genesis", "Genesis Owusu"], search.Candidates.Select(c => c.Name));
-
-        Answers(Ok(("Little Simz", Lane.Safe)));
-        await search.ChooseCandidateCommand.ExecuteAsync(search.Candidates[1]);
-
-        Assert.Equal("Genesis Owusu", search.Name);
-        Assert.False(search.HasCandidates);
-        var running = Assert.IsType<ResultsViewModel>(_running.Take());
-        Assert.Equal("Genesis Owusu", running.Artist);
     }
 
     [Fact]
@@ -405,38 +331,6 @@ public sealed class ViewModelTests
     }
 
     [Fact]
-    public async Task Card_Explore_OpensTheNextResults_OnTheirFirstCard()
-    {
-        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
-        var results = Results();
-        await results.LoadAsync("Nick Drake", cached: false);
-
-        Answers(Ok(("Linda Perhacs", Lane.Safe)));
-        var card = results.Cards.First();
-        await card.ExploreCommand.ExecuteAsync(null);
-
-        var (route, parameters) = Assert.Single(_navigator.Visits);
-        Assert.Equal(KofflardRoutes.Results, route);
-        Assert.Equal("Vashti Bunyan", Assert.IsType<ResultsViewModel>(_running.Take()).Artist);
-        Assert.False(card.HasExploreNote);
-    }
-
-    [Fact]
-    public async Task Card_Explore_WithNoResults_OpensNoPage_AndTheCardSaysSo()
-    {
-        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
-        var results = Results();
-        await results.LoadAsync("Nick Drake", cached: false);
-
-        Answers(Ok());
-        var card = results.Cards.First();
-        await card.ExploreCommand.ExecuteAsync(null);
-
-        Assert.Empty(_navigator.Visits);
-        Assert.Equal("Nothing found like Vashti Bunyan", card.ExploreNote);
-    }
-
-    [Fact]
     public async Task Discover_ASearch_LoadsInPlace_AskingForTheLanesThatAreOn()
     {
         Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Bridget St John", Lane.Curious)));
@@ -493,6 +387,27 @@ public sealed class ViewModelTests
         Assert.Equal(["Vashti Bunyan", "Bridget St John", "Ali Farka Touré"], discover.Results!.Cards.Select(c => c.Name));
         Assert.Equal([Lane.Safe, Lane.Curious, Lane.Wild], discover.Results.Lanes.Select(l => l.Lane));
         _engine.Received().DiscoverAsync(Azure, "key", "Nick Drake", Arg.Any<IReadOnlyCollection<string>>(), LaneMix.Only(Lane.Wild), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Discover_ALaneTurnedOn_WhileTheSearchRuns_IsAskedForWhenItEnds()
+    {
+        var gate = new TaskCompletionSource();
+        var first = Ok(("Vashti Bunyan", Lane.Safe), ("Bridget St John", Lane.Curious));
+        _engine.DiscoverAsync(default!, default, default!, default!, default).ReturnsForAnyArgs(_ => Gated(first, gate.Task));
+        var discover = Discover();
+        await discover.LoadAsync();
+        discover.Search.Name = "Nick Drake";
+        var searching = discover.Search.SearchCommand.ExecuteAsync(null);
+        await Until(() => discover.Results is { HasContent: true });
+
+        await discover.Toggles[(int)Lane.Wild].ToggleCommand.ExecuteAsync(null);
+        Answers(Ok(("Ali Farka Touré", Lane.Wild)));
+        gate.SetResult();
+        await searching;
+
+        await Until(() => discover.Results!.Has(Lane.Wild));
+        Assert.Equal("Ali Farka Touré", Assert.Single(discover.Results!.LaneColumns[(int)Lane.Wild].Cards).Name);
     }
 
     [Fact]
@@ -615,12 +530,45 @@ public sealed class ViewModelTests
         Assert.Equal("No AI connected", settings.ConnectionLine);
     }
 
-    private SearchViewModel Search() => new(_discovery, _connections, _navigator, Launcher());
+    [Fact]
+    public async Task Results_TheDesktopsColumns_HoldEveryLane_AndTheMapTheShownCards()
+    {
+        Answers(Ok(("Vashti Bunyan", Lane.Safe), ("Bridget St John", Lane.Curious), ("Ali Farka Touré", Lane.Wild)));
+        var results = Results();
+        await results.LoadAsync("Nick Drake", cached: false);
+
+        Assert.Equal(["Safe (1)", "Curious (1)", "Wild (1)"], results.LaneColumns.Select(column => column.HeaderText));
+        Assert.Equal("ND", results.ArtistInitials);
+        Assert.Equal("VB", results.Cards.First().Initials);
+        Assert.Equal(["Vashti Bunyan", "Bridget St John", "Ali Farka Touré"], results.MapNodes.Select(node => node.Name));
+
+        results.Shown = new LaneSet(true, true, false);
+        Assert.Equal("Ali Farka Touré", Assert.Single(results.LaneColumns[(int)Lane.Wild].Cards).Name);
+        Assert.Equal(["Vashti Bunyan", "Bridget St John"], results.MapNodes.Select(node => node.Name));
+
+    }
+
+    [Fact]
+    public async Task Discover_AMapNode_SearchesThatMusician_OnTheTrail()
+    {
+        Answers(Ok(("Vashti Bunyan", Lane.Safe)));
+        var discover = Discover();
+        await discover.LoadAsync();
+        discover.Search.Name = "Nick Drake";
+        await discover.Search.SearchCommand.ExecuteAsync(null);
+
+        Answers(Ok(("Linda Perhacs", Lane.Safe)));
+        discover.Results!.MapNodes[0].ExploreCommand.Execute(null);
+        await Until(() => discover.Results.Cards.Any(card => card.Name == "Linda Perhacs"));
+
+        Assert.Equal("Like Vashti Bunyan", discover.Results.Heading);
+        Assert.Equal("Nick Drake", discover.TrailText);
+    }
+
+        private SearchViewModel Search() => new(_discovery, _connections, _navigator);
 
     private ResultsViewModel Results()
-        => new(_discovery, _settings, _saved, _verifier, new SuggestionCards(_launcher, _history, _saved, _time), _connections, _navigator, Launcher());
-
-    private SearchLauncher Launcher() => new(Results, _navigator, _running);
+        => new(_discovery, _settings, _saved, _verifier, new SuggestionCards(_launcher, _history, _saved, _time), _connections, _navigator);
 
     private DiscoverViewModel Discover() => new(Search(), Results, _settings);
 

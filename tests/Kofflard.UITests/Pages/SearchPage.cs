@@ -1,9 +1,12 @@
 using Bruinet.Uat;
+using Kofflard.UITests.Containers;
 
 namespace Kofflard.UITests.Pages;
 
 /// <summary>
-/// Page object for the search page, the Shell root.
+/// Page object for the search part of the one page: the name, ➤ or Find musicians, Recent
+/// (.my/design/one-page-desktop.md). The same ids in the phone's dock and the desktop's search pane. The
+/// results on the same page are <see cref="ResultsPage"/>.
 /// </summary>
 /// <remarks>Favourites (★) and Settings (⚙) are toolbar items, so they are declared on <see cref="AppRoot"/>.</remarks>
 public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(context)
@@ -11,7 +14,7 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
     private readonly AppRoot _appRoot = new(context);
 
     /// <inheritdoc />
-    public override string Name => "SearchPage";
+    public override string Name => "DiscoverPage";
 
     /// <summary>The musician's name.</summary>
     [UatName("Name")]
@@ -21,29 +24,9 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
     [UatName("Name Error")]
     public Label<SearchPage> NameError => new(this, "Search_NameError");
 
-    /// <summary>Searches.</summary>
-    /// <remarks>Not marked as navigating: with no name typed it stays here and says so.</remarks>
+    /// <summary>Searches: ➤ on a phone, Find musicians on the desktop.</summary>
     [UatName("Go")]
     public Button<SearchPage> GoButton => new(this, "Search_Go");
-
-    /// <summary>"No musicians found like …" or an error: what came of a search that opened no page.</summary>
-    [UatName("Message")]
-    public Label<SearchPage> Message => new(this, "Search_Message");
-
-    /// <summary>Offered under the message when the connection is the cause.</summary>
-    [UatName("Fix Connection")]
-    [UatNavigatesTo(typeof(ConnectPage))]
-    public Button<SearchPage> FixConnection => new(this, "Search_FixConnection");
-
-    /// <summary>"Which Genesis do you mean?".</summary>
-    [UatName("Candidates Title")]
-    public Label<SearchPage> CandidatesTitle => new(this, "Search_CandidatesTitle");
-
-    /// <summary>One of the "Did you mean" candidates.</summary>
-    public Button<SearchPage> Candidate(string name) => new(this, $"Candidate_{name}");
-
-    /// <summary>The ✕ on a recent search's chip.</summary>
-    public Button<SearchPage> RemoveRecentButton(string artist) => new(this, $"RecentRow_Remove_{artist}");
 
     /// <summary>Opens the favourites: the star.</summary>
     [UatName("Favourites")]
@@ -54,30 +37,21 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
     [UatNavigatesTo(typeof(SettingsPage))]
     public ToolbarButton<AppRoot> SettingsButton => new(_appRoot, Locator.ByAccessibilityId("Search_Settings"));
 
-    /// <summary>Searches for <paramref name="musician"/>.</summary>
+    /// <summary>The ✕ on a recent search's chip.</summary>
+    public Button<SearchPage> RemoveRecentButton(string artist) => new(this, $"RecentRow_Remove_{artist}");
+
+    /// <summary>The trail's "‹ Nick Drake".</summary>
+    public TextButton<SearchPage> TrailButton => new(this, "Discover_Back");
+
+    /// <summary>Searches for <paramref name="musician"/>; the results show on the same page.</summary>
     [BddWhen("I search for {musician}")]
     public ResultsPage SearchFor(string musician)
     {
         NameEntry.SetText(musician);
         GoButton.Click();
-        return ResultsPage.Arrived(Context);
-    }
-
-    /// <summary>Searches for <paramref name="musician"/> where no results page opens: nobody found, an error, or "Did you mean".</summary>
-    [BddWhen("I search for {musician} and stay")]
-    public SearchPage SearchAndStay(string musician)
-    {
-        NameEntry.SetText(musician);
-        GoButton.Click();
-        return this;
-    }
-
-    /// <summary>Picks a "Did you mean" candidate, which searches it.</summary>
-    [BddWhen("I choose {name}")]
-    public ResultsPage ChooseCandidate(string name)
-    {
-        Candidate(name).Click();
-        return ResultsPage.Arrived(Context);
+        var results = new ResultsPage(Context);
+        results.Heading.AssertText($"Like {musician}", timeoutMs: TestConstants.PageTimeoutMs);
+        return results;
     }
 
     /// <summary>Forgets a recent search with the ✕ on its chip.</summary>
@@ -102,7 +76,19 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
         return SavedPage.Arrived(Context);
     }
 
-    /// <summary>The search page, once it is on screen.</summary>
+    /// <summary>Walks the trail back to its start, so a test's searches make the only trail.</summary>
+    public SearchPage WalkTrailBack()
+    {
+        for (var step = 0; step < 20 && TrailButton.IsExists(); step++)
+        {
+            TrailButton.Click();
+            TrailButton.WaitExists(false, TestConstants.PageTimeoutMs / 10);
+        }
+
+        return this;
+    }
+
+    /// <summary>The one page, once it is on screen.</summary>
     public static SearchPage Arrived(IMauiTestContext context)
     {
         var page = new SearchPage(context);

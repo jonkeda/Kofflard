@@ -160,3 +160,29 @@ public sealed class AiConnectionTests
     public void Azure_IsFirst()
         => Assert.Equal("azure", AiProviders.All[0].Id);
 }
+
+public sealed class ArtistMapTests
+{
+    [Fact]
+    public void EachLane_HasItsSide_AndOnlyFourPlacesEach()
+    {
+        var picks = Enumerable.Range(1, 5).Select(i => ($"Safe {i}", Lane.Safe))
+            .Concat([("Curious 1", Lane.Curious), ("Wild 1", Lane.Wild)]);
+
+        var nodes = ArtistMap.Lay(picks);
+
+        Assert.Equal(6, nodes.Count);
+        Assert.DoesNotContain(nodes, node => node.Name == "Safe 5");
+        Assert.All(nodes.Where(node => node.Lane == Lane.Safe), node => Assert.True(node.Y < ArtistMap.Centre.Y));
+        Assert.True(nodes.Single(node => node.Lane == Lane.Curious).Y > ArtistMap.Centre.Y);
+        Assert.Equal(nodes.Count, nodes.Select(node => (node.X, node.Y)).Distinct().Count());
+    }
+
+    [Fact]
+    public void Initials_AreTheFirstLettersOfTheFirstTwoWords()
+    {
+        Assert.Equal("ND", ArtistMap.Initials("Nick Drake"));
+        Assert.Equal("AF", ArtistMap.Initials("Ali Farka Touré"));
+        Assert.Equal("B", ArtistMap.Initials("Björk"));
+    }
+}

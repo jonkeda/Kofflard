@@ -41,7 +41,7 @@ public sealed class JourneyTests
         var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
         results.Suggestions.Save("Bill Fay");
 
-        results.Back().OpenSaved().Items.AssertSaved("Bill Fay");
+        _fixture.Search.OpenSaved().Items.AssertSaved("Bill Fay");
         return Task.CompletedTask;
     }
 
@@ -53,11 +53,9 @@ public sealed class JourneyTests
         var results = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
 
         results.Suggestions.Explore("Bill Fay").Suggestions.AssertCard("Judee Sill");
-        results.BackButton.Click();
 
-        var earlier = new Pages.ResultsPage(_fixture.Context);
-        earlier.Heading.AssertText("Like Nick Drake", timeoutMs: TestConstants.PageTimeoutMs);
-        earlier.WaitForSuggestions().Suggestions.AssertCard("Vashti Bunyan");
+        results.BackAlongTrail().Heading.AssertText("Like Nick Drake", timeoutMs: TestConstants.PageTimeoutMs);
+        results.Suggestions.AssertCard("Vashti Bunyan");
         return Task.CompletedTask;
     }
 
@@ -67,9 +65,9 @@ public sealed class JourneyTests
     {
         _fixture.Ai.Answer("Xyzzy", FakeAi.Canned("unknown"));
 
-        var search = _fixture.Search.SearchAndStay("Xyzzy");
-        search.Message.AssertText("No musician called Xyzzy is known. Check the spelling and try again.", timeoutMs: TestConstants.PageTimeoutMs);
-        search.AssertLoaded(true);
+        var results = _fixture.Search.SearchFor("Xyzzy");
+        results.State.AssertShowing(ResultsState.Candidates, timeoutMs: TestConstants.PageTimeoutMs);
+        results.CandidatesTitle.AssertText("No musician called Xyzzy is known. Check the spelling and try again.");
         return Task.CompletedTask;
     }
 
@@ -77,7 +75,8 @@ public sealed class JourneyTests
     [Trait("Journey", "DISC.07.1")]
     public Task TheCross_OnARecentSearch_RemovesIt()
     {
-        var search = _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions().Back();
+        _fixture.Search.SearchFor("Nick Drake").WaitForSuggestions();
+        var search = _fixture.Search;
         search.RemoveRecentButton("Nick Drake").AssertExists(true, timeoutMs: TestConstants.PageTimeoutMs);
 
         search.RemoveRecent("Nick Drake");

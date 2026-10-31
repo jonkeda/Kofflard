@@ -25,7 +25,6 @@ public sealed class SuggestionViewModel : ParentViewModel
     private Verification _verification = Verification.Unverified;
     private bool _isSaved;
     private string _openedText = string.Empty;
-    private string _exploreNote = string.Empty;
     private int _opens;
     private bool _showsOtherServices;
 
@@ -79,6 +78,9 @@ public sealed class SuggestionViewModel : ParentViewModel
 
     /// <summary>The lane.</summary>
     public Lane Lane => Suggestion.Lane;
+
+    /// <summary>"VB": the desktop's photo, until there are photos.</summary>
+    public string Initials => ArtistMap.Initials(Name);
 
     /// <summary>Why it fits; for a leap, "Bridge: …".</summary>
     public string Why => Suggestion.Bridge is { } bridge ? $"Bridge: {bridge}" : Suggestion.Why;
@@ -173,25 +175,6 @@ public sealed class SuggestionViewModel : ParentViewModel
 
     /// <summary>Searches from this musician.</summary>
     public IAsyncRelayCommand ExploreCommand { get; }
-
-    /// <summary>
-    /// "Searching…" while "More →" waits for its first card, then what came of it when no page opened:
-    /// "Nothing found like Vashti Bunyan" (.my/design/desktop-aurora-changes.md). Empty otherwise.
-    /// </summary>
-    public string ExploreNote
-    {
-        get => _exploreNote;
-        internal set
-        {
-            if (SetProperty(ref _exploreNote, value))
-            {
-                OnPropertyChanged(nameof(HasExploreNote));
-            }
-        }
-    }
-
-    /// <summary>Whether <see cref="ExploreNote"/> is shown.</summary>
-    public bool HasExploreNote => _exploreNote.Length > 0;
 
     /// <summary>
     /// "Opened in YouTube" for a moment after an open, or "Couldn't open YouTube": the hand-off can be slow,

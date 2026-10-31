@@ -82,30 +82,47 @@
                             VerticalOptions="Center" />
                 </Grid>
 
-                <VerticalStackLayout Spacing="4" Padding="8,0" InputTransparent="True">
-                    <Label AutomationId="Suggestion_Why" Text="{Binding Why}" LineHeight="1.15" />
-                    <Label AutomationId="Suggestion_Tags"
-                           Text="{Binding TagsText}"
-                           Style="{StaticResource Faint}" />
-                    <Label AutomationId="Suggestion_KnownFor"
-                           Text="{Binding KnownForText}"
-                           Style="{StaticResource Faint}"
-                           IsVisible="{Binding HasKnownFor}" />
-                    <Label AutomationId="Suggestion_Opened"
-                           Text="{Binding OpenedText}"
-                           FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light={StaticResource AccentLight}, Dark={StaticResource AccentDark}}"
-                           IsVisible="{Binding HasOpenedText}" />
-                    <!-- "Searching…" while "More →" waits for its first card, then "Nothing found like …" (.my/design/desktop-aurora-changes.md). -->
-                    <Label AutomationId="Suggestion_ExploreNote"
-                           Text="{Binding ExploreNote}"
-                           Style="{StaticResource Muted}"
-                           IsVisible="{Binding HasExploreNote}" />
-                    <Label AutomationId="Suggestion_NotFound"
-                           Text="Couldn't confirm this artist"
-                           Style="{StaticResource Faint}"
-                           IsVisible="{Binding IsNotFound}" />
-                </VerticalStackLayout>
+                <!-- The desktop's photo: the initials on the lane's colour, until there are photos (.my/design/one-page-desktop.md). -->
+                <Grid ColumnDefinitions="Auto,*" Padding="8,0,0,0" InputTransparent="True">
+                    <Border x:Name="Photo"
+                            IsVisible="False"
+                            WidthRequest="56"
+                            HeightRequest="64"
+                            VerticalOptions="Start"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource SafeLight}, Dark={StaticResource SafeDark}}">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding LaneName}" Value="Curious">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CuriousLight}, Dark={StaticResource CuriousDark}}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border" Binding="{Binding LaneName}" Value="Wild">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource WildLight}, Dark={StaticResource WildDark}}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Label Text="{Binding Initials}" TextColor="White" FontAttributes="Bold" FontSize="18"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4" Padding="8,0" InputTransparent="True">
+                        <Label AutomationId="Suggestion_Why" Text="{Binding Why}" LineHeight="1.15" />
+                        <Label AutomationId="Suggestion_Tags"
+                               Text="{Binding TagsText}"
+                               Style="{StaticResource Faint}" />
+                        <Label AutomationId="Suggestion_KnownFor"
+                               Text="{Binding KnownForText}"
+                               Style="{StaticResource Faint}"
+                               IsVisible="{Binding HasKnownFor}" />
+                        <Label AutomationId="Suggestion_Opened"
+                               Text="{Binding OpenedText}"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource AccentLight}, Dark={StaticResource AccentDark}}"
+                               IsVisible="{Binding HasOpenedText}" />
+                        <Label AutomationId="Suggestion_NotFound"
+                               Text="Couldn't confirm this artist"
+                               Style="{StaticResource Faint}"
+                               IsVisible="{Binding IsNotFound}" />
+                    </VerticalStackLayout>
+                </Grid>
 
                 <HorizontalStackLayout AutomationId="Suggestion_OtherServices"
                                        Spacing="4"
