@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    The results (design §3.1). Results_State is a CommunityToolkit StateContainer, as Todo's list: its
+    default content is the suggestions; Loading, Empty, Error and Candidates each carry their own
+    AutomationId, which is how Bruinet's StateContainer control tells which one is showing.
+-->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:Kofflard.Core.ViewModels;assembly=Kofflard.Core"
+             xmlns:models="clr-namespace:Kofflard.Core.Models;assembly=Kofflard.Core"
+             xmlns:views="clr-namespace:Kofflard.App.Views"
+             x:Class="Kofflard.App.Pages.ResultsPage"
+             x:DataType="vm:ResultsViewModel"
+             AutomationId="ResultsPage"
+             Title="{Binding Heading}">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="16,8" RowSpacing="8">
+
+        <VerticalStackLayout Spacing="2">
+            <Label AutomationId="Results_Heading" Text="{Binding Heading}" FontSize="22" FontAttributes="Bold" />
+            <Label AutomationId="Results_Summary" Text="{Binding Summary}" TextColor="{StaticResource Gray500}" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Label AutomationId="Results_Adventure" Text="{Binding AdventureText}" FontSize="12" />
+                <Label Grid.Column="1" AutomationId="Results_Lanes" Text="{Binding LaneSummary}" FontSize="12" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <Grid Grid.Row="1"
+              AutomationId="Results_State"
+              toolkit:StateContainer.CurrentState="{Binding StateKey}">
+
+            <toolkit:StateContainer.StateViews>
+                <VerticalStackLayout toolkit:StateView.StateKey="Loading"
+                                     AutomationId="Results_Loading"
+                                     Spacing="8"
+                                     VerticalOptions="Center">
+                    <ActivityIndicator IsRunning="True" />
+                    <Label Text="Asking the AI…" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout toolkit:StateView.StateKey="Empty"
+                                     AutomationId="Results_Empty"
+                                     VerticalOptions="Center">
+                    <Label AutomationId="Results_EmptyLabel"
+                           Text="The AI had no new musicians to suggest. Try again, or turn the adventure up."
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout toolkit:StateView.StateKey="Error"
+                                     AutomationId="Results_Error"
+                                     Spacing="12"
+                                     VerticalOptions="Center">
+                    <Label AutomationId="Results_ErrorLabel"
+                           Text="{Binding ErrorMessage}"
+                           HorizontalTextAlignment="Center" />
+                    <Button AutomationId="Results_Retry"
+                            Text="Try again"
+                            Command="{Binding RetryCommand}"
+                            HorizontalOptions="Center" />
+                    <Button AutomationId="Results_FixConnection"
+                            Text="Fix the AI connection"
+                            Command="{Binding FixConnectionCommand}"
+                            IsVisible="{Binding CanFixConnection}"
+                            HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <Grid toolkit:StateView.StateKey="Candidates"
+                      AutomationId="Results_Candidates"
+                      RowDefinitions="Auto,*"
+                      RowSpacing="8">
+                    <Label AutomationId="Results_CandidatesTitle" Text="{Binding CandidatesTitle}" FontAttributes="Bold" />
+                    <CollectionView Grid.Row="1"
+                                    AutomationId="Results_CandidateList"
+                                    ItemsSource="{Binding Candidates}"
+                                    SelectionMode="Single"
+                                    SelectedItem="{Binding SelectedCandidate}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Musician">
+                                <VerticalStackLayout AutomationId="CandidateRow" Padding="8">
+                                    <Label AutomationId="CandidateRow_Name" Text="{Binding Name}" FontAttributes="Bold" />
+                                    <Label AutomationId="CandidateRow_Summary" Text="{Binding Summary}" FontSize="12" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </toolkit:StateContainer.StateViews>
+
+            <CollectionView AutomationId="Results_Items"
+                            ItemsSource="{Binding Items}"
+                            SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SuggestionViewModel">
+                        <VerticalStackLayout AutomationId="Suggestion">
+                            <Label AutomationId="Suggestion_Lane"
+                                   Text="{Binding LaneName}"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}"
+                                   Margin="4,8,0,0" />
+                            <views:SuggestionCardView />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+        <Button Grid.Row="2"
+                AutomationId="Results_More"
+                Text="More like this…"
+                Command="{Binding MoreCommand}"
+                IsVisible="{Binding HasContent}" />
+    </Grid>
+</ContentPage>

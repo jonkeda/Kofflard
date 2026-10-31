@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    The search page, the Shell root (design §3.1). Ids are the contract with the page objects: renaming
+    one breaks them.
+-->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Kofflard.Core.ViewModels;assembly=Kofflard.Core"
+             xmlns:services="clr-namespace:Kofflard.Core.Services;assembly=Kofflard.Core"
+             x:Class="Kofflard.App.Pages.SearchPage"
+             x:DataType="vm:SearchViewModel"
+             AutomationId="SearchPage"
+             Title="Kofflard">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Saved" AutomationId="Search_Saved" Command="{Binding SavedCommand}" />
+        <ToolbarItem Text="Settings" AutomationId="Search_Settings" Command="{Binding SettingsCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
+
+        <VerticalStackLayout Spacing="10">
+            <Label Text="Who do you like?" FontSize="24" FontAttributes="Bold" />
+
+            <Entry AutomationId="Search_Name"
+                   Placeholder="A musician or band"
+                   Text="{Binding Name}"
+                   ReturnCommand="{Binding SearchCommand}"
+                   SemanticProperties.Hint="Type the name of a musician you like" />
+            <Label AutomationId="Search_NameError"
+                   Text="{Binding NameError}"
+                   TextColor="Red"
+                   IsVisible="{Binding HasNameError}" />
+
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                <Label Text="How adventurous?" VerticalOptions="Center" />
+                <Label Grid.Column="1"
+                       AutomationId="Search_AdventureName"
+                       Text="{Binding AdventureName}"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center" />
+                <Stepper Grid.Column="2"
+                         AutomationId="Search_Adventure"
+                         Minimum="1"
+                         Maximum="5"
+                         Increment="1"
+                         Value="{Binding AdventureStep}"
+                         SemanticProperties.Description="Adventurousness, from safe to wild" />
+            </Grid>
+
+            <Button AutomationId="Search_Go"
+                    Text="Find musicians"
+                    Command="{Binding SearchCommand}" />
+
+            <Label AutomationId="Search_Connection"
+                   Text="{Binding ConnectionLine}"
+                   FontSize="12"
+                   TextColor="{StaticResource Gray500}" />
+
+            <Label Text="Recent" FontAttributes="Bold" IsVisible="{Binding HasRecent}" />
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="1"
+                        AutomationId="Search_Recent"
+                        ItemsSource="{Binding Recent}"
+                        SelectionMode="Single"
+                        SelectedItem="{Binding SelectedRecent}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="services:RecentSearch">
+                    <Grid AutomationId="RecentRow" Padding="8">
+                        <Label AutomationId="RecentRow_Artist" Text="{Binding Artist}" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

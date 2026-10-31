@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- The settings (design §3.3). Each change is kept at once. -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Kofflard.Core.ViewModels;assembly=Kofflard.Core"
+             x:Class="Kofflard.App.Pages.SettingsPage"
+             x:DataType="vm:SettingsViewModel"
+             AutomationId="SettingsPage"
+             Title="Settings">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+
+            <Label Text="AI" FontAttributes="Bold" FontSize="18" />
+            <Label AutomationId="Settings_Connection" Text="{Binding ConnectionLine}" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button AutomationId="Settings_ChangeAi" Text="Change" Command="{Binding ChangeAiCommand}" />
+                <Button Grid.Column="1"
+                        AutomationId="Settings_Disconnect"
+                        Text="Disconnect"
+                        Command="{Binding DisconnectCommand}"
+                        BackgroundColor="{StaticResource Secondary}"
+                        TextColor="{StaticResource Tertiary}" />
+            </Grid>
+
+            <Label Text="Open with" FontAttributes="Bold" FontSize="18" Margin="0,12,0,0" />
+            <Picker AutomationId="Settings_OpenWith"
+                    Title="Open with"
+                    ItemsSource="{Binding ServiceNames}"
+                    SelectedIndex="{Binding OpenWithIndex}" />
+
+            <Label Text="Check musician names" FontAttributes="Bold" FontSize="18" Margin="0,12,0,0" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <Label Text="Confirms each suggestion with MusicBrainz. Slow: about one name per second."
+                       VerticalOptions="Center" />
+                <Switch Grid.Column="1" AutomationId="Settings_CheckNames" IsToggled="{Binding CheckNames}" />
+            </Grid>
+
+            <Label Text="How adventurous" FontAttributes="Bold" FontSize="18" Margin="0,12,0,0" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <Label AutomationId="Settings_AdventureName" Text="{Binding AdventureName}" VerticalOptions="Center" />
+                <Stepper Grid.Column="1"
+                         AutomationId="Settings_Adventure"
+                         Minimum="1"
+                         Maximum="5"
+                         Increment="1"
+                         Value="{Binding AdventureStep}" />
+            </Grid>
+
+            <Label Text="History" FontAttributes="Bold" FontSize="18" Margin="0,12,0,0" />
+            <Button AutomationId="Settings_ClearHistory"
+                    Text="Clear history"
+                    Command="{Binding ClearHistoryCommand}"
+                    BackgroundColor="{StaticResource Secondary}"
+                    TextColor="{StaticResource Tertiary}" />
+
+            <Label Text="Kofflard has no server and collects nothing. Names you search go to your AI provider; with name checks on, suggested names go to MusicBrainz."
+                   FontSize="12"
+                   TextColor="{StaticResource Gray500}"
+                   Margin="0,12,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

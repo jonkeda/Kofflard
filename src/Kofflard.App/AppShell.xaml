@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    One root page and pushed routes (results, connect, settings, saved); no tabs and no flyout, as in
+    Bruinet's Todo sample.
+-->
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:pages="clr-namespace:Kofflard.App.Pages"
+       x:Class="Kofflard.App.AppShell"
+       Title="Kofflard"
+       FlyoutBehavior="Disabled">
+
+    <ShellContent Route="search"
+                  Title="Kofflard"
+                  ContentTemplate="{DataTemplate pages:SearchPage}" />
+
+</Shell>

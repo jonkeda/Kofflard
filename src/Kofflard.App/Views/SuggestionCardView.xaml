@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    One card (design §3.1), on the results and the saved page. It takes its BindingContext from the
+    list item. Every card repeats the same ids; item scoping keeps them apart.
+-->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Kofflard.Core.ViewModels;assembly=Kofflard.Core"
+             x:Class="Kofflard.App.Views.SuggestionCardView"
+             x:DataType="vm:SuggestionViewModel">
+
+    <Border Padding="12" Margin="0,4" StrokeShape="RoundRectangle 10" Opacity="{Binding Opacity}">
+        <VerticalStackLayout Spacing="4">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Label AutomationId="Suggestion_Name"
+                       Text="{Binding Name}"
+                       FontSize="18"
+                       FontAttributes="Bold" />
+                <Label Grid.Column="1"
+                       AutomationId="Suggestion_Verified"
+                       Text="{Binding VerifiedMark}"
+                       TextColor="{StaticResource Primary}"
+                       FontAttributes="Bold"
+                       SemanticProperties.Description="Confirmed by MusicBrainz"
+                       IsVisible="{Binding IsVerified}" />
+            </Grid>
+            <Label AutomationId="Suggestion_Why" Text="{Binding Why}" />
+            <Label AutomationId="Suggestion_Tags"
+                   Text="{Binding TagsText}"
+                   FontSize="12"
+                   TextColor="{StaticResource Gray500}" />
+            <Label AutomationId="Suggestion_KnownFor"
+                   Text="{Binding KnownForText}"
+                   FontSize="12"
+                   TextColor="{StaticResource Gray500}"
+                   IsVisible="{Binding HasKnownFor}" />
+            <Label AutomationId="Suggestion_NotFound"
+                   Text="Couldn't confirm this artist"
+                   FontSize="12"
+                   TextColor="{StaticResource Gray500}"
+                   IsVisible="{Binding IsNotFound}" />
+
+            <FlexLayout Wrap="Wrap" AlignItems="Center" JustifyContent="Start" Margin="0,6,0,0">
+                <Button AutomationId="Suggestion_Open"
+                        Text="{Binding OpenText}"
+                        Command="{Binding OpenCommand}"
+                        Margin="0,0,8,6" />
+                <Button AutomationId="Suggestion_Second"
+                        Text="{Binding SecondText}"
+                        Command="{Binding OpenSecondCommand}"
+                        BackgroundColor="{StaticResource Secondary}"
+                        TextColor="{StaticResource Tertiary}"
+                        Margin="0,0,8,6" />
+                <Button AutomationId="Suggestion_Third"
+                        Text="{Binding ThirdText}"
+                        Command="{Binding OpenThirdCommand}"
+                        BackgroundColor="{StaticResource Secondary}"
+                        TextColor="{StaticResource Tertiary}"
+                        Margin="0,0,8,6" />
+                <Button AutomationId="Suggestion_Save"
+                        Text="{Binding SaveText}"
+                        Command="{Binding SaveCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource Primary}"
+                        Margin="0,0,8,6" />
+                <Button AutomationId="Suggestion_Explore"
+                        Text="More like this →"
+                        Command="{Binding ExploreCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource Primary}"
+                        Margin="0,0,8,6" />
+            </FlexLayout>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

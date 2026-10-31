@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsTestProject>false</IsTestProject>
+    <Description>What the integration and UI tiers share: the fake AI (WireMock, OpenAI-compatible) and its canned answers.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WireMock.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Kofflard.Infrastructure\Kofflard.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Answers\*.json" LogicalName="Kofflard.Answers.%(Filename).json" />
+  </ItemGroup>
+
+</Project>

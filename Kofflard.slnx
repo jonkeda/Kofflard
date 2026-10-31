@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Kofflard.App/Kofflard.App.csproj" />
+    <Project Path="src/Kofflard.Core/Kofflard.Core.csproj" />
+    <Project Path="src/Kofflard.Infrastructure/Kofflard.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Kofflard.IntegrationTests/Kofflard.IntegrationTests.csproj" />
+    <Project Path="tests/Kofflard.TestSupport/Kofflard.TestSupport.csproj" />
+    <Project Path="tests/Kofflard.Uat/Kofflard.Uat.csproj" />
+    <Project Path="tests/Kofflard.UITests/Kofflard.UITests.csproj" />
+    <Project Path="tests/Kofflard.UnitTests/Kofflard.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/bruinet/">
+    <Project Path="external/test-tooling/samples/Bruinet.Maui.AppSupport/Bruinet.Maui.AppSupport.csproj" />
+    <Project Path="external/test-tooling/samples/Bruinet.Samples.Shared/Bruinet.Samples.Shared.csproj" />
+    <Project Path="external/test-tooling/src/Bruinet.Appium/Bruinet.Appium.csproj" />
+    <Project Path="external/test-tooling/src/Bruinet.Core/Bruinet.Core.csproj" />
+    <Project Path="external/test-tooling/src/Bruinet.Maui/Bruinet.Maui.csproj" />
+    <Project Path="external/test-tooling/src/Bruinet.Maui.Appium/Bruinet.Maui.Appium.csproj" />
+    <Project Path="external/test-tooling/src/Bruinet.Maui.CommunityToolkit/Bruinet.Maui.CommunityToolkit.csproj" />
+    <Project Path="external/test-tooling/src/Bruinet.Maui.FlaUI/Bruinet.Maui.FlaUI.csproj" />
+    <Project Path="external/test-tooling/src/Bruinet.Maui.Headless/Bruinet.Maui.Headless.csproj" />
+    <Project Path="external/test-tooling/src/Bruinet.Uat/Bruinet.Uat.csproj" />
+    <Project Path="external/test-tooling/src/Bruinet.Uia.Contracts/Bruinet.Uia.Contracts.csproj" />
+  </Folder>
+</Solution>

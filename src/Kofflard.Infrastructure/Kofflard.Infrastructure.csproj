@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Kofflard.Infrastructure</RootNamespace>
+    <Description>Kofflard's adapters: the AI providers, OpenRouter sign-in, MusicBrainz, the SQLite stores, launch settings and the composition root.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.AI" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
+    <PackageReference Include="OpenAI" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kofflard.Core\Kofflard.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Kofflard.IntegrationTests" />
+  </ItemGroup>
+
+</Project>

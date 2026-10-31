@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Kofflard.Core</RootNamespace>
+    <Description>Kofflard's models, rules, prompt, validation, ports and view models. No MAUI, HTTP, SQL or AI SDK: everything here is unit-testable.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Todo's MVVM base: ParentViewModel and the relay commands (design §4.2). -->
+    <ProjectReference Include="$(BruinetRoot)samples/Bruinet.Samples.Shared/Bruinet.Samples.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Kofflard.UnitTests" />
+  </ItemGroup>
+
+</Project>

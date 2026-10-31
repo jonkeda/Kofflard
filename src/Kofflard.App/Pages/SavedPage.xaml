@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- The saved musicians, with the same card as the results. -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Kofflard.Core.ViewModels;assembly=Kofflard.Core"
+             xmlns:views="clr-namespace:Kofflard.App.Views"
+             x:Class="Kofflard.App.Pages.SavedPage"
+             x:DataType="vm:SavedViewModel"
+             AutomationId="SavedPage"
+             Title="Saved">
+
+    <Grid RowDefinitions="Auto,*" Padding="16,8">
+        <Label AutomationId="Saved_Empty"
+               Text="Nothing saved yet. Tap ☆ Save on a suggestion to keep it here."
+               IsVisible="{Binding IsEmpty}" />
+        <CollectionView Grid.Row="1"
+                        AutomationId="Saved_Items"
+                        ItemsSource="{Binding Items}"
+                        SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:SuggestionViewModel">
+                    <VerticalStackLayout AutomationId="Suggestion">
+                        <views:SuggestionCardView />
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Connecting an AI (design §6): pick a provider (Azure first), then sign in or paste a key, test, done.
+    There is no Kofflard server: requests go straight from this device to the chosen provider.
+-->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Kofflard.Core.ViewModels;assembly=Kofflard.Core"
+             x:Class="Kofflard.App.Pages.ConnectPage"
+             x:DataType="vm:ConnectViewModel"
+             AutomationId="ConnectPage"
+             Title="Connect an AI">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+            <Label Text="Kofflard asks an AI of your choice for musicians. Use your own account: sign in, or paste an API key."
+                   TextColor="{StaticResource Gray600}" />
+
+            <Label Text="Provider" FontAttributes="Bold" />
+            <Picker AutomationId="Connect_Provider"
+                    Title="Provider"
+                    ItemsSource="{Binding ProviderNames}"
+                    SelectedIndex="{Binding ProviderIndex}" />
+
+            <Label Text="Endpoint" FontAttributes="Bold" IsVisible="{Binding NeedsEndpoint}" />
+            <Entry AutomationId="Connect_Endpoint"
+                   Placeholder="{Binding EndpointHint}"
+                   Text="{Binding Endpoint}"
+                   Keyboard="Url"
+                   IsVisible="{Binding NeedsEndpoint}" />
+
+            <Label Text="{Binding ModelLabel}" FontAttributes="Bold" />
+            <Entry AutomationId="Connect_Model" Text="{Binding Model}" />
+
+            <Button AutomationId="Connect_SignIn"
+                    Text="Sign in with OpenRouter"
+                    Command="{Binding SignInCommand}"
+                    IsVisible="{Binding CanSignIn}" />
+
+            <Label Text="API key" FontAttributes="Bold" IsVisible="{Binding NeedsKey}" />
+            <Entry AutomationId="Connect_ApiKey"
+                   Placeholder="Paste your key"
+                   Text="{Binding ApiKey}"
+                   IsPassword="True"
+                   IsVisible="{Binding NeedsKey}" />
+            <Button AutomationId="Connect_GetKey"
+                    Text="Get a key"
+                    Command="{Binding GetKeyCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource Primary}"
+                    HorizontalOptions="Start"
+                    IsVisible="{Binding NeedsKey}" />
+
+            <Label AutomationId="Connect_Status"
+                   Text="{Binding Status}"
+                   IsVisible="{Binding HasStatus}">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding StatusIsError}" Value="True">
+                        <Setter Property="TextColor" Value="Red" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button AutomationId="Connect_Test"
+                        Text="Test"
+                        Command="{Binding TestCommand}"
+                        BackgroundColor="{StaticResource Secondary}"
+                        TextColor="{StaticResource Tertiary}" />
+                <Button Grid.Column="1"
+                        AutomationId="Connect_Done"
+                        Text="Done"
+                        Command="{Binding DoneCommand}" />
+            </Grid>
+
+            <Label Text="Your key stays on this device, in its secure storage. Only the names you search are sent, to the provider you choose."
+                   FontSize="12"
+                   TextColor="{StaticResource Gray500}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

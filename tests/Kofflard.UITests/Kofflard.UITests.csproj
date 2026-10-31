@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Kofflard.UITests</RootNamespace>
+    <!-- FlaUI drives the Windows app, on Windows. Elsewhere plain net10.0: MauiHeadless and Appium (as Bruinet's Todo). -->
+    <TargetFramework Condition="'$(BruinetWindowsHead)' == 'true'">net10.0-windows</TargetFramework>
+    <TargetFramework Condition="'$(BruinetWindowsHead)' != 'true'">net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(BruinetRoot)src/Bruinet.Core/Bruinet.Core.csproj" />
+    <ProjectReference Include="$(BruinetRoot)src/Bruinet.Maui/Bruinet.Maui.csproj" />
+    <ProjectReference Include="$(BruinetRoot)src/Bruinet.Maui.CommunityToolkit/Bruinet.Maui.CommunityToolkit.csproj" />
+    <ProjectReference Include="$(BruinetRoot)src/Bruinet.Maui.FlaUI/Bruinet.Maui.FlaUI.csproj" Condition="'$(BruinetWindowsHead)' == 'true'" />
+    <ProjectReference Include="$(BruinetRoot)src/Bruinet.Maui.Appium/Bruinet.Maui.Appium.csproj" />
+    <ProjectReference Include="$(BruinetRoot)src/Bruinet.Uat/Bruinet.Uat.csproj" />
+    <!-- The MauiHeadless head (BRUINET_HEAD=headless): the app's own net10.0 build, rendered in this process. -->
+    <ProjectReference Include="$(BruinetRoot)src/Bruinet.Maui.Headless/Bruinet.Maui.Headless.csproj" />
+    <ProjectReference Include="..\..\src\Kofflard.App\Kofflard.App.csproj" SetTargetFramework="TargetFramework=net10.0" />
+    <!-- The fake AI and its canned answers. -->
+    <ProjectReference Include="..\Kofflard.TestSupport\Kofflard.TestSupport.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bruinet.maui.config.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Bruinet.Bdd" />
+  </ItemGroup>
+
+</Project>

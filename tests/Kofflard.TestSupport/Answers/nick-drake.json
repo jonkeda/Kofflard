@@ -1,0 +1,19 @@
+{
+  "status": "ok",
+  "artist": { "name": "Nick Drake", "summary": "English folk singer-songwriter, 1969–74" },
+  "suggestions": [
+    { "name": "Vashti Bunyan", "lane": "close", "why": "Fragile, pastoral late-60s British folk with the same quiet intensity.", "bridge": null, "tags": ["folk", "1970", "UK"], "knownFor": "Just Another Diamond Day" },
+    { "name": "Bert Jansch", "lane": "close", "why": "Intricate open-tuned guitar from the same London folk scene.", "bridge": null, "tags": ["folk", "1960s", "UK"], "knownFor": "Jack Orion" },
+    { "name": "Linda Perhacs", "lane": "close", "why": "Dreamy, hushed songs with layered harmonies.", "bridge": null, "tags": ["psych folk", "1970", "US"], "knownFor": "Parallelograms" },
+    { "name": "Bridget St John", "lane": "close", "why": "A deep, calm voice over gentle fingerpicking.", "bridge": null, "tags": ["folk", "1969", "UK"], "knownFor": "Ask Me No Questions" },
+    { "name": "Elliott Smith", "lane": "close", "why": "Whispered double-tracked vocals and melancholy acoustic songs.", "bridge": null, "tags": ["indie folk", "1990s", "US"], "knownFor": "Either/Or" },
+    { "name": "José González", "lane": "close", "why": "Nylon-string guitar patterns and a soft, steady voice.", "bridge": null, "tags": ["folk", "2000s", "Sweden"], "knownFor": "Veneer" },
+    { "name": "Bill Fay", "lane": "stretch", "why": "Overlooked piano-led songwriter with a gentle, spiritual streak.", "bridge": null, "tags": ["singer-songwriter", "1970", "UK"], "knownFor": "Time of the Last Persecution" },
+    { "name": "Shelagh McDonald", "lane": "stretch", "why": "A lost early-70s folk voice with lush string arrangements.", "bridge": null, "tags": ["folk", "1971", "Scotland"], "knownFor": "Stargazer" },
+    { "name": "Michael Chapman", "lane": "stretch", "why": "Rambling, guitar-driven songs from the same Harvest-era folk world.", "bridge": null, "tags": ["folk", "1970", "UK"], "knownFor": "Fully Qualified Survivor" },
+    { "name": "Sibylle Baier", "lane": "stretch", "why": "Home recordings from the early 70s, intimate and unadorned.", "bridge": null, "tags": ["folk", "1970s", "Germany"], "knownFor": "Colour Green" },
+    { "name": "Ali Farka Touré", "lane": "leap", "why": "Hypnotic Malian desert blues.", "bridge": "Both built songs on looping, open-tuned fingerpicked guitar figures played very softly", "tags": ["desert blues", "1990s", "Mali"], "knownFor": "Talking Timbuktu" },
+    { "name": "Arthur Russell", "lane": "leap", "why": "Experimental cello and voice, from New York's avant-garde.", "bridge": "Cello carries the arrangements, as Robert Kirby's strings do on Bryter Layter", "tags": ["experimental", "1980s", "US"], "knownFor": "World of Echo" }
+  ],
+  "candidates": []
+}

@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      Windows first (on Windows), then Android; iOS when building on a Mac. net10.0 is the app for the
+      MauiHeadless head, as in Bruinet's Todo sample: a library the test process loads, without
+      Platforms\, MauiProgram or the packaged assets; a test composes it with KofflardAppServices.AddKofflardApp.
+    -->
+    <TargetFrameworks>net10.0-android;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">net10.0-windows10.0.19041.0;$(TargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx'))">net10.0-ios;$(TargetFrameworks)</TargetFrameworks>
+    <OutputType Condition="'$(TargetFramework)' != 'net10.0'">Exe</OutputType>
+    <RootNamespace>Kofflard.App</RootNamespace>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+
+    <!-- Compiled bindings everywhere (x:DataType), so a binding typo is a build error. -->
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
+
+    <!-- Unpackaged and self-contained on Windows: a test launches the .exe directly. -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+
+    <ApplicationTitle>Kofflard</ApplicationTitle>
+    <ApplicationId>nl.jonkeda.kofflard</ApplicationId>
+    <ApplicationDisplayVersion>0.1</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+
+    <!-- A UI test installs only the APK, so Debug embeds the assemblies (as in Todo). -->
+    <EmbedAssembliesIntoApk Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">true</EmbedAssembliesIntoApk>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+    <PackageReference Include="CommunityToolkit.Maui" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kofflard.Core\Kofflard.Core.csproj" />
+    <ProjectReference Include="..\Kofflard.Infrastructure\Kofflard.Infrastructure.csproj" />
+    <!-- Bruinet's automation handlers and gesture bridge, referenced as a project, as Todo does. -->
+    <ProjectReference Include="$(BruinetRoot)samples/Bruinet.Maui.AppSupport/Bruinet.Maui.AppSupport.csproj" />
+  </ItemGroup>
+
+  <!-- The MauiHeadless build: no platform code and no app builder. -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <Compile Remove="MauiProgram.cs;Platforms\**" />
+    <MauiXaml Remove="Platforms\**" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net10.0'">
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0F766E" />
+    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#0F766E" BaseSize="128,128" />
+  </ItemGroup>
+
+</Project>

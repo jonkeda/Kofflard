@@ -1,0 +1,15 @@
+{
+  "$schema": "https://bruinet.local/schemas/testsettings.schema.json",
+  "settings": {
+    "capabilities": {
+      "hardware": false,
+      "liveApi": false,
+      "manual": false,
+      "semiAutomated": false
+    },
+    "uat": {
+      "startupMode": "deterministic",
+      "resetAppSettingsBeforeScenario": true
+    }
+  }
+}

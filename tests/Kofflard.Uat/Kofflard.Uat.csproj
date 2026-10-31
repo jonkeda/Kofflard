@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Kofflard.Uat</RootNamespace>
+    <!-- The UI test project's target: net10.0-windows with FlaUI on Windows, else plain net10.0. -->
+    <TargetFramework Condition="'$(BruinetWindowsHead)' == 'true'">net10.0-windows</TargetFramework>
+    <TargetFramework Condition="'$(BruinetWindowsHead)' != 'true'">net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The UAT engine, and the page objects and controls its scenarios drive. -->
+    <ProjectReference Include="$(BruinetRoot)src/Bruinet.Uat/Bruinet.Uat.csproj" />
+    <ProjectReference Include="..\Kofflard.UITests\Kofflard.UITests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="uat.config.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Features\**\*.feature.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Features\**\*.steps.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="TestSettings\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Bruinet.Bdd" />
+  </ItemGroup>
+
+</Project>

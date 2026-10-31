@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+	<!-- Cleartext for a local AI server (Ollama, LM Studio) and the test backends, which are plain http. -->
+	<application android:allowBackup="false" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true" android:usesCleartextTraffic="true"></application>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+
+	<!--
+		Package visibility (Android 11+, design §8.2): without these Launcher.CanOpenAsync says no for the
+		Spotify and YouTube apps even when they are installed. The https intent lets the browser fallback
+		and Custom Tabs (OpenRouter sign-in) resolve.
+	-->
+	<queries>
+		<package android:name="com.spotify.music" />
+		<package android:name="com.google.android.youtube" />
+		<package android:name="com.google.android.apps.youtube.music" />
+		<intent>
+			<action android:name="android.intent.action.VIEW" />
+			<data android:scheme="spotify" />
+		</intent>
+		<intent>
+			<action android:name="android.intent.action.VIEW" />
+			<data android:scheme="youtube" />
+		</intent>
+		<intent>
+			<action android:name="android.intent.action.VIEW" />
+			<data android:scheme="https" />
+		</intent>
+		<intent>
+			<action android:name="android.support.customtabs.action.CustomTabsService" />
+		</intent>
+	</queries>
+</manifest>

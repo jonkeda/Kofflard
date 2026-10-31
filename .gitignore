@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+TestResults/
+**/TestSettings/testsettings.local.json
+**/TestSettings/**/*.secrets.json

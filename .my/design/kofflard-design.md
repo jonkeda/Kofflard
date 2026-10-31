@@ -6,7 +6,17 @@ You type a musician's name, and an LLM suggests other musicians, each with a rea
 
 There is no Kofflard server. People connect their own AI, either by entering an API key or by signing in with OAuth where the provider supports it.
 
-Status: draft, 2026-10-31. Owner: Daan Jonkers.
+Status: phases 0–1 built, with parts of phase 2 (OpenRouter sign-in, opt-in MusicBrainz checks), 2026-10-31. Owner: Daan Jonkers.
+
+**Where the code differs from this design** (each is a simplification; the reason is given):
+
+- **One wire format.** Every provider, Anthropic and Azure included, goes through the OpenAI SDK at its OpenAI-compatible endpoint (Azure: `…/openai/v1/`, with the key also sent as `api-key`). There is no native Anthropic adapter yet. The catalogue is code (`Kofflard.Core/Ai/AiProviders.cs`), not `Providers.json`.
+- **Settings in SQLite.** Settings are kept in the app's SQLite file, not `Preferences`, so tests can set them up the same way on every head. The secret is still kept only in `SecureStorage`.
+- **Disambiguation is a state of the Results page**, not a page of its own.
+- **Parsing and validation live in Core** (`DiscoveryAnswer`, `SuggestionValidator`), next to the prompt.
+- **Exploring has its own button.** "More like this →" on each card starts a new search from that musician, rather than a tap on the card body.
+- **Not built yet:** OAuth for Hugging Face and Azure (Entra ID); these use a key for now. Also not built: streaming, the eval console, Dutch localisation, and cost per search.
+- **iOS** builds only on a Mac: `net10.0-ios` is added only when building on macOS.
 
 ---
 
@@ -86,18 +96,27 @@ The thesis studies video-on-demand, not music, but its findings carry over direc
    - the name
    - a one-line *why* (or the bridge, for leaps)
    - 1–3 tags (genre, era, country)
-   - a ✓ once the artist is verified (§8.4)
-   - **Spotify** and **YouTube** buttons
+   - a ✓ once the artist is verified (§8.4; only when **Check musician names** is on)
+   - one main **open** button for the default service (§8.3), and two small buttons for the other two (YouTube, YouTube Music, Spotify)
    - **+** to save
 
    Tapping the card body starts a new search from that musician ("chain"), so exploring is natural.
 4. **Disambiguation** appears when a name is ambiguous or unknown (for example "Genesis", or a typo). It shows 2–4 candidates with a short description.
 5. **Saved** lists the user's saved musicians, with the same open buttons.
-6. **Settings** has:
-   - the AI connection (change, disconnect)
-   - the model
-   - the preferred music service
-   - clear history
+6. **Settings** (§3.3).
+
+### 3.3 Settings
+
+| Setting | Values | Default | Notes |
+| --- | --- | --- | --- |
+| **AI provider** | the catalogue (§6.1), **Azure first** | Azure OpenAI / Foundry | Plus change and disconnect. The connection test runs on save. |
+| **Model / deployment** | per provider | the provider's default from the catalogue | For Azure: the deployment name |
+| **Open with** | YouTube, YouTube Music, Spotify | YouTube | Sets the card's main button (§8.3) |
+| **Check musician names** | on / off | **off** | MusicBrainz verification (§8.4). It is slow (about 1 name per second), so it is opt-in. When off, there is no ✓ and Spotify links are search links. |
+| **Adventurousness** | 1–5 | 2 | Also on the Search page; both edit the same value |
+| **Clear history** | action | — | Empties recent, shown and cache (§9) |
+
+All of these except the secret are stored in `Preferences`. The secret is stored in `SecureStorage`. `SettingsViewModel` reads and writes them through an `ISettings` port, so view models and tests never touch `Preferences` directly.
 
 ### 3.2 The three lanes
 
@@ -156,7 +175,7 @@ It follows Bruinet's `samples/Todo` layering (`external/test-tooling/samples/Tod
 
 - models: `Musician`, `Suggestion`, `Lane`, `Adventure`, `AiConnection`
 - pure rules: `LaneMix`, `ExclusionPolicy`, `MusicLinks`, `DiscoveryPrompt`, `SuggestionValidator`
-- ports: `IDiscoveryEngine`, `IAiConnections`, `ISecretStore`, `IOAuthBroker`, `IArtistVerifier`, `IHistoryStore`, `ISavedStore`, `IMusicLauncher`, `INavigator`, `IDialogs`
+- ports: `IDiscoveryEngine`, `IAiConnections`, `ISecretStore`, `IOAuthBroker`, `IArtistVerifier`, `ISettings`, `IHistoryStore`, `ISavedStore`, `IMusicLauncher`, `INavigator`, `IDialogs`
 - every view model
 
 **`Kofflard.Infrastructure`** contains:
@@ -187,7 +206,12 @@ Bruinet is referenced by **project reference** into `external/test-tooling/src/B
 
 ### 4.2 MVVM, DI, navigation
 
-- **MVVM: CommunityToolkit.Mvvm** (`ObservableObject`, `[ObservableProperty]`, `[RelayCommand]`). Todo uses a hand-rolled base from `Bruinet.Samples.Shared`, but Kofflard should not depend on a *sample* project. If Bruinet's page objects turn out to need Todo's command types, we copy that base into Core instead (open question Q3).
+- **MVVM: Todo's base, not CommunityToolkit.Mvvm.** Core project-references `external/test-tooling/samples/Bruinet.Samples.Shared` (`net10.0`, no packages), the same way Todo does. Kofflard uses its pieces:
+  - `ViewModels/ViewModelBase.cs`: `ParentViewModel` and `SetProperty`, plus `IViewVisible` and `ICurrentViewModelContainer`
+  - `Commands/`: `RelayCommand`, `AsyncRelayCommand`, and `SingleClickAsyncRelayCommand` for the buttons that open and search
+  - `Navigation/INavigationService`
+
+  This keeps Kofflard's view models identical in shape to Todo's, which is what Bruinet's page objects and the headless head are proven against. If the sample's base changes in a way that breaks us, we copy the folder into `src/Kofflard.Mvvm` and drop the reference.
 - **DI** has two layers, like Todo:
   - `AddKofflardServices(Func<IServiceProvider, LaunchSettings>, KofflardPlatform)` in Infrastructure registers the engine, the provider factory, the OAuth flows, the verifier, the stores, `TimeProvider` and the view models.
   - `AddKofflardApp()` in the App registers `ShellNavigator`, `ShellDialogs`, `MauiMusicLauncher`, `MauiSecretStore`, `MauiOAuthBroker`, `AppShell` and the pages.
@@ -235,13 +259,13 @@ The JSON schema the LLM must answer in is generated from a private DTO in Infras
 
 | Provider | How | Notes |
 | --- | --- | --- |
-| **OpenRouter** | **OAuth (PKCE)**, recommended | One sign-in gives access to many models. The flow returns a *user-controlled API key* billed to the user's OpenRouter credits. No client registration is needed. |
+| **Azure OpenAI / Foundry** (first in the list) | Endpoint + deployment, then **API key** or **Entra ID sign-in** | Listed first and the default. The key is the simple route. Entra sign-in uses MSAL as a public client with the scope `https://cognitiveservices.azure.com/.default`. It needs a multi-tenant Kofflard app registration (no secret), and the user needs the *Cognitive Services OpenAI User* role on the resource. Entra sign-in comes in phase 2. |
+| **OpenRouter** | **OAuth (PKCE)** | One sign-in gives access to many models. The flow returns a *user-controlled API key* billed to the user's OpenRouter credits. No client registration is needed. |
 | **Hugging Face Inference Providers** | **OAuth (PKCE, public client)** with scope `inference-api` | Needs a Kofflard OAuth app registered on Hugging Face *without a secret* (the client id is public, so this is fine). Exposes the OpenAI-compatible endpoint `router.huggingface.co/v1`. |
 | OpenAI | API key | Native chat API |
 | Anthropic (Claude) | API key | Native Messages API |
 | Google Gemini | API key | OpenAI-compatible endpoint |
 | Mistral | API key | OpenAI-compatible |
-| Azure OpenAI / Foundry | Endpoint + key + deployment | For people who already have Azure, such as the owner |
 | **Local: Ollama / LM Studio** | Base URL, no key | Windows (and Mac) only, for free offline use. Results depend on the model; small local models hallucinate more. |
 
 OAuth is used where the provider offers a public, documented flow that results in LLM access. As of 2026-10 that is OpenRouter and Hugging Face. OpenAI, Anthropic and Google do not offer third-party OAuth for API billing, so for them the user pastes a key. The provider catalogue (`Providers.json`, embedded) holds for each provider:
@@ -362,9 +386,11 @@ In UI tests, `FakeMusicLauncher` records links instead of opening them. The real
 
 ### 8.3 Preferred service
 
-A setting picks the preferred service: Spotify, YouTube or ask. Both buttons stay on the card, and the preferred one comes first.
+The **Open with** setting (§3.3) picks the default service: **YouTube** (the default), **YouTube Music** or **Spotify**. It drives the card's main button. The other two stay available as small buttons, so a single search can be opened anywhere. YouTube Music has no app URI scheme we rely on. Its `https://music.youtube.com` link is an App Link / Universal Link, so on Android and iOS it opens the YouTube Music app when installed, and the browser otherwise.
 
-### 8.4 Verification: MusicBrainz, on the device, no key
+### 8.4 Verification: MusicBrainz, on the device, no key, **off by default**
+
+Verification only runs when **Check musician names** is on (§3.3). It is off by default because MusicBrainz allows about 1 request per second, so 12 names take roughly 12–24 s to confirm. When it is off, `NullArtistVerifier` is used: every suggestion stays `Unverified`, no ✓ is shown, and the Spotify links are search links.
 
 The main risk with an LLM is a plausible-sounding invented musician. There are two defences:
 
@@ -390,7 +416,7 @@ SQLite (`Microsoft.Data.Sqlite`, as in Todo) lives in `FileSystem.AppDataDirecto
 | `Cache(Key, Json, At)` | The result cache on `(artist, adventure, provider, model)`, 24 h, used only when `exclude` is empty. "More like this" bypasses it. |
 
 - **Secrets** (API keys, OAuth tokens) are kept only in `SecureStorage` and never in SQLite.
-- **Settings** (provider, model, adventurousness, preferred service) are kept in `Preferences`.
+- **Settings** (provider, model, adventurousness, open with, check musician names) are kept in `Preferences` behind `ISettings` (§3.3).
 - **"Clear history"** empties `Searches`, `Shown` and `Cache`.
 - **"Disconnect AI"** removes the secret.
 
@@ -521,9 +547,9 @@ It writes a report to `.my/evals/`. Run it when the prompt changes, and to decid
 | Phase | Scope |
 | --- | --- |
 | **0: skeleton** | Solution, props and submodule; Core, Infrastructure and App. Connect (pasted key, OpenAI-compatible only), then Search, then Results against `FakeLlmServer`. Headless and Windows UI tests green. |
-| **1: MVP** | The real prompt, validator and lanes. Providers: OpenAI, Gemini, OpenRouter (key), Anthropic and Ollama. Spotify and YouTube *search* links per platform. History, exclusions and Saved. Android build. |
-| **2: connect and trust** | OAuth for OpenRouter and Hugging Face (mobile WebAuthenticator, Windows loopback, OpenRouter's paste-the-code fallback). MusicBrainz verification with direct Spotify artist links. Disambiguation. The eval console. iOS build. |
-| **3: depth** | A "chain" exploration trail (breadcrumbs), streaming results, an optional "why this?" detail, the preferred-service setting, Dutch localisation, and cost per search. |
+| **1: MVP** | The real prompt, validator and lanes. Providers: Azure OpenAI / Foundry (key) first, then OpenAI, Gemini, OpenRouter (key), Anthropic and Ollama. Spotify and YouTube *search* links per platform. History, exclusions and Saved. The Settings page (§3.3). Android build. |
+| **2: connect and trust** | Entra ID sign-in for Azure (MSAL). OAuth for OpenRouter and Hugging Face (mobile WebAuthenticator, Windows loopback, OpenRouter's paste-the-code fallback). MusicBrainz verification (opt-in) with direct Spotify artist links. Disambiguation. The eval console. iOS build. |
+| **3: depth** | A "chain" exploration trail (breadcrumbs), streaming results, an optional "why this?" detail, Dutch localisation, and cost per search. |
 | **Later** | Song and album picks. Sharing a list as text or a link. Optional Spotify sign-in (PKCE, public client id) to start from your top artists or save picks to a playlist. Spotify's development mode limits an app to a small number of users until Spotify approves an extended quota, so this is opt-in and later. |
 
 ---
@@ -532,23 +558,25 @@ It writes a report to `.my/evals/`. Run it when the prompt changes, and to decid
 
 | # | Question | Default if not decided |
 | --- | --- | --- |
-| Q1 | Which provider and model are first and recommended on the Connect page? | OpenRouter (OAuth, many models) with a small, fast model chosen by the eval |
+| Q1 | ~~Which provider is first?~~ **Decided: Azure OpenAI / Foundry.** Still open: which model or deployment to recommend. | A small, fast model chosen by the eval |
 | Q2 | Bruinet branch: the submodule tracks `MauiHeadless` (Tomorrow's checkout is on it, and it is pushed); Tomorrow's `.gitmodules` says `move`. Which should Kofflard follow? | `MauiHeadless` until it merges |
-| Q3 | CommunityToolkit.Mvvm or a copy of Todo's MVVM base? It depends on whether Bruinet's MAUI page objects rely on Todo's command types. | CommunityToolkit.Mvvm, checked during phase 0 |
+| Q3 | ~~CommunityToolkit.Mvvm or Todo's MVVM base?~~ **Decided: Todo's base** (`Bruinet.Samples.Shared`, by project reference). | — |
 | Q4 | Does OpenRouter accept a custom-scheme `callback_url` (`kofflard://oauth/callback`) on mobile? Its docs only cover https and localhost. | Try it in phase 2. If not, use the paste-the-code mode on mobile. |
 | Q5 | Does `spotify:search:` still open the search screen in current Spotify apps on iOS and Android? | Verify on devices in phase 1. If not, prefer the https link (Universal Link / App Link). |
-| Q6 | Should "YouTube" mean YouTube or YouTube Music by default? | YouTube, because it works without a Music subscription |
+| Q6 | ~~YouTube or YouTube Music?~~ **Decided:** both, plus Spotify, chosen by the **Open with** setting, default YouTube. | — |
 | Q7 | Who owns the Hugging Face OAuth app registration (a personal account, or an organisation)? | The owner's personal account; transfer it later if needed |
 
 ---
 
 ## 14. Decisions recorded
 
-1. **Self-contained, with no backend.** Users connect their own AI by API key, or by OAuth where the provider offers it (OpenRouter, Hugging Face). This means no hosting, no cost to us, and no user data on our side. The alternative, a thin server that holds our key, was rejected because it adds overhead and cost.
+1. **Self-contained, with no backend.** Users connect their own AI by API key, or by OAuth where the provider offers it (Azure Entra ID, OpenRouter, Hugging Face). This means no hosting, no cost to us, and no user data on our side. The alternative, a thin server that holds our key, was rejected because it adds overhead and cost.
 2. **One `IChatClient` abstraction with a provider catalogue.** Most providers speak the OpenAI-compatible format, so a new provider is usually a catalogue entry.
 3. **Three lanes with an explicit bridge, and relevance always on.** The thesis found that relevance matters most and that unanchored surprise lowers satisfaction.
 4. **The user controls adventurousness, with no profiling.** In the thesis, consumer characteristics didn't predict how people perceive serendipity.
 5. **System-level novelty by local exclusions.** Serendipity fades when the same "surprises" are shown again.
 6. **The LLM suggests and Core validates.** Structured output, deterministic and unit-tested validation, and no free-text parsing.
 7. **Search links first, verified artist links via MusicBrainz.** It needs no key and runs on the device, and opening a link never fails, even when the model is wrong.
-8. **Todo's layering and Bruinet tests from day one,** minus Api and Contracts. Every feature has a Markdown scenario that runs headless, on Windows and on Android, against a fake LLM.
+8. **Todo's MVVM base, not CommunityToolkit.Mvvm.** View models stay in the same shape Bruinet is proven against.
+9. **A Settings page:** Azure is the first and default provider. "Open with" offers YouTube, YouTube Music or Spotify, with YouTube as the default. "Check musician names" is off by default because MusicBrainz takes about a second per name.
+10. **Todo's layering and Bruinet tests from day one,** minus Api and Contracts. Every feature has a Markdown scenario that runs headless, on Windows and on Android, against a fake LLM.

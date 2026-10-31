@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "artist": { "name": "Genesis Owusu", "summary": "Ghanaian-Australian rapper and singer" },
+  "suggestions": [
+    { "name": "Little Simz", "lane": "close", "why": "Sharp, genre-hopping rap with live-band energy.", "bridge": null, "tags": ["rap", "2020s", "UK"], "knownFor": "Sometimes I Might Be Introvert" },
+    { "name": "Sampa the Great", "lane": "close", "why": "Bold, funk-laced rap from the same Australian scene.", "bridge": null, "tags": ["rap", "2020s", "Zambia/Australia"], "knownFor": "The Return" }
+  ],
+  "candidates": []
+}
