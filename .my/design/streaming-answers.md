@@ -94,6 +94,7 @@ The times are guesses for a small model. Measured on 2026-10-31 with the dev app
 Where the build differs from the plan above:
 - **No separate status update.** The engine reports `ArtistFound`, `PickFound` and `Done`. Lanes are created with their first card instead of when the status arrives; picks written before the status wait for it (`StreamedAnswer`).
 - **The slow-stream check is a unit test, not a UI scenario.** The fake AI sends its whole streamed answer at once, so the "first card while the AI is still answering" check runs on `ResultsViewModel` with a stream held halfway (`Results_CardsArrive_OneByOne_AndMoreWaitsForTheWholeAnswer`).
+- **Searches ask for low reasoning effort** (`reasoning_effort: "low"`), added after measuring: a reasoning model spent most of the wait thinking before the first card. A model that refuses the setting is asked again without it, as with a refused temperature. Not yet measured live.
 - **The live timing is logged by the existing live test**, which now runs only with `KOFFLARD_LIVE_AI=1`: `ai.secrets.json` is the dev app's key and no longer makes tests call the real AI on its own.
 
 ## Not in this change

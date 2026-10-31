@@ -43,6 +43,7 @@ public sealed class DiscoveryEngineTests : IDisposable
         Assert.Equal(FakeAi.Model, root.GetProperty("model").GetString());
         Assert.Equal("json_schema", root.GetProperty("response_format").GetProperty("type").GetString());
         Assert.True(root.GetProperty("stream").GetBoolean());
+        Assert.Equal("low", root.GetProperty("reasoning_effort").GetString());
         var user = root.GetProperty("messages")[1].GetProperty("content").GetString();
         Assert.Contains("4 close, 4 stretch and 4 leap", user, StringComparison.Ordinal);
         Assert.Contains("Bert Jansch", user, StringComparison.Ordinal);
@@ -63,6 +64,18 @@ public sealed class DiscoveryEngineTests : IDisposable
         Assert.Equal(10, picks.Count);
         Assert.All(picks, pick => Assert.Contains(done.Result.Suggestions, s => s.Name == pick.Name && s.Lane == pick.Lane));
         Assert.All(Enum.GetValues<Lane>(), lane => Assert.True(picks.Count(p => p.Lane == lane) <= 4));
+    }
+
+    [Fact]
+    public async Task Discover_WhenTheModelRefusesAReasoningEffort_AsksWithoutIt()
+    {
+        _ai.RefuseReasoning();
+
+        var result = await _engine.DiscoverAsync(Local, null, "Nick Drake", []).ResultAsync();
+
+        Assert.Equal(12, result.Suggestions.Count);
+        Assert.Equal(2, _ai.Requests.Count);
+        Assert.DoesNotContain("reasoning_effort", _ai.Requests[1], StringComparison.Ordinal);
     }
 
     [Fact]

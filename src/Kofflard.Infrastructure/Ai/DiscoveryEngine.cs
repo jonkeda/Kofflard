@@ -16,8 +16,8 @@ namespace Kofflard.Infrastructure.Ai;
 /// (design §7, .my/design/streaming-answers.md).
 /// </summary>
 /// <remarks>
-/// Some models refuse a temperature, and some providers a JSON schema or streaming. A 400 that names one
-/// is retried without it, so a model the catalogue does not know still works.
+/// Some models refuse a temperature or a reasoning effort, and some providers a JSON schema or streaming.
+/// A 400 that names one is retried without it, so a model the catalogue does not know still works.
 /// </remarks>
 public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngine
 {
@@ -46,6 +46,11 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         {
             Temperature = DiscoveryPrompt.Temperature,
             MaxOutputTokens = 4000,
+
+            // A reasoning model thinks before it writes the first card; twelve musicians with a line each
+            // need little of it (.my/design/streaming-answers.md). Models that don't reason refuse it, and
+            // are asked again without.
+            Reasoning = new ReasoningOptions { Effort = ReasoningEffort.Low },
             ResponseFormat = connection.Provider.StructuredOutput == AiStructuredOutput.JsonSchema
                 ? ChatResponseFormat.ForJsonSchema(Schema, DiscoveryPrompt.SchemaName)
                 : ChatResponseFormat.Json,
@@ -56,7 +61,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         {
             var answer = new StreamedAnswer(artist, exclude);
             var text = new StringBuilder();
-            for (var attempt = 0; attempt < 3; attempt++)
+            for (var attempt = 0; attempt < 5; attempt++)
             {
                 var updates = client.GetStreamingResponseAsync(messages, options, cancellationToken).GetAsyncEnumerator(cancellationToken);
                 Exception? failure = null;
@@ -182,7 +187,7 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
                 var response = await client.GetResponseAsync(messages, options, cancellationToken);
                 return response.Text;
             }
-            catch (ClientResultException failure) when (attempt < 2 && failure.Status == 400 && Drop(options, Body(failure)))
+            catch (ClientResultException failure) when (attempt < 4 && failure.Status == 400 && Drop(options, Body(failure)))
             {
                 // Asked again without what the model refused.
             }
@@ -230,6 +235,13 @@ public sealed class DiscoveryEngine(ChatClientFactory clients) : IDiscoveryEngin
         if (options.Temperature is not null && body.Contains("temperature", StringComparison.OrdinalIgnoreCase))
         {
             options.Temperature = null;
+            return true;
+        }
+
+        // After the temperature: a reasoning model refusing one tends to mention "reasoning" too.
+        if (options.Reasoning is not null && body.Contains("reasoning", StringComparison.OrdinalIgnoreCase))
+        {
+            options.Reasoning = null;
             return true;
         }
 

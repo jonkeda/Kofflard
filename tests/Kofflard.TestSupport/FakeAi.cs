@@ -79,6 +79,19 @@ public sealed class FakeAi : IDisposable
         return this;
     }
 
+    /// <summary>Refuses a reasoning effort, as a model that doesn't reason does: a 400 that names it.</summary>
+    public FakeAi RefuseReasoning()
+    {
+        _server
+            .Given(Chat().WithBody((string? body) => body?.Contains("reasoning_effort", StringComparison.Ordinal) == true))
+            .AtPriority(0)
+            .RespondWith(Response.Create()
+                .WithStatusCode(400)
+                .WithHeader("Content-Type", "application/json")
+                .WithBody(JsonSerializer.Serialize(new { error = new { message = "Unrecognized request argument supplied: reasoning_effort", type = "invalid_request_error" } })));
+        return this;
+    }
+
     /// <summary>Refuses to stream, as some providers do for some models: a 400 that names "stream".</summary>
     public FakeAi RefuseStreaming()
     {
