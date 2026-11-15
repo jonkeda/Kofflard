@@ -6,7 +6,7 @@ namespace Kofflard.Uat.Phrases;
 
 /// <summary>
 /// Steps about what is off the screen: what the fake AI answers, and what the app opened in a music
-/// service. Scenarios reach them through <c>Using | Ai</c> in <c>uat.config.md</c>.
+/// service. Scenarios reach them through <c>Using | Ai</c> in <c>bdd.config.md</c>.
 /// </summary>
 [BddStepDefinitions(Namespace = "Ai")]
 public sealed class AiPhrases(KofflardUatFixture fixture) : BddStepDefinitionsBase

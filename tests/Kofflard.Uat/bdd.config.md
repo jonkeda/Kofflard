@@ -1,4 +1,4 @@
-# UAT Config
+# BDD Config
 
 ## Runtime
 
@@ -30,7 +30,7 @@ The subjects outside the screen every scenario may arrange or check (phrase name
 
 | Field | Value |
 | --- | --- |
-| RequireExplicitUatAttributes | false |
+| RequireExplicitBddAttributes | false |
 | AllowNameInference | true |
 
 ## Reporting

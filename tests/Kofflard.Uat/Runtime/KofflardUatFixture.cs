@@ -96,18 +96,18 @@ public sealed class KofflardUatCollection : ICollectionFixture<KofflardUatFixtur
 [Collection(KofflardUatCollection.CollectionName)]
 [Trait("Category", "UAT")]
 [Trait("Target", "MAUI")]
-public sealed class KofflardUatScenarioTests(KofflardUatFixture fixture) : UatScenarioTestBase<KofflardUatFixture>(fixture)
+public sealed class KofflardUatScenarioTests(KofflardUatFixture fixture) : BddScenarioTestBase<KofflardUatFixture>(fixture)
 {
     /// <summary>One case per scenario: <c>[filePath, scenarioName]</c>.</summary>
     public static IEnumerable<object[]> Scenarios => KofflardScenarios.For(phone: false);
 
     /// <summary>Runs one scenario and asserts it passes.</summary>
-    [UatScenarioTheory(Timeout = 120000)]
+    [BddScenarioTheory(Timeout = 120000)]
     [MemberData(nameof(Scenarios))]
-    public Task Scenario_Passes(string filePath, string scenarioName) => RunUatScenarioAsync(filePath, scenarioName);
+    public Task Scenario_Passes(string filePath, string scenarioName) => RunScenarioAsync(filePath, scenarioName);
 
     /// <inheritdoc />
-    protected override UatRuntimeValidationOptions RuntimeValidation { get; } =
+    protected override BddRuntimeValidationOptions RuntimeValidation { get; } =
         new(Target: "MAUI", Fixture: "KofflardUatFixture");
 }
 
@@ -116,17 +116,17 @@ public sealed class KofflardUatScenarioTests(KofflardUatFixture fixture) : UatSc
 [Trait("Category", "UAT")]
 [Trait("Target", "MAUI")]
 [Trait("Layout", "phone")]
-public sealed class KofflardPhoneUatScenarioTests(KofflardPhoneUatFixture fixture) : UatScenarioTestBase<KofflardPhoneUatFixture>(fixture)
+public sealed class KofflardPhoneUatScenarioTests(KofflardPhoneUatFixture fixture) : BddScenarioTestBase<KofflardPhoneUatFixture>(fixture)
 {
     /// <summary>One case per <c>@phone</c> scenario: <c>[filePath, scenarioName]</c>.</summary>
     public static IEnumerable<object[]> Scenarios => KofflardScenarios.For(phone: true);
 
     /// <summary>Runs one scenario and asserts it passes.</summary>
-    [UatScenarioTheory(Timeout = 120000)]
+    [BddScenarioTheory(Timeout = 120000)]
     [MemberData(nameof(Scenarios))]
-    public Task Scenario_Passes(string filePath, string scenarioName) => RunUatScenarioAsync(filePath, scenarioName);
+    public Task Scenario_Passes(string filePath, string scenarioName) => RunScenarioAsync(filePath, scenarioName);
 
     /// <inheritdoc />
-    protected override UatRuntimeValidationOptions RuntimeValidation { get; } =
+    protected override BddRuntimeValidationOptions RuntimeValidation { get; } =
         new(Target: "MAUI", Fixture: "KofflardUatFixture");
 }

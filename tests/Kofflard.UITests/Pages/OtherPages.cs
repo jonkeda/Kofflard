@@ -1,3 +1,4 @@
+using Bruinet.Bdd;
 using Bruinet.Core.Scopes;
 using Bruinet.Uat;
 
@@ -15,20 +16,20 @@ public class SettingsPage(IMauiTestContext context) : PageObjectBase<SettingsPag
     public Label<SettingsPage> Connection => new(this, "Settings_Connection");
 
     /// <summary>Opens Connect, to change the AI.</summary>
-    [UatName("Change")]
-    [UatNavigatesTo(typeof(ConnectPage))]
+    [BddControl("Change")]
+    [BddNavigatesTo(typeof(ConnectPage))]
     public Button<SettingsPage> ChangeButton => new(this, "Settings_ChangeAi");
 
     /// <summary>YouTube, YouTube Music or Spotify.</summary>
-    [UatName("Open With")]
+    [BddControl("Open With")]
     public Picker<SettingsPage> OpenWith => new(this, "Settings_OpenWith");
 
     /// <summary>Whether names are checked against MusicBrainz.</summary>
-    [UatName("Check Names")]
+    [BddControl("Check Names")]
     public Switch<SettingsPage> CheckNames => new(this, "Settings_CheckNames");
 
     /// <summary>Shell's back arrow.</summary>
-    [UatNavigatesTo(typeof(SearchPage))]
+    [BddNavigatesTo(typeof(SearchPage))]
     public Button<AppRoot> BackButton => Context.Platform == Bruinet.Maui.Enums.MauiPlatform.Android
         ? new(_appRoot, Locator.ByAccessibilityId("Navigate up"))
         : new(_appRoot, "NavigationViewBackButton");
@@ -67,15 +68,15 @@ public class SavedPage(IMauiTestContext context) : PageObjectBase<SavedPage>(con
     public override string Name => "SavedPage";
 
     /// <summary>"Nothing saved yet…".</summary>
-    [UatName("Empty Message")]
+    [BddControl("Empty Message")]
     public Label<SavedPage> EmptyMessage => new(this, "Saved_Empty");
 
     /// <summary>The saved musicians.</summary>
-    [UatName("Saved")]
+    [BddControl("Saved")]
     public SavedList Items => new(this, "Saved_Items");
 
     /// <summary>Shell's back arrow.</summary>
-    [UatNavigatesTo(typeof(SearchPage))]
+    [BddNavigatesTo(typeof(SearchPage))]
     public Button<AppRoot> BackButton => Context.Platform == Bruinet.Maui.Enums.MauiPlatform.Android
         ? new(_appRoot, Locator.ByAccessibilityId("Navigate up"))
         : new(_appRoot, "NavigationViewBackButton");
@@ -107,7 +108,7 @@ public sealed class SavedList : CollectionObjectBase<SavedPage, SavedList, Saved
     {
         if (!RunWait(() => FindItem(card => card.NameLabel.GetText() == musician) is not null, TestConstants.PageTimeoutMs))
         {
-            throw new AssertionException($"Expected '{musician}' among the saved musicians.");
+            throw new ControlAssertionException($"Expected '{musician}' among the saved musicians.");
         }
 
         return Self;
@@ -143,11 +144,11 @@ public class ConnectPage(IMauiTestContext context) : PageObjectBase<ConnectPage>
     public Entry<ConnectPage> Model => new(this, "Connect_Model");
 
     /// <summary>"Sign in with OpenRouter", shown for OpenRouter only.</summary>
-    [UatName("Sign In")]
+    [BddControl("Sign In")]
     public Button<ConnectPage> SignInButton => new(this, "Connect_SignIn");
 
     /// <summary>The API key.</summary>
-    [UatName("Api Key")]
+    [BddControl("Api Key")]
     public Entry<ConnectPage> ApiKey => new(this, "Connect_ApiKey");
 
     /// <summary>"✓ The connection works", or what is wrong.</summary>
@@ -157,7 +158,7 @@ public class ConnectPage(IMauiTestContext context) : PageObjectBase<ConnectPage>
     public Button<ConnectPage> TestButton => new(this, "Connect_Test");
 
     /// <summary>Tests, keeps the connection, and goes to Search.</summary>
-    [UatName("Done")]
+    [BddControl("Done")]
     public Button<ConnectPage> DoneButton => new(this, "Connect_Done");
 
     /// <summary>The connect page, once on screen.</summary>

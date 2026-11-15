@@ -47,7 +47,7 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
         var budget = TestConstants.ListSearchMs(Context.Platform);
         if (!RunWait(() => FindItem(card => TryReadName(card) == musician, budget) is not null, budget))
         {
-            throw new AssertionException(
+            throw new ControlAssertionException(
                 $"Expected a card for '{musician}'. Cards shown: {string.Join(", ", Names().Select(name => $"'{name}'"))}.");
         }
 
@@ -84,7 +84,7 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
             }
         }
 
-        throw new AssertionException($"'{musician}' is card {place + 1}, past every lane: {results.LaneHeaders.Summary()}.");
+        throw new ControlAssertionException($"'{musician}' is card {place + 1}, past every lane: {results.LaneHeaders.Summary()}.");
     }
 
     /// <summary>Asserts a tap on <paramref name="musician"/> opens <paramref name="service"/>: the Open with service.</summary>
@@ -179,7 +179,7 @@ public sealed class SuggestionList : CollectionObjectBase<ResultsPage, Suggestio
         string[] saved = ["★", $"Remove {musician} from favourites"];
         if (!RunWait(() => saved.Contains(star.GetText()), TestConstants.PageTimeoutMs))
         {
-            throw new AssertionException($"Expected '{musician}' in favourites; the star says '{star.GetText()}'.");
+            throw new ControlAssertionException($"Expected '{musician}' in favourites; the star says '{star.GetText()}'.");
         }
 
         return Self;
@@ -293,7 +293,7 @@ public sealed class LaneHeaderList : CollectionObjectBase<ResultsPage, LaneHeade
         var budget = TestConstants.ListSearchMs(Context.Platform);
         if (!RunWait(() => FindItem(header => header.Name == lane, budget) is not null, budget))
         {
-            throw new AssertionException($"Expected a lane '{lane}'. Lanes shown: {Summary()}.");
+            throw new ControlAssertionException($"Expected a lane '{lane}'. Lanes shown: {Summary()}.");
         }
 
         return ItemWhere(header => header.Name == lane);
@@ -342,7 +342,7 @@ public sealed class CandidateList : CollectionObjectBase<ResultsPage, CandidateL
     {
         if (!RunWait(() => FindItem(row => row.NameLabel.GetText() == musician) is not null, TestConstants.PageTimeoutMs))
         {
-            throw new AssertionException($"Expected a candidate '{musician}'. Shown: {string.Join(", ", Names())}.");
+            throw new ControlAssertionException($"Expected a candidate '{musician}'. Shown: {string.Join(", ", Names())}.");
         }
 
         SelectItem(ItemWhere(row => row.NameLabel.GetText() == musician).Index, TestConstants.PageTimeoutMs);

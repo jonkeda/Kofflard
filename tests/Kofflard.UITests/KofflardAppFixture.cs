@@ -126,14 +126,14 @@ public class KofflardAppFixture : MauiTestFixtureBase
             Thread.Sleep(50);
         }
 
-        throw new AssertionException($"Expected a link starting '{start}'. Opened: {string.Join(" | ", OpenedLinks)}");
+        throw new ControlAssertionException($"Expected a link starting '{start}'. Opened: {string.Join(" | ", OpenedLinks)}");
     }
 
     /// <inheritdoc />
-    protected override MauiTestContextOptions CreateTestContextOptions()
+    protected override MauiTestContextOptions CreateTestContextOptions(MauiTestContextOptions loaded)
     {
         var settings = Arrange();
-        var options = base.CreateTestContextOptions();
+        var options = base.CreateTestContextOptions(loaded);
         foreach (var (name, value) in LaunchValues(settings, Platform))
         {
             options.DriverOptions!.LaunchSettings[name] = value;
@@ -320,7 +320,7 @@ public class KofflardAppFixture : MauiTestFixtureBase
         {
             var dialog = new ContentDialog<AppRoot>(appRoot);
             var search = new SearchPage(Context);
-            if (dialog.IsExists())
+            if (dialog.Exists())
             {
                 dialog.DialogButton("Cancel").Click();
             }

@@ -1,3 +1,4 @@
+using Bruinet.Bdd;
 using Bruinet.Uat;
 using Kofflard.UITests.Containers;
 
@@ -17,24 +18,24 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
     public override string Name => "DiscoverPage";
 
     /// <summary>The musician's name.</summary>
-    [UatName("Name")]
+    [BddControl("Name")]
     public Entry<SearchPage> NameEntry => new(this, "Search_Name");
 
     /// <summary>"Type a musician's name", after Go with nothing typed.</summary>
-    [UatName("Name Error")]
+    [BddControl("Name Error")]
     public Label<SearchPage> NameError => new(this, "Search_NameError");
 
     /// <summary>Searches: ➤ on a phone, Find musicians on the desktop.</summary>
-    [UatName("Go")]
+    [BddControl("Go")]
     public Button<SearchPage> GoButton => new(this, "Search_Go");
 
     /// <summary>Opens the favourites: the star.</summary>
-    [UatName("Favourites")]
-    [UatNavigatesTo(typeof(SavedPage))]
+    [BddControl("Favourites")]
+    [BddNavigatesTo(typeof(SavedPage))]
     public ToolbarButton<AppRoot> SavedButton => new(_appRoot, Locator.ByAccessibilityId("Search_Saved"));
 
     /// <summary>Opens the settings.</summary>
-    [UatNavigatesTo(typeof(SettingsPage))]
+    [BddNavigatesTo(typeof(SettingsPage))]
     public ToolbarButton<AppRoot> SettingsButton => new(_appRoot, Locator.ByAccessibilityId("Search_Settings"));
 
     /// <summary>The ✕ on a recent search's chip.</summary>
@@ -79,7 +80,7 @@ public class SearchPage(IMauiTestContext context) : PageObjectBase<SearchPage>(c
     /// <summary>Walks the trail back to its start, so a test's searches make the only trail.</summary>
     public SearchPage WalkTrailBack()
     {
-        for (var step = 0; step < 20 && TrailButton.IsExists(); step++)
+        for (var step = 0; step < 20 && TrailButton.Exists(); step++)
         {
             TrailButton.Click();
             TrailButton.WaitExists(false, TestConstants.PageTimeoutMs / 10);
